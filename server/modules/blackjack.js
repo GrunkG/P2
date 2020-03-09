@@ -16,10 +16,6 @@ class blackjack_player extends cards.player {
     }
 
     //doSplit()
-
-    getHandValue(hand) {
-        
-    }
 }
 
 class blackjack extends cards.cardgame {
@@ -43,6 +39,21 @@ class blackjack extends cards.cardgame {
             console.log(`Query returned: \n` + JSON.stringify(result));
         }
     }
+    
+    getCardValue(card) {
+        let card = card.value;
+        if (!/[0-9]/.test(card)) return card;
+        switch(card) {
+            case "Ace":
+                return "Ace";
+            case "Jack":
+            case "Queen":
+            case "King":
+                return 10;
+            default: break;
+        }
+        return 0;
+    }
 
     creategame() {
         let query = "INSERT INTO tbl_activegames (players) VALUES (NULL);";
@@ -56,9 +67,14 @@ class blackjack extends cards.cardgame {
     updategame() {
         if (!this.hasID) return false;
         let query = `UPDATE tbl_activegames SET players = ${this.players.length} WHERE ID = ${this.ID};`;
-        this.sqlcon.doQuery(query, this.queryHandler);
+        this.sqlcon.doQuery(query, this);
     }
-    handleGameRequests(req, res) {
+
+    set playerConnect(player) {
+
+    }
+
+    handleGameRequests(req, res) { //Web-request handling
         let command = req.url.split('/');
         if (command[2] == null) {
                 res.StatusCode=404;
@@ -73,6 +89,13 @@ class blackjack extends cards.cardgame {
                 res.setHeader('Content-Type', 'application/json');
                 res.write(JSON.stringify(test));
                 res.end('\n');
+                break;
+            case "hit":
+                break;
+            case "hold":
+                break;
+            //case "split":
+            case "bet":
                 break;
             default:
                     res.StatusCode=404;

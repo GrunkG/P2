@@ -1,10 +1,10 @@
 class sqltools {
-    constructor(sqlobj, host, user, pass, database) {
+    constructor(sqlobj) {
         this.sqlobj = sqlobj;
-        this.host = host;
-        this.user = user;
-        this.pass = pass;
-        this.database = database;
+        this.host = sqlobj.host;
+        this.user = sqlobj.user;
+        this.pass = sqlobj.pass;
+        this.database = sqlobj.db;
     }
 
     makeConnection() {

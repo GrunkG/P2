@@ -115,13 +115,28 @@ class player extends cardgame {
         return freak;
     }
 
-    //Spil håndtering
-    join_game(game) { }
+    getCardValue(card) {
+        return this.game.getCardValue(card);
+    }
+
+    getHandValue(hand) {
+        let value = 0;
+        let handContent = this.hands[hand].getHold();
+        let handHold = handContent.length;
+        for (let slot = 0; slot < handHold; slot++) {
+            value += this.getCardValue(handContent[slot]);
+        }
+    }
+
+    join_game(game) {
+        return game.playerConnect = this;
+    }
+
     get getGameID() {}
 }
 
 class hand {
-    #holding = []; //Private variable, not Invalid character >.>
+    #holding = []; //Private variable, not Invalid character >.> -- Tested and it tried
     constructor(size) {
         this.handSize = size;
     }
@@ -132,8 +147,7 @@ class hand {
     }
 
     drop(slot) {
-        if (slot < 0) return null; //Arrays don't go lower than 0
-        if (slot > this.handSize) return this.#holding; //Return full hand array
+        if (slot < 0 || slot > this.handSize) return false;
         if (slot > 0) {
             return this.#holding.splice(slot,slot);
         }
@@ -143,8 +157,7 @@ class hand {
     getSize() { return this.handSize; }
 
     getHold(slot) {
-        if (slot < 0) return null; //Arrays don't go lower than 0
-        if (slot > this.handSize) return this.#holding; //Return full hand array
+        if (slot < 0 || slot > this.handSize) return this.#holding;
         return this.#holding[slot];
     }
 }
