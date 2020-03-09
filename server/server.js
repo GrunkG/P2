@@ -8,3 +8,5 @@ let sql = {
     pass: "password",
     db:   "database"
 };
+
+//WIP
