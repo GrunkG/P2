@@ -1,12 +1,33 @@
 let cards = require('./cards_foundation');
 
+class blackjack_player extends cards.player {
+    constructor(hands, size) {
+        super(hands, size);
+    }
+
+    doHit(hand) {
+        if (this.hands[hand].length > this.hands[hand].handSize) return false;
+        this.hands[hand].grab( this.game.drawCard() );
+        return true;
+    }
+
+    doHold() {
+        return false;
+    }
+
+    //doSplit()
+
+    getHandValue(hand) {
+        
+    }
+}
+
 class blackjack extends cards.cardgame {
     constructor(decks, sqlconnector) {
-        super();
+        super(decks, false);
         this.sqlcon = sqlconnector;
         this.players = [];
-        this.dealer = null;
-        this.decks = decks;
+        this.dealer = new blackjack_player(1,52); //1 hand, capable of holder 52 objects.
         this.ID = null;
         this.ready = true;
     }

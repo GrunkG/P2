@@ -1,10 +1,3 @@
-class card {
-    constructor(suit, value) {
-        this.suit = suit;
-        this.value = value;
-    }
-}
-
 class cardgame {
     constructor(decks, bJokers) {
         this.jokers = bJokers; //Bool, true or false
@@ -97,8 +90,38 @@ class cardgame {
     }
 }
 
+class card {
+    constructor(suit, value) {
+        this.suit = suit;
+        this.value = value;
+    }
+}
+
+class player extends cardgame {
+    constructor(hands, handSize) {
+        super();
+        this.hands = this.generateHands(hands, handSize);
+        this.game = null;
+        this.ID = null;
+    }
+
+    generateHands(num, size) {
+        let freak = [];
+
+        //Octopus man here we go
+        for (let arm = 1; arm <= num; arm++) {
+            freak.push(new hand(size));
+        }
+        return freak;
+    }
+
+    //Spil håndtering
+    join_game(game) { }
+    get getGameID() {}
+}
+
 class hand {
-    #holding = [];
+    #holding = []; //Private variable, not Invalid character >.>
     constructor(size) {
         this.handSize = size;
     }
@@ -124,29 +147,6 @@ class hand {
         if (slot > this.handSize) return this.#holding; //Return full hand array
         return this.#holding[slot];
     }
-}
-
-class player extends cardgame {
-    constructor(hands, handSize) {
-        super();
-        this.hands = this.generateHands(hands, handSize);
-        this.game = null;
-        this.ID = null;
-    }
-
-    generateHands(num, size) {
-        let freak = [];
-
-        //Octopus man here we go
-        for (let arm = 1; arm <= num; arm++) {
-            freak.push(new hand(size));
-        }
-        return freak;
-    }
-
-    //Spil håndtering
-    join_game(game) { }
-    get getGameID() {}
 }
 
 //Module - Used for require();
