@@ -1,5 +1,51 @@
 @import url("https://fonts.googleapis.com/css?family=Montserrat:400,600,800&display=swap");
+html {
+  font-size: 62.5%;
+}
+
 body {
   font-family: Montserrat, sans-serif;
+  margin: 0;
+}
+
+header {
+  position: fixed;
+  width: 100%;
+}
+
+header .button-login {
+  float: right;
+  background-color: rgba(0, 0, 0, 0);
+  border: 0;
+  padding: 1rem 3rem;
+  font-size: 2rem;
+}
+
+header .button-login:hover {
+  background-color: #1d34bd;
+  color: white;
+  cursor: pointer;
+}
+
+main {
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  height: 100vh;
+}
+
+main .button-big {
+  width: 100%;
+  height: 100%;
+  font-size: 8rem;
+  font-weight: 600;
+  background-color: white;
+  border: 0;
+}
+
+main .button-big:hover {
+  background-color: #1d34bd;
+  color: white;
+  cursor: pointer;
 }
 /*# sourceMappingURL=style-auto.css.map */
