@@ -1,4 +1,4 @@
-//Needs Card class
+//Needs cards class
 class Deck{
     constructor(deck){
         this.deck = deck;
@@ -7,7 +7,7 @@ class Deck{
         let deck = [];
         for (let i = 0; i < Card.cardSuit.length; i++) {
             for (let j = 0; j < Card.cardValue.length; j++) {
-                let card = new Card(Card.cardValue[j], Card.cardSuit[i], "default");
+                let card = new Card(Card.cardValue[j], Card.cardSuit[i]);
                 deck.push(card);
             }
         }
