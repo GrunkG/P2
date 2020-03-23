@@ -1,10 +1,11 @@
+let mysql = require('mysql');
 class sqltools {
-    constructor(sqlobj) {
-        this.sqlobj = sqlobj;
-        this.host = sqlobj.host;
-        this.user = sqlobj.user;
-        this.pass = sqlobj.pass;
-        this.database = sqlobj.db;
+    constructor(info) {
+        this.sqlobj = mysql;
+        this.host = info.host;
+        this.user = info.user;
+        this.pass = info.pass;
+        this.database = info.db;
     }
 
     makeConnection() {

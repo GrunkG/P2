@@ -47,7 +47,7 @@ class cardgame {
         return new card(cardType, value);
     }
 
-    generateDeck(num) { //Re-write as recursive function?
+    generateDeck(num) {
         let decks = [];
         if (num < 1) return null;
         for (let deck = 1; deck <= num; deck++) {
@@ -88,6 +88,7 @@ class cardgame {
       
         return true;
     }
+
 }
 
 class card {
@@ -126,6 +127,7 @@ class player extends cardgame {
         for (let slot = 0; slot < handHold; slot++) {
             value += this.getCardValue(handContent[slot]);
         }
+        return value;
     }
 
     join_game(game) {
