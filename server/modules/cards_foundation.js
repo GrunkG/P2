@@ -1,61 +1,13 @@
 class cardgame {
-    constructor(decks, bJokers) {
-        this.jokers = bJokers; //Bool, true or false
-        this.decks = this.generateDeck(decks);
-     }
-     
-    generateSuit(suit) {
-        let result = [];
-        let suitSize = this.jokers ? 15 : 13;
-        for (let card = 1; card <= suitSize; card++) {
-            if (card <= 10 && card > 1) { 
-                result.push(this.generateCard(suit,card));
-                continue;
-            }
-            switch (card) {
-                case 1:
-                    result.push(this.generateCard(suit,'Ace'));
-                    break;
-                case 11:
-                    result.push(this.generateCard(suit,'Jack'));
-                    break;
-                case 12:
-                    result.push(this.generateCard(suit,'Queen'));
-                    break;
-                case 13:
-                    result.push(this.generateCard(suit,'King'));
-                    break;
-                case 14:
-                case 15:
-                    result.push(this.generateCard(null,'Joker'));
-                    break;
-                default: break;
-            }
-        }
-        return result;
+    #bJokers = true;
+    constructor() {
+        this.decks = [];
+        this.players = [];
     }
-
-    generateCard(type, value) {
-        let cardType = null;
-        switch(type) {
-            case 1: cardType = "Spades"; break;
-            case 2: cardType = "Hearts"; break;
-            case 3: cardType = "Diamonds"; break;
-            case 4: cardType = "Clubs"; break;
-            default: cardType = null; break;
-        }        
-        return new card(cardType, value);
-    }
-
-    generateDeck(num) {
-        let decks = [];
-        if (num < 1) return null;
-        for (let deck = 1; deck <= num; deck++) {
-            for (let suit = 1; suit <= 4; suit++) {
-                decks =  decks.concat(this.generateSuit(suit));
-            }
-        }
-        return decks;
+    //Public functions
+    startGame(decks = 1, bJokers = true) {
+        this.#bJokers = bJokers;
+        this.decks = cardgame.generateDeck(decks);
     }
 
     drawCard() {
@@ -63,32 +15,67 @@ class cardgame {
         return this.decks.shift();
     }
 
-    putInDeck(card) {
-        if (card instanceof card) {
-            this.decks.push(card);
-            return true;
+    //getCardValue(card) { } - Should be implemented for each card game iteration, since it changes based on game rules.
+
+    isJokersInPlay() { return this.#bJokers; }
+
+    /* 
+     * Static ~ Private-ish functions, as made fairly obvious they're accessable through the class reference itself,
+     * however inaccessable through a instanciation of the class.
+     */
+    static generateDeck(num) {
+        let decks = [];
+        if (num < 1) return null;
+        for (let deck = 1; deck <= num; deck++) {
+            for (let suit = 1; suit <= 4; suit++) {
+                decks =  decks.concat(cardgame.generateSuit(suit));
+            }
         }
-        return false;
+        return decks;
     }
 
-    shuffleDeck() { //Using Fisher-Yates Shuffle - https://bost.ocks.org/mike/shuffle/
-        var m = this.decks.length, t, i;
-
-        // While there remain elements to shuffle…
-        while (m) {
-      
-          // Pick a remaining element…
-          i = Math.floor(Math.random() * m--);
-      
-          // And swap it with the current element.
-          t = this.decks[m];
-          this.decks[m] = this.decks[i];
-          this.decks[i] = t;
+    static generateSuit(suit) {
+        let result = [];
+        let suitSize = this.#bJokers ? 15 : 13;
+        for (let card = 1; card <= suitSize; card++) {
+            if (card <= 10 && card > 1) { 
+                result.push(cardgame.generateCard(suit,card));
+                continue;
+            }
+            switch (card) {
+                case 1:
+                    result.push(cardgame.generateCard(suit,'A'));
+                    break;
+                case 11:
+                    result.push(cardgame.generateCard(suit,'J'));
+                    break;
+                case 12:
+                    result.push(cardgame.generateCard(suit,'Q'));
+                    break;
+                case 13:
+                    result.push(cardgame.generateCard(suit,'K'));
+                    break;
+                case 14:
+                case 15:
+                    result.push(cardgame.generateCard(null,'Joker'));
+                    break;
+                default: break;
+            }
         }
-      
-        return true;
+        return result;
     }
 
+    static generateCard(type, value) {
+        let cardType = null;
+        switch(type) {
+            case 1: cardType = "S"; break;
+            case 2: cardType = "H"; break;
+            case 3: cardType = "D"; break;
+            case 4: cardType = "C"; break;
+            default: cardType = null; break;
+        }        
+        return new card(cardType, value);
+    }
 }
 
 class card {
@@ -98,68 +85,78 @@ class card {
     }
 }
 
-class player extends cardgame {
-    constructor(hands, handSize) {
-        super();
+class player {
+    constructor(hands, handSize, dealer = false) {
+        this.activeGame = null;
         this.hands = this.generateHands(hands, handSize);
-        this.game = null;
-        this.ID = null;
+        this.isDealer = dealer;
+        this.active = true;
+        this.bet = 0;
+    }
+
+    //Public functions
+    joinGame(game) {
+        game.players.push(this);
+        this.activeGame = game;
+    }
+    
+    getHandValue(hand) {
+        let cards = this.hands[hand].getHold();
+        return this.activeGame.getCardsValue(cards);
+    }
+
+    shuffleDeck() { //Using Fisher-Yates Shuffle - https://bost.ocks.org/mike/shuffle/
+        if (this.isDealer) {
+            var m = this.activeGame.decks.length, t, i;
+
+            // While there remain elements to shuffle…
+            while (m) {
+        
+            // Pick a remaining element…
+            i = Math.floor(Math.random() * m--);
+        
+            // And swap it with the current element.
+            t = this.activeGame.decks[m];
+            this.activeGame.decks[m] = this.activeGame.decks[i];
+            this.activeGame.decks[i] = t;
+            }
+        
+            return true;
+        }
+        console.log("ERROR: Player attempted to shuffle deck, but is not a dealer.")
+        return false;
     }
 
     generateHands(num, size) {
         let freak = [];
-
         //Octopus man here we go
         for (let arm = 1; arm <= num; arm++) {
             freak.push(new hand(size));
         }
         return freak;
     }
-
-    getCardValue(card) {
-        return this.game.getCardValue(card);
-    }
-
-    getHandValue(hand) {
-        let value = 0;
-        let handContent = this.hands[hand].getHold();
-        let handHold = handContent.length;
-        for (let slot = 0; slot < handHold; slot++) {
-            value += this.getCardValue(handContent[slot]);
-        }
-        return value;
-    }
-
-    join_game(game) {
-        return game.playerConnect = this;
-    }
-
-    get getGameID() {}
 }
 
 class hand {
-    #holding = []; //Private variable, not Invalid character >.> -- Tested and it tried
-    constructor(size) {
-        this.handSize = size;
-    }
+    #holding = [];
+    constructor() { }
 
     grab(object) {
-        if (this.#holding.length == this.handSize) return false;
         return this.#holding.push(object);
     }
 
     drop(slot) {
-        if (slot < 0 || slot > this.handSize) return false;
+        if (slot < 0 || slot > this.#handSize) return false;
         if (slot > 0) {
             return this.#holding.splice(slot,slot);
         }
         return this.#holding.splice(0,1);
     }
 
-    getSize() { return this.handSize; }
+    getSize() { return this.#holding.length; }
 
-    getHold(slot) {
-        if (slot < 0 || slot > this.handSize) return this.#holding;
+    getHold(slot = -1) {
+        if (slot < 0 || slot > this.#handSize) return this.#holding;
         return this.#holding[slot];
     }
 }
