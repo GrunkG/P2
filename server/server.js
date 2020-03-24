@@ -1,50 +1,102 @@
-//requires
-const httptools = require('./modules/httptools');
 const http = require('http');
+const webtools = require('./modules/httptools');
 
-//Global variables
-const pathPublic = "./PublicResources/client/";
-const defaultHTML = "demo.html";
-const serverinfo = {ip: '127.0.0.1', port: 3000};
-
-//Objects
-let tools = new httptools(pathPublic);
+const socket = require('websocket');
+const mysql = require('mysql');
+const bjackMod = require('./modules/blackjack');
 
 let sql = {
-    host: "localhost",
-    user: "username",
-    pass: "password",
-    db:   "database"
+    host: "vps269131.vps.ovh.ca",
+    user: "p2bois",
+    pass: "Yc5dRx85dm",
+    db: "P2"
 };
 
+let port = 3000,
+    ip = "127.0.0.1",
+    acceptedOrigin = `http://${ip}:${port}`;
+
+const pathPublic = "./PublicResources/client/";
+const defaultHTML = "demo.html";
+
 class user {
-    constructor(name, secret) {
-        this.name = name,
-        this.secret = secret,
-        this.action = null;
+    constructor(connection, index) {
+        this.ID = null,
+        this.player = null;
+        this.connection = connection;
+        this.userIndex = index;
     }
-}
+};
 
-//Establish server
-let server = http.createServer((req, res) => {
+let activeUsers = [];
+
+//########  Webserver
+const webserv = http.createServer((req, res) => {
     let method = req.method;
-    switch (method) {
-        case "GET":
-            let url = req.url;
-            if (url == "/") tools.fileResponse(defaultHTML, res);
-            tools.fileResponse(url, res);
-            break;
-        //case "POST":
-        default:
-            res.statusCode=404;
-            res.end("\n");
-            break;
+    if (method == "GET") {
+        switch(req.url) {
+            case "/":
+                webtools.fileResponse(defaultHTML, pathPublic, res)
+                break;
+            default:
+                webtools.fileResponse(req.url, pathPublic, res)
+                break;
+        }
     }
-} );
 
-server.listen(serverinfo.port, serverinfo.ip, () => {
-    //let d = new Date();
-   // console.log(`[${d.getHours()}:${d.getMinutes()}:${d.getSeconds()}] > Server listening at http://${serverinfo.ip}:${serverinfo.port}/`);
+    if (method == "POST") {
+
+    }
 });
 
-//Handle requests from client
+webserv.listen(port, ip, () => {
+    let d = new Date();
+    console.log(`[${d.getHours()}:${d.getMinutes()}:${d.getSeconds()}] > Server listening at ${acceptedOrigin}`);
+});
+
+//######## WebSockets - Active game(s) handler
+const gameserv = new socket.server({httpServer: webserv});
+
+function isAcceptedOrigin(origin) {
+    return (origin == acceptedOrigin) ? true : false;
+}
+
+//Handles all the blackjack game logic
+function gamehandler(message) {
+
+}
+
+//WebSocket Event Handler
+gameserv.on('request', (req) => {
+    //Only allow connections from our own website origin
+    if (!isAcceptedOrigin(req.origin)) {
+        req.reject();
+        return;
+    }
+
+    //Accept connection and start handling events
+    let connection = req.accept(null, req.origin);
+    console.log("Connection accepted from origin: " + req.origin);
+    activeUsers.push(new user(connection, activeUsers.length-1));
+
+    //Handle incoming messages from connection
+    connection.on('message', (message) => {
+        if (message.type != "utf8") return;
+        
+        //Try and convert message to an easy to handle JSON object.
+        try { 
+            let msg = JSON.parse(message.utf8Data);
+            /*console.log(ID);
+            if (msg.type == "id") ID = msg.id; */
+            if (msg.type == "game") gamehandler(msg);
+        } catch (err) { //Wrong type of message, print error.
+            console.error(err);
+            return;
+        }
+    });
+
+    //Handle closed connection
+    connection.on('close', (connection) => {
+        activeUsers.splice()
+    });
+});
