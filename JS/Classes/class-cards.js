@@ -14,18 +14,21 @@ class Card {
     }
 
     //Size = width of card, posX = x position in html, posY = y position
-    printCard(size, posX, posY, htmlLocation) {
+    printCard(htmlLocation) {
         let card = document.createElement("img");
         card.src = `/Git/Resources/Cards/Front/${this.front}/${this.value}${this.suit}.png`; //e.g. "/Resources/Cards/Default/spades-ace.png"
-        let cssStyle = `width: ${size}px; position: absolute; left: ${posX}px; top: ${posY}px;`;
+        let cssStyle = `width: 100px;`
         card.style.cssText = cssStyle;
         htmlLocation.appendChild(card);
     }
-    printCardFaceDown(size, posX, posY, htmlLocation) { //Could be part of printCard
+    printCardById(htmlId){
+        this.printCard(document.getElementById(htmlId));
+    }
+    printCardFaceDown(htmlLocation) { //Could be part of printCard
         let card = document.createElement("img");
         card.src = `/Git/Resources/Cards/Back/${this.back}.png`;
         card.style.width = `${size}px`
-        let cssStyle = `width: ${size}px; position: absolute; left: ${posX}px; top: ${posY}px;`;
+        let cssStyle = `width: 100px;`;
         card.style.cssText = cssStyle;
         htmlLocation.appendChild(card);
     }
