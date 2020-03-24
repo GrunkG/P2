@@ -9,12 +9,39 @@
     <title>P2 projektet</title>
 </head>
 <body>
-    <!-- <header>
-        <button class="button-login">Login</button>
-    </header> -->
+    <header>
+        <form action="" method="post">
+            <a class="logout" href=""></a>
+        </form>
+    </header>
     <main>
-        <div id="cardContainer">
-            Hej
+        <div class="blackjack-container">
+            <div class="main-game">
+                <div class="dealer">
+                    <span class="dealer__title">Dealer</span>
+                    <div class="dealer__card-container" id="dealer__card-container"></div>
+                    <span class="dealer__card-sum" id="dealer__card-sum">30</span>
+                </div>
+
+                <div class="player">
+                    <span class="player__title">You</span>
+                    <div class="player__card-container" id="player__card-container"></div>
+                    <span class="player__card-sum" id="player__card-sum">10</span>
+                    <div class="player__buttons">
+                        <button>Hit</button>
+                        <button>Hold</button>
+                        <button class="inactive">Double</button>
+                        <button>Split</button>
+                        <button>Insurance</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="remote-player">
+                <span class="remote-player__title">P1</span>
+                <div class="remote-player__card-container" id="remote-player-p1__card-container"></div>
+                <span class="remote-player__card-sum" id="remote-player-p1__card-sum"></span>
+            </div>
         </div>
     </main>
 </body>

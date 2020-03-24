@@ -6,8 +6,10 @@ let newDeck = new Deck(Deck.getDeck);
 newDeck.addDeck(5);
 
 
-test.printCardById("cardContainer");
-test.printCardById("cardContainer");
+test.printCardById("dealer__card-container");
+test.printCardById("dealer__card-container");
+test.printCardById("dealer__card-container");
+test.printCardById("player__card-container");
 
 // for (let index = 0; index < newDeck.deck.length; index++) {
 //     newDeck.deck[index].printCard(100, 120 * index % 1560 + 100, 200 * Math.floor(index * 1/13 + 1) - 100, document.body);

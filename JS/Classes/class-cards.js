@@ -17,8 +17,8 @@ class Card {
     printCard(htmlLocation) {
         let card = document.createElement("img");
         card.src = `/Git/Resources/Cards/Front/${this.front}/${this.value}${this.suit}.png`; //e.g. "/Resources/Cards/Default/spades-ace.png"
-        let cssStyle = `width: 100px;`
-        card.style.cssText = cssStyle;
+        //let cssStyle = `height: inherit`
+        //card.style.cssText = cssStyle;
         htmlLocation.appendChild(card);
     }
     printCardById(htmlId){
@@ -28,7 +28,7 @@ class Card {
         let card = document.createElement("img");
         card.src = `/Git/Resources/Cards/Back/${this.back}.png`;
         card.style.width = `${size}px`
-        let cssStyle = `width: 100px;`;
+        let cssStyle = `height: auto`;
         card.style.cssText = cssStyle;
         htmlLocation.appendChild(card);
     }
