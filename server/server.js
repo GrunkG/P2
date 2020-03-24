@@ -6,10 +6,10 @@ const mysql = require('mysql');
 const bjackMod = require('./modules/blackjack');
 
 let sql = {
-    host: "vps269131.vps.ovh.ca",
-    user: "p2bois",
-    pass: "Yc5dRx85dm",
-    db: "P2"
+    host: "localhost",
+    user: "username",
+    pass: "password",
+    db:   "database"
 };
 
 let port = 3000,
