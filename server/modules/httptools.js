@@ -6,13 +6,9 @@ const path=require("path");
    when working with a http server. */
 
 class httptools {
-  constructor(publicPath) { 
-    this.publicPath = publicPath;
-  }
-
   //Shamelessly stolen from Lecture 5 Exercises solution 
-  fileResponse(filename,res){
-      const sPath=this.securePath(filename);
+  static fileResponse(filename, publicPath, res){
+      const sPath=this.securePath(filename, publicPath);
       //console.log("Reading: "+sPath);
       fs.readFile(sPath, (err, data) => {
         if (err) {
@@ -29,8 +25,9 @@ class httptools {
         }
       });
   }
+
   //Shamelessly stolen from Lecture 5 Exercises solution 
-  guessMimeType(fileName){
+  static guessMimeType(fileName){
     const fileExtension=fileName.split('.').pop().toLowerCase();
     //console.log(fileExtension);
     const ext2Mime ={ //Aught to check with IANA spec
@@ -53,13 +50,13 @@ class httptools {
     return (ext2Mime[fileExtension]||"text/plain");
   }
   //Shamelessly stolen from Lecture 5 Exercises solution 
-  securePath(userPath){
+  static securePath(userPath, publicPath){
     if (userPath.indexOf('\0') !== -1) {
       // could also test for illegal chars: if (!/^[a-z0-9]+$/.test(filename)) {return undefined;}
       return undefined;
   
     }
-    userPath= this.publicPath+userPath;
+    userPath= publicPath+userPath;
     const rootFileSystem=process.cwd();
     let p= path.join(rootFileSystem,path.normalize(userPath)); 
     //console.log("The path is:"+p);

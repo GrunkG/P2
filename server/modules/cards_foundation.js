@@ -146,7 +146,6 @@ class hand {
     }
 
     drop(slot) {
-        if (slot < 0 || slot > this.#handSize) return false;
         if (slot > 0) {
             return this.#holding.splice(slot,slot);
         }
@@ -156,7 +155,7 @@ class hand {
     getSize() { return this.#holding.length; }
 
     getHold(slot = -1) {
-        if (slot < 0 || slot > this.#handSize) return this.#holding;
+        if (slot < 0) return this.#holding; //Return it all!
         return this.#holding[slot];
     }
 }
