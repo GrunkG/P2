@@ -1,4 +1,4 @@
-//Needs cards class
+//Needs cards class -- Use this class to store the players' decks
 class Deck{
     constructor(deck){
         this.deck = deck;
@@ -28,5 +28,9 @@ class Deck{
             shuffledDeck[i] = this.deck[Math.floor(Math.random() * array.length)];
         }
         return shuffledDeck;
+    }
+    //Print all cards in a deck within the container with the id htmlId
+    printDeck(htmlId){
+        this.deck.forEach(card => card.printCardById(htmlId));
     }
 }

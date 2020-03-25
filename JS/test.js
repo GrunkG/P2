@@ -3,23 +3,19 @@ let test = new Card("K", "H");
 // test.printCardFaceDown(100, 90, 40, document.body);
 
 let newDeck = new Deck(Deck.getDeck);
-newDeck.addDeck(5);
 
+//newDeck.addDeck(5);
 
 test.printCardById("dealer__card-container");
 test.printCardById("dealer__card-container");
 test.printCardById("dealer__card-container");
 test.printCardById("player__card-container");
-test.printCardById("remote-player-p1__card-container");
-test.printCardById("remote-player-p1__card-container");
 
-// for (let index = 0; index < newDeck.deck.length; index++) {
-//     newDeck.deck[index].printCard(100, 120 * index % 1560 + 100, 200 * Math.floor(index * 1/13 + 1) - 100, document.body);
-// }
 
-// for (let index = 0; index < newDeck.deck.length; index++) {
-//      newDeck.deck[index].printCard(randMinMax(50, 100), 120 * index % 1560 + 100, 200 * Math.floor(index * 1/13 + 1) - 100, document.body);
-// }
+
+//newDeck.printDeck("remote-player-p1__card-container");
+
+
 
 function randMinMax(min, max){
     return Math.floor(Math.random() * (max - min) + min);
