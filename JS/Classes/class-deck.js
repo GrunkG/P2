@@ -31,10 +31,14 @@ class Deck{
         return shuffledDeck;
     }
     //Print all cards in a deck within the container with the id htmlId
-    printDeck(){
+    print(){
         this.deck.forEach(card => card.printCardById(this.htmlId));
     }
-    clearDeck(){
+    clear(){
         document.getElementById(this.htmlId).innerHTML = "";
+    }
+    update(){
+        newDeck.clear();
+        newDeck.print();
     }
 }
