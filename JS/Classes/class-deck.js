@@ -1,7 +1,8 @@
 //Needs cards class -- Use this class to store the players' decks
 class Deck{
-    constructor(deck){
+    constructor(deck, htmlId){
         this.deck = deck;
+        this.htmlId = htmlId;
     }
     //Makes a deck of cards
     static get getDeck(){
@@ -30,7 +31,10 @@ class Deck{
         return shuffledDeck;
     }
     //Print all cards in a deck within the container with the id htmlId
-    printDeck(htmlId){
-        this.deck.forEach(card => card.printCardById(htmlId));
+    printDeck(){
+        this.deck.forEach(card => card.printCardById(this.htmlId));
+    }
+    clearDeck(){
+        document.getElementById(this.htmlId).innerHTML = "";
     }
 }
