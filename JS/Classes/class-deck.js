@@ -38,7 +38,7 @@ class Deck{
         document.getElementById(this.htmlId).innerHTML = "";
     }
     update(){
-        newDeck.clear();
-        newDeck.print();
+        this.clear();
+        this.print();
     }
 }
