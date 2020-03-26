@@ -20,7 +20,7 @@ class Card {
         htmlLocation.appendChild(card);
     }
     printCardById(htmlId, front = "Default"){
-        this.printCard(document.getElementById(htmlId, front));
+        this.printCard(document.getElementById(htmlId), front);
     }
     printCardFaceDown(htmlLocation, back = "default") { //Could be part of printCard
         let card = document.createElement("img");

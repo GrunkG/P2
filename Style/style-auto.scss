@@ -88,6 +88,7 @@ main{
         img{
             height: 17rem;
             box-shadow: 0 3px 8px rgba(0,0,0,0.08);
+            border-radius: 8px;
         }
     }
     &__card-sum{
@@ -150,9 +151,11 @@ main{
         grid-auto-flow: column;
         grid-gap: 1rem;
         grid-auto-columns: min-content;
+        border-radius: 8px;
         img{
             height: 8rem;
             box-shadow: 0 3px 8px rgba(0,0,0,0.08);
+            border-radius: 5px;
         }
     }
     &__card-sum{

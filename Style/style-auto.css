@@ -107,6 +107,7 @@ main .button-big:hover {
   height: 17rem;
   -webkit-box-shadow: 0 3px 8px rgba(0, 0, 0, 0.08);
           box-shadow: 0 3px 8px rgba(0, 0, 0, 0.08);
+  border-radius: 8px;
 }
 
 .dealer__card-sum, .player__card-sum {
@@ -182,12 +183,14 @@ main .button-big:hover {
   grid-gap: 1rem;
   grid-auto-columns: -webkit-min-content;
   grid-auto-columns: min-content;
+  border-radius: 8px;
 }
 
 .remote-player__card-container img {
   height: 8rem;
   -webkit-box-shadow: 0 3px 8px rgba(0, 0, 0, 0.08);
           box-shadow: 0 3px 8px rgba(0, 0, 0, 0.08);
+  border-radius: 5px;
 }
 
 .remote-player__card-sum {
