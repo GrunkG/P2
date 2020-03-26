@@ -1,5 +1,6 @@
 let gameElement = null;
 let playerElement = null;
+let ws = null;
 window.onload = () => {
     initiateGame();
 };
@@ -8,7 +9,7 @@ function initiateGame() {
     console.log("Test");
     gameElement = document.getElementById("game");
     let startBtn = document.createElement("button");
-    startBtn.onclick = () => {requestServer("/game/start/testa")};
+    startBtn.onclick = () => {gameHandler();};
     startBtn.id = "startBtn";
     startBtn.innerHTML = "START"
     gameElement.appendChild(startBtn);
@@ -27,12 +28,21 @@ function requestServer(url) {
     );
 }
 
-function handleResponse(res) {
 
+
+function gameHandler() {
+    ws = new WebSocket('ws://localhost:3000/');
+    ws.onopen = () => {
+        ws.send(JSON.stringify({type: "game", content: "startgame"}));
+    }
+
+    ws.onmessage = (msg) => {
+        console.log(JSON.parse(msg.data));
+    }
 }
 
 function doHit() {
-    requestServer("/game/hit");
+    ws.send(JSON.stringify({type: "game", content: "hit"}));
 }
 
 function doHold() {

@@ -1,13 +1,15 @@
 class cardgame {
-    #bJokers = true;
     constructor() {
         this.decks = [];
         this.players = [];
+        this.jokers = true;
     }
     //Public functions
     startGame(decks = 1, bJokers = true) {
-        this.#bJokers = bJokers;
+        this.jokers = bJokers;
         this.decks = cardgame.generateDeck(decks);
+        this.shuffleDeck()
+        return this;
     }
 
     drawCard() {
@@ -15,9 +17,31 @@ class cardgame {
         return this.decks.shift();
     }
 
+    shuffleDeck() { //Using Fisher-Yates Shuffle - https://bost.ocks.org/mike/shuffle/
+        var m = this.decks.length, t, i;
+
+        // While there remain elements to shuffle…
+        while (m) {
+    
+        // Pick a remaining element…
+        i = Math.floor(Math.random() * m--);
+    
+        // And swap it with the current element.
+        t = this.decks[m];
+        this.decks[m] = this.decks[i];
+        this.decks[i] = t;
+        }
+    
+        return true;
+    }
+
+    addPlayer(player) {
+        this.players.push(player);
+    }
+
     //getCardValue(card) { } - Should be implemented for each card game iteration, since it changes based on game rules.
 
-    isJokersInPlay() { return this.#bJokers; }
+    isJokersInPlay() { return this.jokers; }
 
     /* 
      * Static ~ Private-ish functions, as made fairly obvious they're accessable through the class reference itself,
@@ -36,7 +60,7 @@ class cardgame {
 
     static generateSuit(suit) {
         let result = [];
-        let suitSize = this.#bJokers ? 15 : 13;
+        let suitSize = this.jokers ? 15 : 13;
         for (let card = 1; card <= suitSize; card++) {
             if (card <= 10 && card > 1) { 
                 result.push(cardgame.generateCard(suit,card));
@@ -86,17 +110,16 @@ class card {
 }
 
 class player {
-    constructor(hands, handSize, dealer = false) {
+    constructor(hands, dealer = false) {
         this.activeGame = null;
-        this.hands = this.generateHands(hands, handSize);
+        this.hands = this.generateHands(hands);
         this.isDealer = dealer;
-        this.active = true;
         this.bet = 0;
     }
 
     //Public functions
     joinGame(game) {
-        game.players.push(this);
+        //game.addPlayer(this);
         this.activeGame = game;
     }
     
@@ -105,35 +128,19 @@ class player {
         return this.activeGame.getCardsValue(cards);
     }
 
-    shuffleDeck() { //Using Fisher-Yates Shuffle - https://bost.ocks.org/mike/shuffle/
-        if (this.isDealer) {
-            var m = this.activeGame.decks.length, t, i;
-
-            // While there remain elements to shuffle…
-            while (m) {
-        
-            // Pick a remaining element…
-            i = Math.floor(Math.random() * m--);
-        
-            // And swap it with the current element.
-            t = this.activeGame.decks[m];
-            this.activeGame.decks[m] = this.activeGame.decks[i];
-            this.activeGame.decks[i] = t;
-            }
-        
-            return true;
-        }
-        console.log("ERROR: Player attempted to shuffle deck, but is not a dealer.")
-        return false;
-    }
-
-    generateHands(num, size) {
+    generateHands(num) {
         let freak = [];
         //Octopus man here we go
         for (let arm = 1; arm <= num; arm++) {
-            freak.push(new hand(size));
+            freak.push(new hand());
         }
         return freak;
+    }
+
+    generateHand() {
+        let newhand = new hand();
+        this.hands.push(newhand);
+        return newhand;
     }
 }
 

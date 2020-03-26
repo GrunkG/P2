@@ -3,7 +3,8 @@ const webtools = require('./modules/httptools');
 
 const socket = require('websocket');
 const mysql = require('mysql');
-const bjackMod = require('./modules/blackjack');
+const cardgame = require('./modules/cards_foundation');
+const bjackGame = require('./modules/blackjack');
 
 let sql = {
     host: "localhost",
@@ -20,15 +21,14 @@ const pathPublic = "./PublicResources/client/";
 const defaultHTML = "demo.html";
 
 class user {
-    constructor(connection, index) {
+    constructor(connection) {
         this.ID = null,
-        this.player = null;
+        this.playerObj = null;
         this.connection = connection;
-        this.userIndex = index;
     }
 };
 
-let activeUsers = [];
+let activeGames = [];
 
 //########  Webserver
 const webserv = http.createServer((req, res) => {
@@ -61,11 +61,6 @@ function isAcceptedOrigin(origin) {
     return (origin == acceptedOrigin) ? true : false;
 }
 
-//Handles all the blackjack game logic
-function gamehandler(message) {
-
-}
-
 //WebSocket Event Handler
 gameserv.on('request', (req) => {
     //Only allow connections from our own website origin
@@ -77,7 +72,39 @@ gameserv.on('request', (req) => {
     //Accept connection and start handling events
     let connection = req.accept(null, req.origin);
     console.log("Connection accepted from origin: " + req.origin);
-    activeUsers.push(new user(connection, activeUsers.length-1));
+
+    let thisUser = new user(connection);
+
+    //Handles all the blackjack game logic
+    function gamehandler(message) {
+        switch(message.content) {
+            case "startgame":
+                let new_game = new bjackGame().startGame(4, false);
+                thisUser.playerObj =  new cardgame.player(1);
+                thisUser.playerObj.joinGame(new_game);
+                activeGames.push(new_game);
+                send({type: "game", content: "game created", obj: thisUser.playerObj});
+                //break;
+            case "hit":
+                let drawn_card = thisUser.playerObj.activeGame.hit();
+                thisUser.playerObj.hands[0].grab(drawn_card);
+                send({type: "game", content: "card", obj: drawn_card});
+                break;
+            case "hold":
+                break;
+            case "double":
+                break;
+            case "split":
+                break;
+            case "insurance":
+                break;
+            default:  break;
+        }
+    }
+
+    function send(message) {
+        connection.send( JSON.stringify(message) );
+    }
 
     //Handle incoming messages from connection
     connection.on('message', (message) => {
@@ -86,8 +113,6 @@ gameserv.on('request', (req) => {
         //Try and convert message to an easy to handle JSON object.
         try { 
             let msg = JSON.parse(message.utf8Data);
-            /*console.log(ID);
-            if (msg.type == "id") ID = msg.id; */
             if (msg.type == "game") gamehandler(msg);
         } catch (err) { //Wrong type of message, print error.
             console.error(err);
@@ -97,6 +122,5 @@ gameserv.on('request', (req) => {
 
     //Handle closed connection
     connection.on('close', (connection) => {
-        activeUsers.splice()
     });
 });
