@@ -16,7 +16,7 @@ class Card {
     //Size = width of card, posX = x position in html, posY = y position
     printCard(htmlLocation) {
         let card = document.createElement("img");
-        card.src = `/Git/Resources/Cards/Front/${this.front}/${this.value}${this.suit}.png`; //e.g. "/Resources/Cards/Default/spades-ace.png"
+        card.src = `/P2/Resources/Cards/Front/${this.front}/${this.value}${this.suit}.png`; //e.g. "/Resources/Cards/Default/spades-ace.png"
         //let cssStyle = `height: inherit`
         //card.style.cssText = cssStyle;
         htmlLocation.appendChild(card);
@@ -26,7 +26,7 @@ class Card {
     }
     printCardFaceDown(htmlLocation) { //Could be part of printCard
         let card = document.createElement("img");
-        card.src = `/Git/Resources/Cards/Back/${this.back}.png`;
+        card.src = `/P2/Resources/Cards/Back/${this.back}.png`;
         card.style.width = `${size}px`
         let cssStyle = `height: auto`;
         card.style.cssText = cssStyle;
