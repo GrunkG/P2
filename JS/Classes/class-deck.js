@@ -1,15 +1,17 @@
 //Needs cards class -- Use this class to store the players' decks
 class Deck{
-    constructor(deck, htmlId){
+    constructor(deck, htmlId, cardFront = "Default", cardBack = "default"){
         this.deck = deck;
         this.htmlId = htmlId;
+        this.cardFront = cardFront;
+        this.cardBack = cardBack;
     }
     //Makes a deck of cards
     static get getDeck(){
         let deck = [];
         for (let i = 0; i < Card.cardSuit.length; i++) {
             for (let j = 0; j < Card.cardValue.length; j++) {
-                let card = new Card(Card.cardValue[j], Card.cardSuit[i]);
+                let card = new Card(Card.cardValue[j], Card.cardSuit[i], cardFront, cardBack);
                 deck.push(card);
             }
         }
@@ -32,11 +34,13 @@ class Deck{
     }
     //Print all cards in a deck within the container with the id htmlId
     print(){
-        this.deck.forEach(card => card.printCardById(this.htmlId));
+        this.deck.forEach(card => card.printCardById(this.htmlId, this.cardFront));
     }
+    //Removes all printed cards in deck from screen
     clear(){
         document.getElementById(this.htmlId).innerHTML = "";
     }
+    //Updates a printed deck of cards to match the current deck
     update(){
         this.clear();
         this.print();
