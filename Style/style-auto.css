@@ -147,6 +147,10 @@ main .button-big:hover {
   cursor: default;
 }
 
+.player__buttons button:focus {
+  outline: 0;
+}
+
 .remote-player {
   width: 80%;
   background-color: #e2e2e2;

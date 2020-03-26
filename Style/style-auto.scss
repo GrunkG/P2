@@ -120,6 +120,9 @@ main{
                 color: #eeeeee;
                 cursor: default;
             }
+            &:focus{
+                outline: 0;
+            }
         }
     }
 }
