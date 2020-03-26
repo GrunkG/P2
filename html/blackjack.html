@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <link rel="stylesheet" type="text/css" href="../Style/style.css">
+    <link rel="stylesheet" type="text/css" href="../Style/style-auto.css">
+    <script src="../JS/Classes/class-cards.js"></script>
+    <script src="../JS/Classes/class-deck.js"></script>
+    <script src="../JS/client.js"></script>
+    <title>P2 projektet</title>
+</head>
+<body>
+    <header>
+        <form action="" method="post">
+            <a class="logout" href=""></a>
+        </form>
+    </header>
+    <main>
+        <div class="blackjack-container">
+            <div class="main-game">
+                <div class="dealer">
+                    <span class="dealer__title">Dealer</span>
+                    <div class="dealer__card-container" id="dealer__card-container"></div>
+                    <span class="dealer__card-sum" id="dealer__card-sum">30</span>
+                </div>
+
+                <div class="player">
+                    <span class="player__title">You</span>
+                    <div class="player__card-container" id="player__card-container"></div>
+                    <span class="player__card-sum" id="player__card-sum">10</span>
+                    <div class="player__buttons">
+                        <button>Hit</button>
+                        <button>Hold</button>
+                        <button class="inactive">Double</button>
+                        <button>Split</button>
+                        <button>Insurance</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="remote-player">
+                <span class="remote-player__title">P1</span>
+                <div class="remote-player__card-container" id="remote-player-p1__card-container"></div>
+                <span class="remote-player__card-sum" id="remote-player-p1__card-sum">42</span>
+            </div>
+        </div>
+    </main>
+</body>
+
+</html>

@@ -8,12 +8,12 @@ class cardgame {
     startGame(decks = 1, bJokers = true) {
         this.jokers = bJokers;
         this.decks = cardgame.generateDeck(decks);
-        this.shuffleDeck()
+        this.shuffleDeck();
         return this;
     }
 
     drawCard() {
-        if (this.decks == null) return null;
+        if (this.decks.length == 0) return null;
         return this.decks.shift();
     }
 
@@ -31,7 +31,7 @@ class cardgame {
         this.decks[m] = this.decks[i];
         this.decks[i] = t;
         }
-    
+        console.log("Done");
         return true;
     }
 
@@ -125,6 +125,7 @@ class player {
     
     getHandValue(hand) {
         let cards = this.hands[hand].getHold();
+        if (cards.length == 0) return 0;
         return this.activeGame.getCardsValue(cards);
     }
 

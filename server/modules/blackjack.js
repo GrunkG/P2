@@ -4,6 +4,7 @@ class blackjack extends cardmod.cardgame {
     constructor() {
         super();
         this.gameID = null; //Used for online identification
+        this.dealer = []; //temp?
     }
 
     hit() {
@@ -37,11 +38,12 @@ class blackjack extends cardmod.cardgame {
                 return 0;
                 break;
         }
+        return 0;
     }
     
     getCardsValue(cards) {
         let value = 0;
-        for (i = 0; i < cards.length; i++) {
+        for (let i = 0; i < cards.length; i++) {
             value += this.getCardValue(cards[i], value)
         }
         return value;

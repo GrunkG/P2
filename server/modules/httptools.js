@@ -8,6 +8,8 @@ const path=require("path");
 class httptools {
   //Shamelessly stolen from Lecture 5 Exercises solution 
   static fileResponse(filename, publicPath, res){
+      if (filename.indexOf("%20") > -1) filename = filename.replace("%20", " ");
+      console.log(filename);
       const sPath=this.securePath(filename, publicPath);
       //console.log("Reading: "+sPath);
       fs.readFile(sPath, (err, data) => {
