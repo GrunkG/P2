@@ -19,6 +19,52 @@ function dealCard(target, card) {
     card.printCardById(target);
 }
 
+function initGame(msg) {
+    let newCard = null
+    for (let i = 0; i < msg.cards.length; i++) {
+        cardObj = msg.cards[i];
+        newCard = new Card(cardObj.value.toString(), cardObj.suit);
+        dealCard(playerTarget, new Card(cardObj.value.toString(), cardObj.suit));
+        playerDeck.deck.push(newCard);
+    }
+    for (i = 0; i < msg.dealer.length; i++) {
+        cardObj = msg.dealer[i];
+        newCard = new Card(cardObj.value.toString(), cardObj.suit);
+        dealCard(dealerTarget, new Card(cardObj.value.toString(), cardObj.suit));
+    }
+    playerDeck.update();
+    document.getElementById(playerSumTarget).innerHTML = msg.pPoints;
+    document.getElementById(dealerSumTarget).innerHTML = msg.dPoints;
+    document.getElementById(remoteSumTarget).innerHTML = msg.pPoints;
+}
+
+function handleHit(msg) {
+    let cardObj = msg.obj,
+    //Player
+    playerCard = cardObj.p,
+    newCard = new Card(playerCard.value.toString(), playerCard.suit),
+    points = msg.val;
+    dealCard(playerTarget, newCard);
+    playerDeck.deck.push(newCard)
+    playerDeck.update();
+    document.getElementById(playerSumTarget).innerHTML = points;
+    document.getElementById(remoteSumTarget).innerHTML = points;
+
+    //Dealer
+    let dealerCard = cardObj.d;
+    points = msg.dval;
+    dealCard(dealerTarget, newCard);
+    document.getElementById(dealerSumTarget).innerHTML = points;
+}
+
+function handleFillDealer(cards, points) {
+    for (let i = 0; i < cards.length; i++) {
+        let new_card = new Card(cards[i].value.toString(), cards[i].suit);
+        dealCard(dealerTarget, new_card); 
+    }
+    document.getElementById(dealerSumTarget).innerHTML = points;
+}
+
 function gameHandler() {
     ws = new WebSocket('ws://localhost:3000/');
     ws.onopen = () => {
@@ -28,36 +74,20 @@ function gameHandler() {
     ws.onmessage = (message) => {
         try {
             let msg = JSON.parse(message.data),
-                cardObj;
+                cardObj,
+                newCard;
             console.log(msg);
-            if (msg.type == "game") {
+            if (msg.type == "blackjack") {
                 switch (msg.content) {
                     case "game created":
-                        let newCard = null
-                        for (let i = 0; i < msg.cards.length; i++) {
-                            cardObj = msg.cards[i];
-                            newCard = new Card(cardObj.value.toString(), cardObj.suit);
-                            dealCard(playerTarget, new Card(cardObj.value.toString(), cardObj.suit));
-                            playerDeck.deck.push(newCard);
-                        }
-                        for (i = 0; i < msg.dealer.length; i++) {
-                            cardObj = msg.dealer[i];
-                            newCard = new Card(cardObj.value.toString(), cardObj.suit);
-                            dealCard(dealerTarget, new Card(cardObj.value.toString(), cardObj.suit));
-                        }
-                        playerDeck.update();
-                        document.getElementById(playerSumTarget).innerHTML = msg.pPoints;
-                        document.getElementById(dealerSumTarget).innerHTML = msg.dPoints;
-                        document.getElementById(remoteSumTarget).innerHTML = msg.pPoints;
+                        initGame(msg);
                         break;
                     case "card":
-                        cardObj = msg.obj;
-                        dealCard(playerTarget, new Card(cardObj.value.toString(), cardObj.suit));
+                        handleHit(msg);
                         break;
-                    case "dealer-card":
-                        cardObj = msg.obj;
-                        dealCard(dealerTarget, new Card(cardObj.value.toString(), cardObj.suit));
-                        break;
+                    case "winner":
+                        handleFillDealer(msg.obj.dealer, msg.obj.points);
+                        console.log("Winner is: " + ((msg.obj.winner) ? "You" : "Dealer"));
                     case "done":
                         break;
                 }
@@ -74,7 +104,7 @@ function doHit() {
 }
 
 function doHold() {
-    requestServer("/game/hold");
+    ws.send(JSON.stringify({type: "game", content: "hold"}));
 }
 
 function doBet(amount) {

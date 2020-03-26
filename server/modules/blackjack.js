@@ -48,6 +48,13 @@ class blackjack extends cardmod.cardgame {
         }
         return value;
     }
+
+    determineWin(handValue) {
+        let dealerPoints = this.getCardsValue(this.dealer);
+        if (handValue == 21 && (dealerPoints < 21 || dealerPoints > 21) ) return true;
+        if (dealerPoints == 21 && (handValue < 21 || handValue > 21) ) return false;
+        return (handValue > dealerPoints) ? true : false;
+    }
 }
 
 
