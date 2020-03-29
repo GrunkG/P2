@@ -75,84 +75,10 @@ gameserv.on('request', (req) => {
 
     let thisUser = new user(connection),
         game,
-        playerObj;
-
-    function initGame() {
-        for (let i = 1; i <= 3; i++) {
-            let drawn_card = thisUser.playerObj.activeGame.drawCard();
-            if (i%2 == 1)
-                thisUser.playerObj.hands[0].grab(drawn_card);
-            else
-                thisUser.playerObj.activeGame.dealer.push(drawn_card);
-        }
-    }
-
-    function handleHit() {
-        //Player
-        let p_card = thisUser.playerObj.activeGame.drawCard(), points;
-        thisUser.playerObj.hands[0].grab(p_card);
-        points = thisUser.playerObj.getHandValue(0);
-
-        //Dealer
-        let d_card = thisUser.playerObj.activeGame.drawCard(), dpoints;
-        dpoints = thisUser.playerObj.activeGame.getCardsValue(thisUser.playerObj.activeGame.dealer);
-        
-        if (dpoints >= 21 || points >= 21)
-            handleHold();
-
-        send({type: "blackjack", content: "card", obj: {p: p_card, d:d_card}, val: points, dval: dpoints});
-    }
-
-    function handleHold() {
-        points = thisUser.playerObj.getHandValue(0);
-        fillDealer();
-        let win = thisUser.playerObj.activeGame.determineWin(points)
-        dpoints = thisUser.playerObj.activeGame.getCardsValue(thisUser.playerObj.activeGame.dealer);
-        send({type: "blackjack", content: "winner", obj: {winner: win, dealer: thisUser.playerObj.activeGame.dealer, points:dpoints}});
-    }
-
-    function fillDealer() {
-        let dealer = thisUser.playerObj.activeGame.dealer;
-        let points = thisUser.playerObj.activeGame.getCardsValue(dealer);
-        while (points < 17) {
-            let drawn_card = thisUser.playerObj.activeGame.drawCard();
-            thisUser.playerObj.activeGame.dealer.push(drawn_card);
-            points = thisUser.playerObj.activeGame.getCardsValue(dealer);
-        }
-    }
-
-    //Handles all the blackjack game logic
-    function gamehandler(message) {
-        switch(message.content) {
-            case "startgame":
-                let new_game = new bjackGame().startGame(4, false);
-                thisUser.playerObj =  new cardgame.player(1);
-                thisUser.playerObj.joinGame(new_game);
-                activeGames.push(new_game);
-                initGame();
-                send({type: "blackjack", content: "game created", cards: thisUser.playerObj.hands[0].getHold(), 
-                        dealer: thisUser.playerObj.activeGame.dealer, pPoints: thisUser.playerObj.getHandValue(0),
-                        dPoints: thisUser.playerObj.activeGame.getCardsValue(thisUser.playerObj.activeGame.dealer) });
-                break;
-            case "hit":
-                handleHit();
-                break;
-            case "hold":
-                handleHold()
-                break;
-            case "double":
-                break;
-            case "split":
-                break;
-            case "insurance":
-                break;
-            default:  break;
-        }
-    }
-
-    function send(message) {
-        connection.send( JSON.stringify(message) );
-    }
+        playerObj,
+        response = {type: "blackjack", content: "", player: {hand: 0, cards: [], points: 0}, 
+                    dealer: {cards: [], points: 0}, win: null, bet: 0},
+        activeHand = 0;
 
     //Handle incoming messages from connection
     connection.on('message', (message) => {
@@ -171,4 +97,135 @@ gameserv.on('request', (req) => {
     //Handle closed connection
     connection.on('close', (connection) => {
     });
+
+    //Handles all the blackjack game logic
+    function gamehandler(message) {
+        switch(message.content) {
+            case "startgame":
+                let new_game = new bjackGame().startGame(4, false);
+                thisUser.playerObj =  new cardgame.player(1);
+                thisUser.playerObj.joinGame(new_game);
+                activeGames.push(new_game);
+
+                game = thisUser.playerObj.activeGame;
+                playerObj =thisUser.playerObj; 
+
+                initGame();
+                break;
+            case "hit":
+                handleHit();
+                break;
+            case "hold":
+                handleHold()
+                break;
+            case "double":
+                handleDouble();
+                break;
+            case "split":
+                handleSplit();
+                break;
+            case "insurance":
+                handleInsurance();
+                break;
+            default:  break;
+        }
+    }
+
+    function updateResponsePoints() {
+        response.player.points = playerObj.getHandValue(activeHand);
+        response.dealer.points = game.getCardsValue(game.dealer);
+        response.bet = playerObj.bet[activeHand];
+        response.player.hand = activeHand;
+    }
+
+    function initGame() {
+        for (let i = 1; i <= 3; i++) {
+            let drawn_card = game.drawCard();
+            if (i%2 == 1)
+                playerObj.hands[0].grab(drawn_card);
+            else
+                game.dealer.push(drawn_card);
+        }
+
+        response.content = "game created";
+        response.player.cards = playerObj.hands[0].getHold();
+        response.dealer.cards = game.dealer;
+        updateResponsePoints();
+        send(response);
+    }
+
+    function handleHit() {
+        //Player
+        let card = game.drawCard();
+        playerObj.hands[activeHand].grab(card);
+        response.player.cards = card;
+
+        //Dealer
+        card = game.drawCard()
+        game.dealer.push(card);
+        response.dealer.cards = card;
+        
+        updateResponsePoints();
+        if (response.dealer.points >= 21 || response.player.points >= 21)
+            handleHold();
+
+        response.content = "card";
+        send(response);
+
+        if (playerObj.hands.length > 1 && activeHand != (playerObj.hand.length -1 ) )
+            activeHand++;
+        else
+            activeHand = 0;
+    }
+
+    function handleHold() {
+        response.content = "winner";
+        fillDealer();
+
+        updateResponsePoints();
+        response.dealer.cards = game.dealer;
+        response.player.cards = playerObj.hands[activeHand].getHold();
+
+        let win = game.determineWin(response.player.points)
+        response.win = win;
+
+        send(response);
+    }
+
+    function fillDealer() {
+        let dealerCards = game.dealer;
+        let points = game.getCardsValue(dealerCards);
+        while (points < 17) {
+            let drawn_card = game.drawCard();
+            game.dealer.push(drawn_card);
+            points = game.getCardsValue(dealerCards);
+        }
+    }
+    function handleDouble() {
+        let hand = playerObj.hands[activeHand];
+        if (hand.length == 2) {
+            let card = game.drawCard();
+            hand.grab(card);
+            playerObj.bet[activeHand] *= 2;
+            handleHold();
+        }
+    }
+    function handleSplit() {
+        let hand = playerObj.hands[activeHand],
+            cards = hand.getHold();
+
+        if (cards[0] == cards[1]) {
+            playerObj.hands[playerObj.hands.length] = cards.shift();
+            playerObj.bet[playerObj.hands.length] = playerObj.bet[activeHand];
+        }
+    }
+    function handleInsurance() {
+
+    }
+
+    function send(message) {
+        connection.send( JSON.stringify(message) );
+    }
+
+    
 });

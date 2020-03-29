@@ -114,7 +114,7 @@ class player {
         this.activeGame = null;
         this.hands = this.generateHands(hands);
         this.isDealer = dealer;
-        this.bet = 0;
+        this.bet = [0];
     }
 
     //Public functions

@@ -19,50 +19,60 @@ function dealCard(target, card) {
     card.printCardById(target);
 }
 
-function initGame(msg) {
-    let newCard = null
-    for (let i = 0; i < msg.cards.length; i++) {
-        cardObj = msg.cards[i];
-        newCard = new Card(cardObj.value.toString(), cardObj.suit);
-        dealCard(playerTarget, new Card(cardObj.value.toString(), cardObj.suit));
-        playerDeck.deck.push(newCard);
-    }
-    for (i = 0; i < msg.dealer.length; i++) {
-        cardObj = msg.dealer[i];
-        newCard = new Card(cardObj.value.toString(), cardObj.suit);
-        dealCard(dealerTarget, new Card(cardObj.value.toString(), cardObj.suit));
-    }
-    playerDeck.update();
-    document.getElementById(playerSumTarget).innerHTML = msg.pPoints;
-    document.getElementById(dealerSumTarget).innerHTML = msg.dPoints;
-    document.getElementById(remoteSumTarget).innerHTML = msg.pPoints;
-}
-
 function handleHit(msg) {
-    let cardObj = msg.obj,
     //Player
-    playerCard = cardObj.p,
-    newCard = new Card(playerCard.value.toString(), playerCard.suit),
-    points = msg.val;
-    dealCard(playerTarget, newCard);
-    playerDeck.deck.push(newCard)
+    let player = msg.player;
+    let card = player.cards,
+        new_card = new Card(card.value.toString(), card.suit);
+            
+    dealCard(playerTarget, new_card);
+    playerDeck.deck.push(new_card)
     playerDeck.update();
-    document.getElementById(playerSumTarget).innerHTML = points;
-    document.getElementById(remoteSumTarget).innerHTML = points;
+    document.getElementById(playerSumTarget).innerHTML = player.points;
+    document.getElementById(remoteSumTarget).innerHTML = player.points;
 
     //Dealer
-    let dealerCard = cardObj.d;
-    points = msg.dval;
-    dealCard(dealerTarget, newCard);
-    document.getElementById(dealerSumTarget).innerHTML = points;
+    let dealer = msg.dealer;
+    card = dealer.cards;
+    new_card = new Card(card.value.toString(), card.suit);
+    dealCard(dealerTarget, new_card);
+    document.getElementById(dealerSumTarget).innerHTML = dealer.points;
 }
 
-function handleFillDealer(cards, points) {
-    for (let i = 0; i < cards.length; i++) {
-        let new_card = new Card(cards[i].value.toString(), cards[i].suit);
-        dealCard(dealerTarget, new_card); 
+function handleCards(msg) {
+    //Player
+    let player = msg.player;
+    for (let i = 0; i < player.cards.length; i++) {
+        let card = player.cards[i],
+            new_card = new Card(card.value.toString(), card.suit);
+            
+        dealCard(playerTarget, new_card);
+        playerDeck.deck.push(new_card)
     }
-    document.getElementById(dealerSumTarget).innerHTML = points;
+    playerDeck.update();
+    document.getElementById(playerSumTarget).innerHTML = player.points;
+    document.getElementById(remoteSumTarget).innerHTML = player.points;
+
+    //Dealer
+    let dealer = msg.dealer;
+    for (i = 0; i < dealer.cards.length; i++) {
+        let card = dealer.cards[i],
+            new_card = new Card(card.value.toString(), card.suit);
+
+        dealCard(dealerTarget, new_card);
+    }
+    document.getElementById(dealerSumTarget).innerHTML = dealer.points;
+}
+
+function handleWinner(msg) {
+    clearCardsHolders();
+    handleCards(msg);
+} 
+
+function clearCardsHolders() {
+    document.getElementById("player__card-container").innerHTML = "";
+    document.getElementById("dealer__card-container").innerHTML = "";
+    playerDeck.deck = [];
 }
 
 function gameHandler() {
@@ -80,14 +90,16 @@ function gameHandler() {
             if (msg.type == "blackjack") {
                 switch (msg.content) {
                     case "game created":
-                        initGame(msg);
+                        handleCards(msg);
                         break;
                     case "card":
                         handleHit(msg);
                         break;
+                    case "split":
+                        break;
                     case "winner":
-                        handleFillDealer(msg.obj.dealer, msg.obj.points);
-                        console.log("Winner is: " + ((msg.obj.winner) ? "You" : "Dealer"));
+                        handleWinner(msg);
+                        console.log("Winner is: " + ((msg.win) ? "You" : "Dealer"));
                     case "done":
                         break;
                 }
@@ -102,9 +114,17 @@ function gameHandler() {
 function doHit() {
     ws.send(JSON.stringify({type: "game", content: "hit"}));
 }
-
 function doHold() {
     ws.send(JSON.stringify({type: "game", content: "hold"}));
+}
+function doDouble() {
+    ws.send(JSON.stringify({type: "game", content: "double"}));
+}
+function doSplit() {
+    ws.send(JSON.stringify({type: "game", content: "split"}));
+}
+function doInsure() {
+    ws.send(JSON.stringify({type: "game", content: "insure"}));
 }
 
 function doBet(amount) {
