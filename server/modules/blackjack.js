@@ -51,9 +51,13 @@ class blackjack extends cardmod.cardgame {
 
     determineWin(handValue) {
         let dealerPoints = this.getCardsValue(this.dealer);
-        if (handValue == 21 && (dealerPoints < 21 || dealerPoints > 21) ) return true;
-        if (dealerPoints == 21 && (handValue < 21 || handValue > 21) ) return false;
-        return (handValue > dealerPoints) ? true : false;
+        if (dealerPoints == 21 && handValue == 21) return 2; //Draw
+        if (handValue == 21) return true; //Win
+        if (dealerPoints == 21) return false; //Lose
+        if (dealerPoints > 21 && handValue > 21) return false //Double bust, dealer wins
+
+        //If none of the above, highest hand value wins.
+        return (dealerPoints < handValue) ? true : false; 
     }
 }
 
