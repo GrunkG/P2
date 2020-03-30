@@ -62,7 +62,7 @@ main .button-big:hover {
   -ms-grid-rows: (min-content)[4];
       grid-template-rows: repeat(4, -webkit-min-content);
       grid-template-rows: repeat(4, min-content);
-  grid-auto-flow: column;
+  grid-auto-flow: row;
 }
 
 .blackjack-container .main-game {

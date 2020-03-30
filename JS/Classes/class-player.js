@@ -28,7 +28,7 @@ class RemotePlayer extends Player{
         newRemote.setAttribute("class", "remote-player");
 
         newRemoteTitle.setAttribute("class", "remote-player__title"); //Title container
-        newRemoteTitle.textContent = `${this.id.slice(-2)}`;
+        newRemoteTitle.textContent = `${this.id.slice(14)}`;
         newRemote.appendChild(newRemoteTitle);
 
         newRemoteCardContainer.setAttribute("class", "remote-player__card-container"); //Card container
