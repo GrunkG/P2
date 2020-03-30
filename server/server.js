@@ -74,8 +74,7 @@ gameserv.on('request', (req) => {
     let connection = req.accept(null, req.origin);
     console.log("Connection accepted from origin: " + req.origin);
 
-    let thisUser = new user(connection),
-        game,
+    let game,
         playerObj = new cardgame.Player(),
         response = {type: "blackjack", content: "", player: {hand: 0, cards: [], points: 0}, 
                     dealer: {cards: [], points: 0}, win: null, bet: 0},
@@ -114,7 +113,6 @@ gameserv.on('request', (req) => {
                 handleHold()
                 break;
             case "double":
-                console.log("Hmm");
                 handleDouble();
                 break;
             case "split":
@@ -163,7 +161,7 @@ gameserv.on('request', (req) => {
 
     function handleHold() {
         response.content = "winner";
-        game.fillDealer(response.dealer.points);
+        game.hold(playerObj.hands[activeHand]);
 
         updateResponsePoints();
         response.dealer.cards = game.dealer;
@@ -196,6 +194,4 @@ gameserv.on('request', (req) => {
     function send(message) {
         connection.send( JSON.stringify(message) );
     }
-
-    
 });

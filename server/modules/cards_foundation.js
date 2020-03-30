@@ -42,7 +42,7 @@ class Cards {
                     value = values[i];          //Use the string value, since it might differ based on the game.
 
                 //Construct card object
-                let card = {suit: current_suit, val: value};
+                let card = {suit: current_suit, val: value, visible: true};
                 //Push new card into the deck array.
                 this.deck.push(card); 
             }

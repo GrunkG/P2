@@ -6,6 +6,7 @@ const playerTarget = "player__card-container",
 
 let ws = null,
     playerDeck = new Deck([], "remote-player-p1__card-container");
+
 window.onload = () => {
     initiateGame();
 };
@@ -15,8 +16,11 @@ function initiateGame() {
     gameHandler();
 }
 
-function dealCard(target, card) {
-    card.printCardById(target);
+function dealCard(target, card, visible = true) {
+    if (visible)
+        card.printCardById(target);
+    else
+        card.printCardFaceDown(document.getElementById(target));
 }
 
 function handleHit(msg) {
@@ -49,19 +53,22 @@ function handleCards(msg) {
     let dealer = msg.dealer;
     for (i = 0; i < dealer.cards.length; i++) {
         let card = dealer.cards[i],
-            new_card = new Card(card.val.toString(), card.suit);
-
-        dealCard(dealerTarget, new_card);
+            new_card = new Card(card.val.toString(), card.suit),
+            visible = card.visible;
+        if (visible)
+            dealCard(dealerTarget, new_card);
+        else
+            dealCard(dealerTarget, new_card, visible);
     }
     document.getElementById(dealerSumTarget).innerHTML = dealer.points;
 }
 
 function handleWinner(msg) {
     clearCardsHolders();
-    if (msg.win == 2)
+    if (msg.win == "D")
         console.log("Winner: Draw");
     else
-        console.log("Winner is: " + ((msg.win) ? "You" : "Dealer"));
+        console.log("Winner is: " + ((msg.win == "W") ? "You" : "Dealer"));
         
     handleCards(msg);
 } 
@@ -124,5 +131,5 @@ function doInsure() {
 }
 
 function doBet(amount) {
-    requestServer(`/game/bet/${amount}`);
+    ws.send(JSON.stringify({type: "game", content: "bet", amount: amount}));
 }

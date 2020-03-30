@@ -21,8 +21,11 @@ class Blackjack extends cardmod.Cards{
         for (let i = 0; i < 2; i++)
             this.dealPlayers();
 
-        //Deal the initial dealer card
-        this.dealer.push(this.deck.shift());
+        //Deal the initial two dealer cards, one hidden and one hidden.
+        let hidden_card = this.drawCard();
+        hidden_card.visible = false;
+        this.dealer.push(hidden_card);
+        this.dealer.push(this.drawCard());
     }
 
    
@@ -31,10 +34,13 @@ class Blackjack extends cardmod.Cards{
     getCardsValue(cards) {
         let value = 0;
         for (let i = 0; i < cards.length; i++) {
-            //Card: {suit: string, val: int/string}
+            //Card: {suit: string, val: int/string, visible: bool}
             let card = cards[i];
 
             if (card == undefined)
+                continue;
+
+            if (!card.visible)
                 continue;
 
             //If the card value contains a number from 0-9, add it to the current value.
@@ -112,10 +118,33 @@ class Blackjack extends cardmod.Cards{
 
     //Hold -> End round
     hold(hand) {
-        let dealer_value = this.getCardsValue(this.dealer);
-        console.log(dealer_value);
-        this.fillDealer(dealer_value);
-        this.determineWinner();
+        hand.isHolding = true;
+        if (this.isEveryoneDone()) {
+            let dealer_value = this.getCardsValue(this.dealer);
+            console.log(dealer_value);
+            this.dealer[0].visible = true;
+            this.fillDealer(dealer_value);
+            this.determineWinner();
+        }
+    }
+
+    //Is all hands holding (Awaiting dealer reveal) ?
+    isEveryoneDone() {
+        //For all players
+        for (let i = 0; i < this.players.length; i++) {
+            let player = this.players[i];
+            //And all player hands
+            for(let x = 0; x < player.hands.length; x++) {
+                let hand = player.hands[x];
+
+                //If someone isn't done yet, return false.
+                if (hand.isHolding == false)
+                    return false;
+            }
+        }
+
+        //We've been through them all, it checks out, everyone is done.
+        return true;
     }
 
     /* 
