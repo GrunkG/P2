@@ -5,14 +5,14 @@ const suits = ["S", "H", "D", "C"];
 const values = ["2", "3", "4", "5", "6", "7", "8", "9", "J", "Q", "K", "A"];
 
 /*
-    Cardgame Class, handles general card game elements.
+    Cards Class, handles general card game elements.
     Should for the most part function as an abstract class.
 */
 class Cards {
     constructor() {
-        this.players = [];
-        this.dealer = [];
-        this.deck = [];
+        this.players = [];  //Contains all player objects active in the current game.
+        this.dealer = [];   //Contains all dealer cards
+        this.deck = [];     //Contains all cards in the deck.
     }
 
     /*
@@ -27,7 +27,7 @@ class Cards {
         this.shuffleDeck();
     }
 
-    fillDeck(decks) {
+    fillDeck(decks, jokers) {
         //For each suit
         for (let suit = 0; suit < suits.length; suit++) {
             //And for each cards value
@@ -45,6 +45,18 @@ class Cards {
                 let card = {suit: current_suit, val: value, visible: true};
                 //Push new card into the deck array.
                 this.deck.push(card); 
+            }
+        }
+
+        //If jokers are in play, add 2 jokers for each deck.
+        if (jokers) {
+            //For all decks the decks in play
+            for (let i = 0; i < decks; i++) {
+                //Do twice
+                for (let x = 0; x < 2; x++) {
+                    let joker = {suit: null, val: "Joker", visible: true}
+                    this.deck.push(joker);
+                }
             }
         }
     }
@@ -66,7 +78,7 @@ class Cards {
 
     //Deals each player a card
     dealPlayers() {
-        //Runs through each player currently in the player array -> from the cardgame class
+        //Runs through each player currently in the player array
         for (let i = 0; i < this.players.length; i++) {
             let player = this.players[i],
                 hands = player.hands.length;
@@ -81,6 +93,7 @@ class Cards {
         }
     }
 
+    //Draw a card from the top of the deck
     drawCard() {
         return this.deck.shift();
     }
@@ -94,6 +107,7 @@ class Player {
         this.game = null;
     }
 
+    //Join a game, game = an instance of a class extending the Cards class
     join(game) {
         this.game = game;
         game.players.push(this);

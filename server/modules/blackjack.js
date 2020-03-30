@@ -2,7 +2,7 @@ const cardmod = require('./cards_foundation');
 
 /*
     Blackjack Class
-    Extends the cardgame class
+    Extends the Cards class
 
     Handles blackjack related functionality
 */
@@ -11,7 +11,7 @@ class Blackjack extends cardmod.Cards{
         super();
     }
 
-    //Overwrite normal initGame from cardgame class
+    //Overwrite normal initialize from Cards class
     //Additionally deals all players their first cards.
     initialize(decks, jokers) {
         this.fillDeck(decks, jokers);
@@ -69,9 +69,10 @@ class Blackjack extends cardmod.Cards{
     //Goes through each hand for each player and determines whether it was a losing hand or not.
     determineWinner() {
         let dealer_value = this.getCardsValue(this.dealer);
+        //For all players
         for (let i = 0; i < this.players.length; i++) {
             let player = this.players[i];
-
+            //And all player hands
             for (let x = 0; x < player.hands.length; x++) {
                 //Hand: {cards:[], bet: 0, isHolding: false, winner: null}
                 let hand = player.hands[x],
@@ -102,28 +103,41 @@ class Blackjack extends cardmod.Cards{
 
     //Fill up the dealer cards until value is higher or equals to 17.
     fillDealer(value) {
+        //If the current dealer hand value is above or equal to 17
+        //Stop, we've aquired as many cards as needed.
         if (value >= 17) return;
+        //If not, draw a new card from the top of the stack
         this.dealer.push(this.deck.shift());
+        //Calculate new dealer hand value
         let new_value = this.getCardsValue(this.dealer);
-        console.log(new_value + " .. " + value);
+        //Do it all over again, but this time based on the current dealer value.
         this.fillDealer(new_value);        
     }
 
     //Hit -> Draw card
     hit(hand) {
+        //Draw a card from the top of the stack.
         let drawn_card = this.deck.shift();
+        //Push the new card into the hand cards array.
         hand.cards.push(drawn_card);
+        //Return the card which was drawn, for easier client response handling.
         return drawn_card;
     }
 
     //Hold -> End round
     hold(hand) {
+        //Set current hand to be in a holding position/state.
         hand.isHolding = true;
+
+        //Check if everyone is currently holding
         if (this.isEveryoneDone()) {
+            //Everyone is holder, get dealer value
             let dealer_value = this.getCardsValue(this.dealer);
-            console.log(dealer_value);
+            //Show the hidden card.
             this.dealer[0].visible = true;
+            //Fill dealer with additional cards.
             this.fillDealer(dealer_value);
+            //Determine what hands won or lost.
             this.determineWinner();
         }
     }
@@ -135,6 +149,7 @@ class Blackjack extends cardmod.Cards{
             let player = this.players[i];
             //And all player hands
             for(let x = 0; x < player.hands.length; x++) {
+                //Hand: {cards:[], bet: 0, isHolding: false, winner: null}
                 let hand = player.hands[x];
 
                 //If someone isn't done yet, return false.
@@ -154,13 +169,15 @@ class Blackjack extends cardmod.Cards{
     */
     double(hand) {
         let drawn_card = null;
+
         //If we're at the initial round and the hand isn't in a holding position.
         if (hand.cards.length == 2 && !hand.isHolding) {
-            drawn_card = this.hit(hand);
-            hand.bet *= 2;
-            hand.isHolding = true;
+            drawn_card = this.hit(hand); //Draw a card
+            hand.bet *= 2; //Double hand bet
+            hand.isHolding = true; //Is now holding and awaiting dealer reveal.
         }
-        return drawn_card;
+
+        return drawn_card; //Return drawn card, makes it easier to handle a response to client.
     }
 
     /*
@@ -172,12 +189,15 @@ class Blackjack extends cardmod.Cards{
         Each hand is then dealt a card, so they have 2 each.
     */
    split(player, hand) {
-       if (hand.cards.length == 2) {
+       //If the player hand has only 2 cards and isn't in a holding position.
+       if (hand.cards.length == 2 && !hand.isHolding) {
             let cards = hand.cards;
-            //If they are the same card values
+            //If both cards have the same card values
             if (cards[0].val == cards[1].val) {
                 //Create new hand with the same bet as the initial hand.
                 let new_hand = new cardmod.Hand;
+                new_hand.bet = hand.bet;
+
                 //Push the first card into the new hand. -> Removes it from the other array as well.
                 new_hand.cards.push(hand.cards.shift());
 
@@ -199,9 +219,12 @@ class Blackjack extends cardmod.Cards{
         Bet is paid 2:1
    */
    insurance(player) {
-        let dealer_card = this.dealer[0];
+        //First card is always hidden, shown card a such the second one, on index 1.
+        let dealer_card = this.dealer[1];
+        //If the dealer card is an Ace
         if (dealer_card.val = "A") {
-            //Half the bet of the initial hand
+            //Set player insurance to half the bet of the initial hand, 
+            // since it's done at the start of a round.
             player.insurance = (player.hands[0].bet / 2);
         }
    }
