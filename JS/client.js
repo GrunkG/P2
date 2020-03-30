@@ -7,6 +7,8 @@ const playerTarget = "player__card-container",
 let ws = null,
     playerDeck = new Deck([], "remote-player-p1__card-container");
 
+let hand = 0;
+
 window.onload = () => {
     initiateGame();
 };
@@ -24,7 +26,7 @@ function dealCard(target, card, visible = true) {
 }
 
 function handleHit(msg) {
-    let player = msg.player;
+    /* let player = msg.player;
     let card = player.cards,
         new_card = new Card(card.val.toString(), card.suit);
             
@@ -32,10 +34,14 @@ function handleHit(msg) {
     playerDeck.deck.push(new_card)
     playerDeck.update();
     document.getElementById(playerSumTarget).innerHTML = player.points;
-    document.getElementById(remoteSumTarget).innerHTML = player.points;
+    document.getElementById(remoteSumTarget).innerHTML = player.points; */
+
+    handleCards(msg);
 }
 
 function handleCards(msg) {
+    clearCardHolders();
+
     //Player
     let player = msg.player;
     for (let i = 0; i < player.cards.length; i++) {
@@ -64,7 +70,7 @@ function handleCards(msg) {
 }
 
 function handleWinner(msg) {
-    clearCardsHolders();
+    clearCardHolders();
     if (msg.win == "D")
         console.log("Winner: Draw");
     else
@@ -73,7 +79,7 @@ function handleWinner(msg) {
     handleCards(msg);
 } 
 
-function clearCardsHolders() {
+function clearCardHolders() {
     document.getElementById("player__card-container").innerHTML = "";
     document.getElementById("dealer__card-container").innerHTML = "";
     playerDeck.deck = [];

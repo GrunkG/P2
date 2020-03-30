@@ -28,8 +28,6 @@ class Blackjack extends cardmod.Cards{
         this.dealer.push(this.drawCard());
     }
 
-   
-
     //Get the total card value of a card array.
     getCardsValue(cards) {
         let value = 0;
@@ -78,6 +76,7 @@ class Blackjack extends cardmod.Cards{
                 let hand = player.hands[x],
                     value = this.getCardsValue(hand.cards);
                 
+                //W = win, L = Loss, D = Draw
                 //Best hand
                 if (dealer_value > value)
                     hand.winner = "L";
@@ -207,8 +206,12 @@ class Blackjack extends cardmod.Cards{
 
                 //Push the new hand into the player hands array.
                 player.hands.push(new_hand);
+
+                return true; //Success
             }
        }
+
+       return false; //Something went wrong, or client is attempting to cheat.
    }
 
    /*
@@ -226,7 +229,11 @@ class Blackjack extends cardmod.Cards{
             //Set player insurance to half the bet of the initial hand, 
             // since it's done at the start of a round.
             player.insurance = (player.hands[0].bet / 2);
+
+            return true; // Success
         }
+
+        return false; //Something went wrong, or client is attempting to cheat.
    }
 }
 

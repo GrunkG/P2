@@ -76,8 +76,9 @@ gameserv.on('request', (req) => {
 
     let game,
         playerObj = new cardgame.Player(),
-        response = {type: "blackjack", content: "", player: {hand: 0, cards: [], points: 0}, 
-                    dealer: {cards: [], points: 0}, win: null, bet: 0},
+        response = { type: "blackjack", content: "", 
+                    player: {hand: 0, cards: [], points: 0, winner: null, bet: 0, insurance: 0}, 
+                    dealer: {cards: [], points: 0} },
         activeHand = 0;
 
     //Handle incoming messages from connection
@@ -102,6 +103,7 @@ gameserv.on('request', (req) => {
     function gamehandler(message) {
         switch(message.content) {
             case "startgame":
+                activeGames[0] = new bjackGame(); //Temp - Allows easy new games
                 playerObj.join(activeGames[0]);
                 game = playerObj.game;
                 initGame();
@@ -144,7 +146,8 @@ gameserv.on('request', (req) => {
 
     function handleHit() {
         response.content = "card";
-        response.player.cards = game.hit(playerObj.hands[activeHand]);
+        game.hit(playerObj.hands[activeHand]);
+        response.player.cards = playerObj.hands[activeHand].cards;
         
         updateResponsePoints();
         send(response);
@@ -181,14 +184,28 @@ gameserv.on('request', (req) => {
         }
     }
 
+    //May need refinement, depending on how visualization implementation turns out.
     function handleSplit() {
         let hand = playerObj.hands[activeHand];
-        game.split(playerObj, hand);
-        //Re-think the response element to handle splitting
+        if ( game.split(playerObj, hand) ) {
+
+            //Hand has been split, response with new hand
+            response.content = "card";
+            response.player.cards = playerObj.hands[activeHand].cards;
+            updateResponsePoints();
+            send(response);
+        }
     }
 
     function handleInsurance() {
-        game.insurance(playerObj);
+        //If insurance was possible
+        if(game.insurance(playerObj)) {
+            
+            //Prepare response -> Set response insurance to active insurance.
+            response.player.insurance = playerObj.insurance;
+            response.content = "insurance";
+            send(response);
+        }
     }
 
     function send(message) {
