@@ -171,6 +171,7 @@ main .button-big:hover {
   font-size: 2rem;
   font-weight: bold;
   color: #1d34bd;
+  text-transform: capitalize;
 }
 
 .remote-player__card-container {

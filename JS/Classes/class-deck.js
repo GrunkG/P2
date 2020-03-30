@@ -1,8 +1,7 @@
-//Needs cards class -- Use this class to store the players' decks
+//Needs cards class -- Use this class to store player decks
 class Deck{
-    constructor(deck, htmlId, cardFront = "Default", cardBack = "default"){
-        this.deck = deck;
-        this.htmlId = htmlId;
+    constructor(cards, cardFront = "Default", cardBack = "default"){
+        this.cards = cards;
         this.cardFront = cardFront;
         this.cardBack = cardBack;
     }
@@ -20,29 +19,30 @@ class Deck{
     //Able to add more decks
     addDeck(numberOfDecks){
         for (let i = 0; i < numberOfDecks; i++) {
-            this.deck = this.deck.concat(Deck.getDeck);
+            this.cards = this.cards.concat(Deck.getDeck);
         }
-        return this.deck;
+        return this.cards;
     }
     //Add shuffle method - Jonas har lavet dette, så læs det gerne kloge hoveder
     shuffleCards(){
         let shuffledDeck = [];
-        for (let i = 0; i < this.deck.length; i++) {
-            shuffledDeck[i] = this.deck[Math.floor(Math.random() * array.length)];
+        for (let i = 0; i < this.cards.length; i++) {
+            shuffledDeck[i] = this.cards[Math.floor(Math.random() * array.length)];
         }
         return shuffledDeck;
     }
-    //Print all cards in a deck within the container with the id htmlId
-    print(){
-        this.deck.forEach(card => card.printCardById(this.htmlId, this.cardFront));
+    //Print all cards in the card container of id
+    print(id){
+        this.cards.forEach(card => card.printCardById(id + "__card-container", this.cardFront));
+        return this;
     }
-    //Removes all printed cards in deck from screen
-    clear(){
-        document.getElementById(this.htmlId).innerHTML = "";
+    //Removes all printed cards in the card container of id
+    clear(id){
+        document.getElementById(id + "__card-container").innerHTML = "";
+        return this;
     }
     //Updates a printed deck of cards to match the current deck
-    update(){
-        this.clear();
-        this.print();
+    update(id){
+        this.clear(id).print(id);
     }
 }
