@@ -1,176 +1,112 @@
-class cardgame {
+//Variables
+//            Spades, Hearts, Diamonds, Clubs
+const suits = ["S", "H", "D", "C"];
+//                                                      Jack, Queen, King, Ace
+const values = ["2", "3", "4", "5", "6", "7", "8", "9", "J", "Q", "K", "A"];
+
+/*
+    Cardgame Class, handles general card game elements.
+    Should for the most part function as an abstract class.
+*/
+class Cards {
     constructor() {
-        this.decks = [];
         this.players = [];
-        this.jokers = true;
-    }
-    //Public functions
-    startGame(decks = 1, bJokers = true) {
-        this.jokers = bJokers;
-        this.decks = cardgame.generateDeck(decks);
-        this.shuffleDeck();
-        return this;
+        this.dealer = [];
+        this.deck = [];
     }
 
-    drawCard() {
-        if (this.decks.length == 0) return null;
-        return this.decks.shift();
+    /*
+        initialize(dekcs, jokers)
+        Function handles initilization of a card game by:
+            - Filling the 'deck' based on whether jokers should be used 
+              and how many decks are in play.
+            - Shuffles the deck after being filled.
+    */
+    initialize(decks) {
+        this.fillDeck(decks, jokers);
+        this.shuffleDeck();
+    }
+
+    fillDeck(decks) {
+        //For each suit
+        for (let suit = 0; suit < suits.length; suit++) {
+            //And for each cards value
+            for (let i = 0; i < values.length; i++) {
+                let value = 0,                  //Initiate value variable
+                    current_suit = suits[suit]; //Current suit for easier read.
+
+                //If the card index is below 7 -> below picture cards and Ace.
+                if (i >= 0 && i <= 7)
+                    value = parseInt(values[i]); //Convert string to integer.
+                if (i > 7)
+                    value = values[i];          //Use the string value, since it might differ based on the game.
+
+                //Construct card object
+                let card = {suit: current_suit, val: value};
+                //Push new card into the deck array.
+                this.deck.push(card); 
+            }
+        }
     }
 
     shuffleDeck() { //Using Fisher-Yates Shuffle - https://bost.ocks.org/mike/shuffle/
-        var m = this.decks.length, t, i;
+        var m = this.deck.length, t, i;
 
         // While there remain elements to shuffle…
         while (m) {
-    
-        // Pick a remaining element…
-        i = Math.floor(Math.random() * m--);
-    
-        // And swap it with the current element.
-        t = this.decks[m];
-        this.decks[m] = this.decks[i];
-        this.decks[i] = t;
+            // Pick a remaining element…
+            i = Math.floor(Math.random() * m--);
+        
+            // And swap it with the current element.
+            t = this.deck[m];
+            this.deck[m] = this.deck[i];
+            this.deck[i] = t;
         }
-        console.log("Done");
-        return true;
     }
 
-    addPlayer(player) {
-        this.players.push(player);
-    }
+    //Deals each player a card
+    dealPlayers() {
+        //Runs through each player currently in the player array -> from the cardgame class
+        for (let i = 0; i < this.players.length; i++) {
+            let player = this.players[i],
+                hands = player.hands.length;
 
-    //getCardValue(card) { } - Should be implemented for each card game iteration, since it changes based on game rules.
+            //Run through each existing hand.
+            for (let x = 0; x < hands; x++) {
+                let hand = player.hands[x];
 
-    isJokersInPlay() { return this.jokers; }
-
-    /* 
-     * Static ~ Private-ish functions, as made fairly obvious they're accessable through the class reference itself,
-     * however inaccessable through a instanciation of the class.
-     */
-    static generateDeck(num) {
-        let decks = [];
-        if (num < 1) return null;
-        for (let deck = 1; deck <= num; deck++) {
-            for (let suit = 1; suit <= 4; suit++) {
-                decks =  decks.concat(cardgame.generateSuit(suit));
+                //Deal first card in the deck.
+                hand.cards.push(this.deck.shift());
             }
         }
-        return decks;
     }
 
-    static generateSuit(suit) {
-        let result = [];
-        let suitSize = this.jokers ? 15 : 13;
-        for (let card = 1; card <= suitSize; card++) {
-            if (card <= 10 && card > 1) { 
-                result.push(cardgame.generateCard(suit,card));
-                continue;
-            }
-            switch (card) {
-                case 1:
-                    result.push(cardgame.generateCard(suit,'A'));
-                    break;
-                case 11:
-                    result.push(cardgame.generateCard(suit,'J'));
-                    break;
-                case 12:
-                    result.push(cardgame.generateCard(suit,'Q'));
-                    break;
-                case 13:
-                    result.push(cardgame.generateCard(suit,'K'));
-                    break;
-                case 14:
-                case 15:
-                    result.push(cardgame.generateCard(null,'Joker'));
-                    break;
-                default: break;
-            }
-        }
-        return result;
+    drawCard() {
+        return this.deck.shift();
     }
 
-    static generateCard(type, value) {
-        let cardType = null;
-        switch(type) {
-            case 1: cardType = "S"; break;
-            case 2: cardType = "H"; break;
-            case 3: cardType = "D"; break;
-            case 4: cardType = "C"; break;
-            default: cardType = null; break;
-        }        
-        return new card(cardType, value);
+}
+
+class Player {
+    constructor() {
+        this.hands = [];
+        this.hands.push(new Hand());
+        this.game = null;
+    }
+
+    join(game) {
+        this.game = game;
+        game.players.push(this);
     }
 }
 
-class card {
-    constructor(suit, value) {
-        this.suit = suit;
-        this.value = value;
+class Hand {
+    constructor() {
+        this.cards = [];
+        this.bet = 0;
+        this.isHolding = false;
+        this.winner = null;
     }
 }
 
-class player {
-    constructor(hands, dealer = false) {
-        this.activeGame = null;
-        this.hands = this.generateHands(hands);
-        this.isDealer = dealer;
-        this.bet = [0];
-    }
-
-    //Public functions
-    joinGame(game) {
-        //game.addPlayer(this);
-        this.activeGame = game;
-    }
-    
-    getHandValue(hand) {
-        let cards = this.hands[hand].getHold();
-        if (cards.length == 0) return 0;
-        return this.activeGame.getCardsValue(cards);
-    }
-
-    generateHands(num) {
-        let freak = [];
-        //Octopus man here we go
-        for (let arm = 1; arm <= num; arm++) {
-            freak.push(new hand());
-        }
-        return freak;
-    }
-
-    generateHand() {
-        let newhand = new hand();
-        this.hands.push(newhand);
-        return newhand;
-    }
-}
-
-class hand {
-    #holding = [];
-    constructor() { }
-
-    grab(object) {
-        return this.#holding.push(object);
-    }
-
-    drop(slot) {
-        if (slot > 0) {
-            return this.#holding.splice(slot,slot);
-        }
-        return this.#holding.splice(0,1);
-    }
-
-    getSize() { return this.#holding.length; }
-
-    getHold(slot = -1) {
-        if (slot < 0) return this.#holding; //Return it all!
-        return this.#holding[slot];
-    }
-}
-
-//Module - Used for require();
-module.exports =  {
-    cardgame,
-    player
-};
-
+module.exports = { Cards, Player, Hand };

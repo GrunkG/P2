@@ -20,23 +20,15 @@ function dealCard(target, card) {
 }
 
 function handleHit(msg) {
-    //Player
     let player = msg.player;
     let card = player.cards,
-        new_card = new Card(card.value.toString(), card.suit);
+        new_card = new Card(card.val.toString(), card.suit);
             
     dealCard(playerTarget, new_card);
     playerDeck.deck.push(new_card)
     playerDeck.update();
     document.getElementById(playerSumTarget).innerHTML = player.points;
     document.getElementById(remoteSumTarget).innerHTML = player.points;
-
-    //Dealer
-    let dealer = msg.dealer;
-    card = dealer.cards;
-    new_card = new Card(card.value.toString(), card.suit);
-    dealCard(dealerTarget, new_card);
-    document.getElementById(dealerSumTarget).innerHTML = dealer.points;
 }
 
 function handleCards(msg) {
@@ -44,7 +36,7 @@ function handleCards(msg) {
     let player = msg.player;
     for (let i = 0; i < player.cards.length; i++) {
         let card = player.cards[i],
-            new_card = new Card(card.value.toString(), card.suit);
+            new_card = new Card(card.val.toString(), card.suit);
             
         dealCard(playerTarget, new_card);
         playerDeck.deck.push(new_card)
@@ -57,7 +49,7 @@ function handleCards(msg) {
     let dealer = msg.dealer;
     for (i = 0; i < dealer.cards.length; i++) {
         let card = dealer.cards[i],
-            new_card = new Card(card.value.toString(), card.suit);
+            new_card = new Card(card.val.toString(), card.suit);
 
         dealCard(dealerTarget, new_card);
     }
@@ -66,6 +58,11 @@ function handleCards(msg) {
 
 function handleWinner(msg) {
     clearCardsHolders();
+    if (msg.win == 2)
+        console.log("Winner: Draw");
+    else
+        console.log("Winner is: " + ((msg.win) ? "You" : "Dealer"));
+        
     handleCards(msg);
 } 
 
@@ -99,7 +96,6 @@ function gameHandler() {
                         break;
                     case "winner":
                         handleWinner(msg);
-                        console.log("Winner is: " + ((msg.win) ? "You" : "Dealer"));
                     case "done":
                         break;
                 }
