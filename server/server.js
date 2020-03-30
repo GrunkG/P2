@@ -58,6 +58,7 @@ webserv.listen(port, ip, () => {
 //######## WebSockets - Active game(s) handler
 const gameserv = new socket.server({httpServer: webserv});
 
+//Boolean, is origin input equals to the accept origin?
 function isAcceptedOrigin(origin) {
     return (origin == acceptedOrigin) ? true : false;
 }
@@ -74,12 +75,14 @@ gameserv.on('request', (req) => {
     let connection = req.accept(null, req.origin);
     console.log("Connection accepted from origin: " + req.origin);
 
-    let game,
+    let game, //Active game
         playerObj = new cardgame.Player(),
-        response = { type: "blackjack", content: "", 
-                    player: {hand: 0, cards: [], points: 0, winner: null, bet: 0, insurance: 0}, 
+        response = { type: "blackjack", content: "",
+                    //Player response object
+                    player: {hand: 0, cards: [], points: 0, winner: null, bet: 0, insurance: 0},
+                    //Dealer response object
                     dealer: {cards: [], points: 0} },
-        activeHand = 0;
+        activeHand = 0; //Current playing hand -> 0 unless player has been able to split.
 
     //Handle incoming messages from connection
     connection.on('message', (message) => {
@@ -97,6 +100,8 @@ gameserv.on('request', (req) => {
 
     //Handle closed connection
     connection.on('close', (connection) => {
+        //Remove player from its active game
+        //Destroy player
     });
 
     //Handles all the blackjack game logic
@@ -120,8 +125,11 @@ gameserv.on('request', (req) => {
             case "split":
                 handleSplit();
                 break;
-            case "insurance":
+            case "insure":
                 handleInsurance();
+                break;
+            case "bet":
+                handleBet(message);
                 break;
             default:  break;
         }
@@ -187,7 +195,7 @@ gameserv.on('request', (req) => {
     //May need refinement, depending on how visualization implementation turns out.
     function handleSplit() {
         let hand = playerObj.hands[activeHand];
-        if ( game.split(playerObj, hand) ) {
+        if ( game.split(playerObj, hand) == true) {
 
             //Hand has been split, response with new hand
             response.content = "card";
@@ -199,13 +207,36 @@ gameserv.on('request', (req) => {
 
     function handleInsurance() {
         //If insurance was possible
-        if(game.insurance(playerObj)) {
-            
+        if(game.insurance(playerObj) == true) {
+
             //Prepare response -> Set response insurance to active insurance.
             response.player.insurance = playerObj.insurance;
             response.content = "insurance";
             send(response);
         }
+    }
+
+    function handleBet(msg) {
+        let bet = msg.amount;
+        /*
+            let currency = getPlayerCurrencyOfSomeSort();
+            if (currency >= bet) {
+                game.bet(playerObj.hands[activeHand], bet);
+
+                //Response code
+                response.content = "card";
+                response.player.cards = playerObj.hands[activeHand].cards;
+                updateResponsePoints();
+                send(response);
+            }
+        */
+
+        game.bet(playerObj.hands[activeHand], bet);
+        //Reponse code
+        response.content = "card";
+        response.player.cards = playerObj.hands[activeHand].cards;
+        updateResponsePoints();
+        send(response);
     }
 
     function send(message) {

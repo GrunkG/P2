@@ -225,7 +225,7 @@ class Blackjack extends cardmod.Cards{
         //First card is always hidden, shown card a such the second one, on index 1.
         let dealer_card = this.dealer[1];
         //If the dealer card is an Ace
-        if (dealer_card.val = "A") {
+        if (dealer_card.val == "A") {
             //Set player insurance to half the bet of the initial hand, 
             // since it's done at the start of a round.
             player.insurance = (player.hands[0].bet / 2);

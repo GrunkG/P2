@@ -98,6 +98,12 @@ class Cards {
         return this.deck.shift();
     }
 
+    //Bet for hand - Not handling a currency check, since that may varie based on the
+    //Service provider.
+    bet(hand, amount) {
+        hand.bet = amount;
+    }
+
 }
 
 class Player {
