@@ -99,6 +99,41 @@ main{
 }
 
 .player{
+    &__bet{
+        margin-top: 2rem;
+        &--amount{
+            font-size: 4rem;
+            font-weight: bold;
+            width: 10rem;
+            display: inline-block;
+            text-align: right;
+        }
+        &--input{
+            appearance: none;
+            margin: 0 3rem;
+            width: 40rem;
+            height: 1.5rem;
+            border-radius: 1.5rem;
+            background-color: #e2e2e2;
+            &::-webkit-slider-thumb{
+                appearance: none;
+                border-radius: 3rem;
+                width: 3rem;
+                height: 3rem;
+                background-color: $main-color;
+            }
+        }
+        &--submit{
+            font-size: 3rem;
+            color: #fff;
+            background-color: $main-color;
+            border: 0;
+            padding: 1rem 3rem;
+            border-radius: 5rem;
+            box-shadow: 0 3px 8px rgba(0,0,0,0.2);
+        }
+    }
+
     &__buttons{
         display: flex;
         justify-content: space-around;
@@ -118,7 +153,7 @@ main{
             }
             &.inactive{
                 background-color: #aaa;
-                color: #eeeeee;
+                color: #e2e2e2;
                 cursor: default;
             }
             &:focus{

@@ -116,6 +116,49 @@ main .button-big:hover {
   font-weight: bold;
 }
 
+.player__bet {
+  margin-top: 2rem;
+}
+
+.player__bet--amount {
+  font-size: 4rem;
+  font-weight: bold;
+  width: 10rem;
+  display: inline-block;
+  text-align: right;
+}
+
+.player__bet--input {
+  -webkit-appearance: none;
+     -moz-appearance: none;
+          appearance: none;
+  margin: 0 3rem;
+  width: 40rem;
+  height: 1.5rem;
+  border-radius: 1.5rem;
+  background-color: #e2e2e2;
+}
+
+.player__bet--input::-webkit-slider-thumb {
+  -webkit-appearance: none;
+          appearance: none;
+  border-radius: 3rem;
+  width: 3rem;
+  height: 3rem;
+  background-color: #1d34bd;
+}
+
+.player__bet--submit {
+  font-size: 3rem;
+  color: #fff;
+  background-color: #1d34bd;
+  border: 0;
+  padding: 1rem 3rem;
+  border-radius: 5rem;
+  -webkit-box-shadow: 0 3px 8px rgba(0, 0, 0, 0.2);
+          box-shadow: 0 3px 8px rgba(0, 0, 0, 0.2);
+}
+
 .player__buttons {
   display: -webkit-box;
   display: -ms-flexbox;
@@ -144,7 +187,7 @@ main .button-big:hover {
 
 .player__buttons button.inactive {
   background-color: #aaa;
-  color: #eeeeee;
+  color: #e2e2e2;
   cursor: default;
 }
 
