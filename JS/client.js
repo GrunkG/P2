@@ -1,20 +1,22 @@
 const playerTarget = "player__card-container",
     playerSumTarget = "player__card-sum",
-    remoteSumTarget = "remote-player-p1__card-sum",
     dealerTarget = "dealer__card-container",
     dealerSumTarget = "dealer__card-sum";
 
 let ws = null,
-    playerDeck = new Deck([], "remote-player-p1__card-container");
+    game = null,
+    remoteDecks = [];
 
 let hand = 0;
 
 window.onload = () => {
     initiateGame();
+    game = new Game();
+    game.addRemotes(1);
 };
 
 function initiateGame() {
-    playerDeck.cardFront = "Simple Black";
+    //playerDeck.cardFront = "Simple Black";
     gameHandler();
 }
 
@@ -35,7 +37,7 @@ function handleHit(msg) {
     playerDeck.update();
     document.getElementById(playerSumTarget).innerHTML = player.points;
     document.getElementById(remoteSumTarget).innerHTML = player.points; */
-
+    //Currently sending all cards at a time, rather than just 1 card.
     handleCards(msg);
 }
 
@@ -49,11 +51,10 @@ function handleCards(msg) {
             new_card = new Card(card.val.toString(), card.suit);
             
         dealCard(playerTarget, new_card);
-        playerDeck.deck.push(new_card)
+        //playerDeck.deck.push(new_card)
     }
-    playerDeck.update();
+    //playerDeck.update();
     document.getElementById(playerSumTarget).innerHTML = player.points;
-    document.getElementById(remoteSumTarget).innerHTML = player.points;
 
     //Dealer
     let dealer = msg.dealer;
@@ -83,6 +84,47 @@ function clearCardHolders() {
     document.getElementById("player__card-container").innerHTML = "";
     document.getElementById("dealer__card-container").innerHTML = "";
     playerDeck.deck = [];
+}
+
+//W.I.P - Still missing additional hands handling on client-side.
+function updateGame(msg) {
+    //Add new remote players if necessary
+    let remote_players = document.getElementsByClassName("remote-player");
+    let players = msg.players;
+    let difference = remote_players.length - players.length;
+    
+    //If the difference is greater than 0
+    if (difference > 0)
+        game.addRemotes(difference);
+
+    //For each active player
+    for (let i = 0; i < players.length; i++) {
+        let remote_deck = remoteDecks[i],
+            player = players[i],
+            remote_id = "remote-remote-player-p" + i;
+
+        //Clean up remote deck for new cards
+        remote_deck = new Deck([]);
+
+        //For each active player hand
+        for (let x = 0; x < player.hands.length; x++) {
+            let hand = player.hands[x];
+
+            //-> Add hand cards to a hand element for each separat hand
+            for (let y = 0; y < hand.cards.length; y++) {
+                let card = hand.cards[y];
+                let new_card = new Card(card.val.toString(), card.suit);
+                //Currently only handling the first hand, needs further client-side hand visualization.
+                if (x > 0)
+                    continue;
+
+                remote_deck.deck.push(new_card);
+            }
+        }
+
+        //Update the shown cards
+        remote_deck.update(remote_id);
+    }
 }
 
 function gameHandler() {
@@ -136,6 +178,9 @@ function doInsure() {
     ws.send(JSON.stringify({type: "game", content: "insure"}));
 }
 
-function doBet(amount) {
-    ws.send(JSON.stringify({type: "game", content: "bet", amount: amount}));
+function doBet() {
+    let input = document.getElementById("player__bet--input");
+    let value = parseInt(input.value);
+
+    ws.send(JSON.stringify({type: "game", content: "bet", amount: value}));
 }

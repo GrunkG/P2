@@ -135,7 +135,30 @@ gameserv.on('request', (req) => {
             default:  break;
         }
     }
+    function update() {
+        let updateResponse = {  type: "blackjack", content: "update", players: []   };
+        
+        //For each player active in the game
+        for (let i = 0; i < game.players.length; i++) {
+            let playersResponse = {hands: [], insurance: 0};
 
+            let player = game.players[i];
+            let hands = player.hands;
+
+            //For each hand active for the player
+            for (let x = 0; x < player.hands.length; x++) {
+                let hand = player.hands[x];
+                playersResponse.hands.push( {   cards: hand.cards, bet: hand.bet, 
+                                            isHolding: hand.isHolding, winner: hand.winner  }  );
+            }
+
+            playersResponse.insurance = player.insurance;
+            updateResponse.players.push(playersResponse);
+        }
+
+        //send(updateResponse);
+        //Send to all
+    }
     function updateResponsePoints() {
         response.player.points = game.getCardsValue(playerObj.hands[activeHand].cards);
         response.dealer.points = game.getCardsValue(game.dealer);
