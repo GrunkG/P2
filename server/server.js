@@ -71,7 +71,8 @@ gameserv.on('request', (req) => {
         return;
     }
 
-    //Accept connection and start handling events
+    //Accept connection and start handling events from the new connection
+    //Everything runs asyncron for each new connection.
     let connection = req.accept(null, req.origin);
     console.log("Connection accepted from origin: " + req.origin);
 
