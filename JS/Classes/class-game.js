@@ -1,19 +1,19 @@
 class Game{
-    constructor(player = this.getPlayer, dealer = this.getDealer, remotes = []){
+    constructor(player = Game.getPlayer, dealer = Game.getDealer, remotes = []){
         this.player = player; //Class player
         this.dealer = dealer; //Class player
         this.remotes = remotes; //Array of class player
     }
     static get getPlayer(){
-        return new Player(`player`, new Deck([]));
+        return new Player(`player`);
     }
     static get getDealer(){
-        return new Player(`dealer`, new Deck([]));
+        return new Player(`dealer`);
     }
     //Adds a single remote player to the array of remotes
     addRemote(){
-        this.remotes[this.remotes.length] = new RemotePlayer(`remote-player-p${this.remotes.length+1}`, new Deck([]));
-        this.remotes[this.remotes.length - 1].initialize();
+        this.remotes[this.remotes.length] = new RemotePlayer(`remote-player-p${this.remotes.length+1}`);
+        this.remotes[this.remotes.length - 1].initialize(0);
     }
     //Method that creates multiple remotes
     addRemotes(amount){

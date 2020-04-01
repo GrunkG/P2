@@ -32,7 +32,7 @@ main {
   display: -webkit-box;
   display: -ms-flexbox;
   display: flex;
-  height: 100vh;
+  min-height: 100vh;
 }
 
 main .button-big {
@@ -69,7 +69,7 @@ main .button-big:hover {
   grid-column: 2 / -2;
   grid-row: 1 / -1;
   background-color: #f3f3f3;
-  height: 100vh;
+  min-height: 100vh;
 }
 
 .dealer, .player {
@@ -94,7 +94,7 @@ main .button-big:hover {
   margin-top: 4rem;
 }
 
-.dealer__card-container, .player__card-container {
+.dealer__card-container, .dealer__card-container div, .player__card-container, .player__card-container div {
   margin-top: 2rem;
   height: auto;
   display: -ms-grid;
@@ -103,7 +103,7 @@ main .button-big:hover {
   grid-gap: 1rem;
 }
 
-.dealer__card-container img, .player__card-container img {
+.dealer__card-container img, .dealer__card-container div img, .player__card-container img, .player__card-container div img {
   height: 17rem;
   -webkit-box-shadow: 0 3px 8px rgba(0, 0, 0, 0.08);
           box-shadow: 0 3px 8px rgba(0, 0, 0, 0.08);
@@ -114,6 +114,22 @@ main .button-big:hover {
   margin-top: 1rem;
   font-size: 3rem;
   font-weight: bold;
+}
+
+.player__card-container {
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-orient: vertical;
+  -webkit-box-direction: normal;
+      -ms-flex-direction: column;
+          flex-direction: column;
+}
+
+.player__card-sum {
+  -ms-flex-item-align: center;
+      -ms-grid-row-align: center;
+      align-self: center;
 }
 
 .player__bet {
@@ -174,7 +190,7 @@ main .button-big:hover {
   background-color: #1d34bd;
   border: 0;
   padding: 1rem 3rem;
-  margin-top: 4rem;
+  margin: 4rem 0;
   border-radius: 5rem;
   -webkit-box-shadow: 0 3px 8px rgba(0, 0, 0, 0.2);
           box-shadow: 0 3px 8px rgba(0, 0, 0, 0.2);
@@ -217,7 +233,7 @@ main .button-big:hover {
   text-transform: capitalize;
 }
 
-.remote-player__card-container {
+.remote-player__card-container div {
   margin-top: 1rem;
   margin-bottom: 1rem;
   height: auto;
@@ -230,7 +246,7 @@ main .button-big:hover {
   border-radius: 8px;
 }
 
-.remote-player__card-container img {
+.remote-player__card-container div img {
   height: 8rem;
   -webkit-box-shadow: 0 3px 8px rgba(0, 0, 0, 0.08);
           box-shadow: 0 3px 8px rgba(0, 0, 0, 0.08);
