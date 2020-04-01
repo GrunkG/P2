@@ -2,11 +2,11 @@ const http = require('http');
 const webtools = require('./modules/httptools');
 
 const socket = require('websocket');
-const mysql = require('mysql');
+const mysql = require('mysql'); // Not in use yet
 const cardgame = require('./modules/cards_foundation');
 const bjackGame = require('./modules/blackjack');
 
-let sql = {
+let sql = { // Not in use yet
     host: "localhost",
     user: "username",
     pass: "password",
@@ -85,6 +85,8 @@ gameserv.on('request', (req) => {
                     dealer: {cards: [], points: 0} },
         activeHand = 0; //Current playing hand -> 0 unless player has been able to split.
 
+    playerObj.connection = connection;
+
     //Handle incoming messages from connection
     connection.on('message', (message) => {
         if (message.type != "utf8") return;
@@ -109,10 +111,13 @@ gameserv.on('request', (req) => {
     function gamehandler(message) {
         switch(message.content) {
             case "startgame":
-                activeGames[0] = new bjackGame(); //Temp - Allows easy new games
+                //activeGames[0] = new bjackGame(); //Temp - Allows easy new games
                 playerObj.join(activeGames[0]);
                 game = playerObj.game;
                 initGame();
+                break;
+            case "joingame":
+                handleNewJoin();
                 break;
             case "hit":
                 handleHit();
@@ -134,6 +139,7 @@ gameserv.on('request', (req) => {
                 break;
             default:  break;
         }
+        update();
     }
     function update() {
         let updateResponse = {  type: "blackjack", content: "update", players: []   };
@@ -158,7 +164,13 @@ gameserv.on('request', (req) => {
 
         //send(updateResponse);
         //Send to all
+        for (let i = 0; i < game.players.length; i++) {
+            let player = game.players[i];
+            player.connection.send( JSON.stringify(updateResponse) );
+        }
+
     }
+
     function updateResponsePoints() {
         response.player.points = game.getCardsValue(playerObj.hands[activeHand].cards);
         response.dealer.points = game.getCardsValue(game.dealer);
@@ -167,7 +179,22 @@ gameserv.on('request', (req) => {
     }
 
     function initGame() {
-        game.initialize(4);
+        if (game.dealer.length == 0)
+            game.initialize(4);
+        else
+            handleNewJoin();
+
+        response.content = "game created";
+        response.player.cards = playerObj.hands[activeHand].cards;
+        response.dealer.cards = game.dealer;
+        updateResponsePoints();
+        send(response);
+    }
+
+    function handleNewJoin() {
+        for (let i = 0; i < 2; i ++) {
+            game.hit(playerObj.hands[activeHand]);
+        }
 
         response.content = "game created";
         response.player.cards = playerObj.hands[activeHand].cards;

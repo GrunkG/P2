@@ -13,6 +13,15 @@ window.onload = () => {
     initiateGame();
     game = new Game();
     game.addRemotes(1);
+
+    let slider = document.getElementById("player__bet--input");
+    let output = document.getElementById("player__bet--amount");
+    output.innerHTML = slider.value;
+
+    slider.oninput = function() {
+        let output = document.getElementById("player__bet--amount");
+        output.innerHTML = this.value;
+    }
 };
 
 function initiateGame() {
@@ -83,7 +92,6 @@ function handleWinner(msg) {
 function clearCardHolders() {
     document.getElementById("player__card-container").innerHTML = "";
     document.getElementById("dealer__card-container").innerHTML = "";
-    playerDeck.deck = [];
 }
 
 //W.I.P - Still missing additional hands handling on client-side.
@@ -94,15 +102,15 @@ function updateGame(msg) {
     let difference = remote_players.length - players.length;
     
     //If the difference is greater than 0
-    if (difference > 0)
-        game.addRemotes(difference);
+    if (Math.abs(difference) > 0)
+        game.addRemotes(Math.abs(difference));
 
     //For each active player
     for (let i = 0; i < players.length; i++) {
         let remote_deck = remoteDecks[i],
             player = players[i],
-            remote_id = "remote-remote-player-p" + i;
-
+            remote_id = "remote-player-p" + (i+1);
+            console.log(remote_id);
         //Clean up remote deck for new cards
         remote_deck = new Deck([]);
 
@@ -118,7 +126,7 @@ function updateGame(msg) {
                 if (x > 0)
                     continue;
 
-                remote_deck.deck.push(new_card);
+                remote_deck.cards.push(new_card);
             }
         }
 
@@ -152,6 +160,9 @@ function gameHandler() {
                     case "winner":
                         handleWinner(msg);
                     case "done":
+                        break;
+                    case "update":
+                        updateGame(msg);
                         break;
                 }
             }

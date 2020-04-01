@@ -8,6 +8,8 @@
     <link rel="stylesheet" type="text/css" href="../Style/style-auto.css">
     <script src="../JS/Classes/class-cards.js"></script>
     <script src="../JS/Classes/class-deck.js"></script>
+    <script src="../JS/Classes/class-game.js"></script>
+    <script src="../JS/Classes/class-player.js"></script>
     <script src="../JS/client.js"></script>
     <title>P2 projektet</title>
 </head>
@@ -30,7 +32,7 @@
                     <span class="player__title">You</span>
                     <div class="player__card-container" id="player__card-container"></div>
                     <span class="player__card-sum" id="player__card-sum">10</span>
-                    <form class="player__bet" id="player__bet">
+                    <form class="player__bet" id="player__bet" onsubmit="return false">
                         <span class="player__bet--amount" id="player__bet--amount"></span>
                         <input class="player__bet--input" id="player__bet--input" type="range" name="bet" min="1" max="100" value="50">
                         <button class="player__bet--submit" onclick="doBet()">Place Bet</button>
