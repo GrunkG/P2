@@ -129,6 +129,9 @@ main{
                 height: 3rem;
                 background-color: $main-color;
             }
+            &:focus{
+                outline: 0;
+            }
         }
         &--submit{
             font-size: 3rem;

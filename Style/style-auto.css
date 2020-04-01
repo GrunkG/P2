@@ -164,6 +164,10 @@ main .button-big:hover {
   background-color: #1d34bd;
 }
 
+.player__bet--input:focus {
+  outline: 0;
+}
+
 .player__bet--submit {
   font-size: 3rem;
   color: #fff;
