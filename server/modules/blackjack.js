@@ -115,12 +115,16 @@ class Blackjack extends cardmod.Cards{
 
     //Hit -> Draw card
     hit(hand) {
-        //Draw a card from the top of the stack.
-        let drawn_card = this.deck.shift();
-        //Push the new card into the hand cards array.
-        hand.cards.push(drawn_card);
-        //Return the card which was drawn, for easier client response handling.
-        return drawn_card;
+        //Can only draw a card if not in a holding position
+        if (!hand.isHolding) {
+            //Draw a card from the top of the stack.
+            let drawn_card = this.deck.shift();
+            //Push the new card into the hand cards array.
+            hand.cards.push(drawn_card);
+            //Return the card which was drawn, for easier client response handling.
+            return drawn_card;
+        }
+        return null;
     }
 
     //Hold -> End round
