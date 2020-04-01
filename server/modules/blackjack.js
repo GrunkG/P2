@@ -124,7 +124,6 @@ class Blackjack extends cardmod.Cards{
             //Return the card which was drawn, for easier client response handling.
             return drawn_card;
         }
-        return null;
     }
 
     //Hold -> End round
