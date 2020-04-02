@@ -2,7 +2,7 @@
 //            Spades, Hearts, Diamonds, Clubs
 const suits = ["S", "H", "D", "C"];
 //                                                      Jack, Queen, King, Ace
-const values = ["2", "3", "4", "5", "6", "7", "8", "9", "J", "Q", "K", "A"];
+const values = ["2", "3", "4", "5", "6", "7", "8", "9", "10", "J", "Q", "K", "A"];
 
 /*
     Cards Class, handles general card game elements.
@@ -36,9 +36,9 @@ class Cards {
                     current_suit = suits[suit]; //Current suit for easier read.
 
                 //If the card index is below 7 -> below picture cards and Ace.
-                if (i >= 0 && i <= 7)
+                if (i >= 0 && i <= 8)
                     value = parseInt(values[i]); //Convert string to integer.
-                if (i > 7)
+                if (i > 8)
                     value = values[i];          //Use the string value, since it might differ based on the game.
 
                 //Construct card object
