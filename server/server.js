@@ -67,6 +67,7 @@ function isAcceptedOrigin(origin) {
 gameserv.on('request', (req) => {
     //Only allow connections from our own website origin
     if (!isAcceptedOrigin(req.origin)) {
+        console.log("Rejected connection from " + req.origin);
         req.reject();
         return;
     }
