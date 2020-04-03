@@ -15,3 +15,5 @@ game.player.splitHand(0);
 game.remotes[0].hands[0] = testCards2;
 game.remotes[0].printHands();
 game.remotes[0].splitHand(0);
+
+
