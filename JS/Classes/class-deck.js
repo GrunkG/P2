@@ -21,7 +21,7 @@ class Deck{
         }
         return this.cards;
     }
-    //Add shuffle method - Jonas har lavet dette, så læs det gerne kloge hoveder
+    //Shuffle method - Skal denne ikke fjerne det kort den finder i this.cards så den ikke kan blive taget flere gange?
     shuffleCards(){
         let shuffledDeck = [];
         for (let i = 0; i < this.cards.length; i++) {
