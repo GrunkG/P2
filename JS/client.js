@@ -3,6 +3,7 @@ const playerTarget = "player__card-container",
     dealerTarget = "dealer__card-container",
     dealerSumTarget = "dealer__card-sum";
 
+    //Hvad står ws for?
 let ws = null,
     game = null,
     remoteDecks = [];
@@ -35,7 +36,7 @@ function dealCard(target, card, visible = true) {
     else
         card.printCardFaceDown(document.getElementById(target));
 }
-
+//msg hvad er det?
 function handleHit(msg) {
     /* let player = msg.player;
     let card = player.cards,
