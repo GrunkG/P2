@@ -57,7 +57,7 @@ main .button-big:hover {
 }
 
 .hide {
-  display: none;
+  display: none !important;
 }
 
 @media screen and (max-width: 825px) {

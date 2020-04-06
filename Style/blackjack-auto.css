@@ -63,6 +63,18 @@
   font-weight: bold;
 }
 
+.player__info {
+  font-size: 3rem;
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  width: 80%;
+}
+
+.player__info--capital {
+  margin-left: auto;
+}
+
 .player__card-container {
   display: -webkit-box;
   display: -ms-flexbox;
@@ -143,34 +155,6 @@
   width: 100%;
 }
 
-.player__buttons button {
-  font-size: 3rem;
-  color: #fff;
-  background-color: #1d34bd;
-  border: 0;
-  padding: 1rem 3rem;
-  margin: 4rem 0;
-  border-radius: 5rem;
-  -webkit-box-shadow: 0 3px 8px rgba(0, 0, 0, 0.2);
-          box-shadow: 0 3px 8px rgba(0, 0, 0, 0.2);
-  font-family: Montserrat;
-  cursor: pointer;
-}
-
-.player__buttons button:hover {
-  background-color: #162891;
-}
-
-.player__buttons button.inactive {
-  background-color: #aaa;
-  color: #e2e2e2;
-  cursor: default;
-}
-
-.player__buttons button:focus {
-  outline: 0;
-}
-
 .remote-player {
   width: 80%;
   background-color: #e2e2e2;
@@ -184,7 +168,7 @@
   margin-top: 4rem;
 }
 
-.remote-player:nth-of-type(2), .remote-player:nth-of-type(3) {
+.remote-player:nth-of-type(3), .remote-player:nth-of-type(4) {
   margin-top: 10rem;
 }
 
@@ -221,5 +205,109 @@
   font-size: 2rem;
   font-weight: bold;
   color: #888;
+}
+
+.result {
+  position: fixed;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.4);
+  z-index: 10;
+  display: -ms-grid;
+  display: grid;
+}
+
+.result span {
+  font-size: 8rem;
+  font-weight: bold;
+  color: #fff;
+      justify-self: center;
+  margin-top: 10rem;
+  -ms-grid-row: 1;
+  -ms-grid-column: 1;
+  -ms-grid-column-span: 2;
+  grid-area: result;
+}
+
+.result__win, .result__lose {
+  place-self: center;
+  width: 50rem;
+  height: 40rem;
+  -webkit-box-shadow: 0 3px 8px rgba(0, 0, 0, 0.08);
+          box-shadow: 0 3px 8px rgba(0, 0, 0, 0.08);
+  border-radius: 1rem;
+  position: relative;
+  display: -ms-grid;
+  display: grid;
+      grid-template-areas: "result result" "again logout";
+}
+
+.result__win {
+  background-color: #1d34bd;
+}
+
+.result__lose {
+  background-color: #852424;
+}
+
+.result button {
+  background-color: #fff;
+  color: #000;
+  width: -webkit-fit-content;
+  width: -moz-fit-content;
+  width: fit-content;
+  height: -webkit-fit-content;
+  height: -moz-fit-content;
+  height: fit-content;
+  -ms-grid-column-align: center;
+      justify-self: center;
+  -ms-flex-item-align: end;
+      -ms-grid-row-align: end;
+      align-self: end;
+}
+
+.result button:hover {
+  background-color: #eee;
+}
+
+.result button:nth-of-type(1) {
+  -ms-grid-row: 2;
+  -ms-grid-column: 1;
+  grid-area: again;
+}
+
+.result button:nth-of-type(2) {
+  -ms-grid-row: 2;
+  -ms-grid-column: 2;
+  grid-area: logout;
+}
+
+button {
+  font-size: 3rem;
+  color: #fff;
+  background-color: #1d34bd;
+  border: 0;
+  padding: 1rem 3rem;
+  margin: 4rem 0;
+  border-radius: 5rem;
+  -webkit-box-shadow: 0 3px 8px rgba(0, 0, 0, 0.2);
+          box-shadow: 0 3px 8px rgba(0, 0, 0, 0.2);
+  font-family: Montserrat;
+  cursor: pointer;
+}
+
+button:hover {
+  background-color: #162891;
+}
+
+button.inactive {
+  background-color: #aaa;
+  color: #e2e2e2;
+  cursor: default;
+}
+
+button:focus {
+  outline: 0;
 }
 /*# sourceMappingURL=blackjack-auto.css.map */

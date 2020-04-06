@@ -53,6 +53,14 @@
 
 //Player
 .player{
+    &__info{
+        font-size: 3rem;
+        display: flex;
+        width: 80%;
+        &--capital{
+            margin-left: auto;
+        }
+    }
     &__card-container{
         display: flex;
         flex-direction: column;
@@ -108,29 +116,6 @@
         display: flex;
         justify-content: space-around;
         width: 100%;
-        button{
-            font-size: 3rem;
-            color: #fff;
-            background-color: $main-color;
-            border: 0;
-            padding: 1rem 3rem;
-            margin: 4rem 0;
-            border-radius: 5rem;
-            box-shadow: 0 3px 8px rgba(0,0,0,0.2);
-            font-family: Montserrat;
-            cursor: pointer;
-            &:hover{
-                background-color: darken($main-color, 10);
-            }
-            &.inactive{
-                background-color: #aaa;
-                color: #e2e2e2;
-                cursor: default;
-            }
-            &:focus{
-                outline: 0;
-            }
-        }
     }
 }
 
@@ -143,7 +128,7 @@
     border-radius: 1rem;
     padding: 1.5rem;
     margin-top: 4rem;
-    &:nth-of-type(2), &:nth-of-type(3){
+    &:nth-of-type(3), &:nth-of-type(4){
         margin-top: 10rem;
     }
     &__title{
@@ -173,5 +158,84 @@
         font-size: 2rem;
         font-weight: bold;
         color: #888;
+    }
+}
+
+//Win / Lose screen
+.result{
+    position: fixed;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0,0,0,0.4);
+    z-index: 10;
+    display: grid;
+    span{
+        font-size: 8rem;
+        font-weight: bold;
+        color: #fff;
+        justify-self: center;
+        margin-top: 10rem;
+        grid-area: result;
+    }
+    &__win, &__lose{
+        place-self: center;
+        width: 50rem;
+        height: 40rem;
+        box-shadow: 0 3px 8px rgba(0,0,0,0.08);
+        border-radius: 1rem;
+        position: relative;
+        display: grid;
+        grid-template-areas: 
+            "result result"
+            "again logout";
+    }
+    &__win{
+        background-color: $main-color;
+    }
+    &__lose{
+        background-color: rgb(133, 36, 36);
+    }
+    button{
+        background-color: #fff;
+        color: #000;
+        width: fit-content;
+        height: fit-content;
+        justify-self: center;
+        align-self: end;
+        &:hover{
+            background-color: #eee;
+        }
+        &:nth-of-type(1){
+            grid-area: again;
+        }
+        &:nth-of-type(2){
+            grid-area: logout;
+        }
+    }
+}
+
+//Buttons
+button{
+    font-size: 3rem;
+    color: #fff;
+    background-color: $main-color;
+    border: 0;
+    padding: 1rem 3rem;
+    margin: 4rem 0;
+    border-radius: 5rem;
+    box-shadow: 0 3px 8px rgba(0,0,0,0.2);
+    font-family: Montserrat;
+    cursor: pointer;
+    &:hover{
+        background-color: darken($main-color, 10);
+    }
+    &.inactive{
+        background-color: #aaa;
+        color: #e2e2e2;
+        cursor: default;
+    }
+    &:focus{
+        outline: 0;
     }
 }

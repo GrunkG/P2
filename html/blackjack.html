@@ -26,6 +26,10 @@
 
                 <div class="player">
                     <span class="player__title">You</span>
+                    <div class="player__info">
+                        <span class="player__info--bet">Bet: <span id="player__info--bet"></span></span>
+                        <span class="player__info--capital">Capital: <span id="player__info--capital"></span></span>
+                    </div>
                     <div class="player__card-container" id="player__card-container">
                         <div id="player__card-container0"></div>
                         <span class="player__card-sum" id="player__card-sum0">10</span>
@@ -42,6 +46,19 @@
                         <button>Split</button>
                         <button>Insurance</button>
                     </div>
+                </div>
+            </div>
+            
+            <div class="result hide">
+                <div class="result__win hide">
+                    <span>You Win</span>
+                    <button>Play Again</button>
+                    <button>Log out</button>
+                </div>
+                <div class="result__lose hide">
+                    <span>You Lose</span>
+                    <button>Play Again</button>
+                    <button>Log out</button>
                 </div>
             </div>
         </div>
