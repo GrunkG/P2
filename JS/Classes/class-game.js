@@ -31,4 +31,23 @@ class Game{
         this.player.printHands();
         this.dealer.printHands();
     }
+    toggleWinScreen(){
+        toggleDisplayNone("result", "grid");
+        toggleDisplayNone("result__win", "grid");
+    }
+    toggleLoseScreen(){
+        toggleDisplayNone("result", "grid");
+        toggleDisplayNone("result__lose", "grid");
+    }
 }
+
+//Id = id of element in html, toggles display between "none" and the input display
+function toggleDisplayNone(id, display){
+    let element = document.getElementById(id);
+    if (element.style.display === "none") {
+        element.style.display = display;
+    } else {
+        element.style.display = "none";
+    }
+}
+
