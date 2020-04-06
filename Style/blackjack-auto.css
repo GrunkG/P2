@@ -111,6 +111,10 @@
   background-color: #1d34bd;
 }
 
+.player__bet--input::-webkit-slider-thumb:hover {
+  background-color: #162891;
+}
+
 .player__bet--input:focus {
   outline: 0;
 }
@@ -124,6 +128,10 @@
   border-radius: 5rem;
   -webkit-box-shadow: 0 3px 8px rgba(0, 0, 0, 0.2);
           box-shadow: 0 3px 8px rgba(0, 0, 0, 0.2);
+}
+
+.player__bet--submit:hover {
+  background-color: #162891;
 }
 
 .player__buttons {

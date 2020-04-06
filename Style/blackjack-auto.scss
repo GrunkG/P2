@@ -82,6 +82,9 @@
                 width: 3rem;
                 height: 3rem;
                 background-color: $main-color;
+                &:hover{
+                    background-color: darken($main-color, 10);
+                }
             }
             &:focus{
                 outline: 0;
@@ -95,6 +98,9 @@
             padding: 1rem 3rem;
             border-radius: 5rem;
             box-shadow: 0 3px 8px rgba(0,0,0,0.2);
+            &:hover{
+                background-color: darken($main-color, 10);
+            }
         }
     }
 
