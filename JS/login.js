@@ -1,9 +1,13 @@
 function toggleLogin(){
     toggleDisplayNone("login", "grid");
+    toggleDisplayNone("blackjack-container", "grid");
+    toggleDisplayNone("login-button", "grid");
 }
 
 function toggleRegister(){
     toggleDisplayNone("register", "grid");
+    toggleDisplayNone("blackjack-container", "grid");
+    toggleDisplayNone("login-button", "grid");
 }
 
 function hideLoginShowRegister(){
@@ -11,10 +15,21 @@ function hideLoginShowRegister(){
     toggleRegister();
 }
 
-function showLogout(){
+function toggleLogout(){
     toggleDisplayNone("login-button", "grid");
     toggleDisplayNone("logout-button", "grid");
 }
 
-//toggleDisplayNone("login", "grid");
+function login(){
+    //Check if login is correct
+    //Log in the player
+    //Hide login and show log out button
+    toggleLogin();
+    toggleLogout();
+}
 
+function logout(){
+    //Log out the player
+    //Hide log out button and show log in button
+    toggleLogout();
+}

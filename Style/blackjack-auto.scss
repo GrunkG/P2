@@ -178,7 +178,7 @@
         margin-top: 10rem;
         grid-area: result;
     }
-    &__win, &__lose{
+    &__win, &__lose, &__draw{
         place-self: center;
         width: 50rem;
         height: 40rem;
@@ -194,7 +194,10 @@
         background-color: $main-color;
     }
     &__lose{
-        background-color: rgb(133, 36, 36);
+        background-color: #BF4042;
+    }
+    &__draw{
+        background-color: #f3c500;
     }
     button{
         background-color: #fff;

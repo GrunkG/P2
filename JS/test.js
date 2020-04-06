@@ -12,7 +12,9 @@ game.dealer.hands[0] = testCards;
 
 game.remotes[0].hands[0] = testCards2;
 
+game.player.splitHand(0);
+
 game.updateScreen();
 
-//game.toggleWinScreen();
+//game.toggleDrawScreen();
 

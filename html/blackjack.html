@@ -13,7 +13,7 @@
 <body>
     <header>
         <a href="#" onclick="toggleLogin();" class="login-logout-button" id="login-button">Log in</a>
-        <a href="#" class="login-logout-button" id="logout-button" style="display: none;">Log out</a>
+        <a href="#" onclick="logout();" class="login-logout-button" id="logout-button" style="display: none;">Log out</a>
     </header>
     <main>
         <div class="blackjack-container" id="blackjack-container">
@@ -60,6 +60,11 @@
                     <button>Play Again</button>
                     <button>Log out</button>
                 </div>
+                <div class="result__draw" id="result__draw" style="display: none;">
+                    <span>Draw</span>
+                    <button>Play Again</button>
+                    <button>Log out</button>
+                </div>
             </div>
         </div>
     </main>
@@ -78,7 +83,7 @@
 
                 <a class="login__container--form-forgot" href="#">Forgot password?</a>
 
-                <input type="submit" value="Login" onclick="toggleLogin();">
+                <input type="submit" value="Login" onclick="login();">
                 <a class="login__container--form-register" href="#" onclick="hideLoginShowRegister();">New user?<span>REGISTER</span></a>
             </form>
         </div>

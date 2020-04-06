@@ -230,7 +230,7 @@
   grid-area: result;
 }
 
-.result__win, .result__lose {
+.result__win, .result__lose, .result__draw {
   place-self: center;
   width: 50rem;
   height: 40rem;
@@ -248,7 +248,11 @@
 }
 
 .result__lose {
-  background-color: #852424;
+  background-color: #BF4042;
+}
+
+.result__draw {
+  background-color: #f3c500;
 }
 
 .result button {

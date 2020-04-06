@@ -39,5 +39,9 @@ class Game{
         toggleDisplayNone("result", "grid");
         toggleDisplayNone("result__lose", "grid");
     }
+    toggleDrawScreen(){
+        toggleDisplayNone("result", "grid");
+        toggleDisplayNone("result__draw", "grid");
+    }
 }
 
