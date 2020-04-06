@@ -22,5 +22,13 @@ class Game{
         }
     }
     //Method to print all remotes
+    printRemotes(){
+        this.remotes.forEach(remote => remote.printHands());
+    }
     //Method to print everything at once
+    updateScreen(){
+        this.printRemotes();
+        this.player.printHands();
+        this.dealer.printHands();
+    }
 }
