@@ -76,11 +76,16 @@ class Blackjack extends cardmod.Cards{
                 let hand = player.hands[x],
                     value = this.getCardsValue(hand.cards);
                 
+                
                 //W = win, L = Loss, D = Draw
                 //Best hand
                 if (dealer_value > value)
                     hand.winner = "L";
-                if (value > dealer_value);
+                if (value > dealer_value)
+                    hand.winner = "W";
+                if (dealer_value == 21 && value != 21)
+                    hand.winner = "L";
+                if (value == 21 && dealer_value != 21)
                     hand.winner = "W";
 
                 //Draw
@@ -88,6 +93,8 @@ class Blackjack extends cardmod.Cards{
                     hand.winner = "D";
                     continue;
                 }
+                if (dealer_value == value)
+                    hand.winner = "D";
 
                 //Busts
                 if (dealer_value > 21 && value > 21)
@@ -201,7 +208,7 @@ class Blackjack extends cardmod.Cards{
                 new_hand.bet = hand.bet;
 
                 //Push the first card into the new hand. -> Removes it from the other array as well.
-                new_hand.cards.push(hand.cards.shift());
+                new_hand.cards.push(hand.cards.pop());
 
                 //Deal new cards.
                 this.hit(hand);

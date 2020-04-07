@@ -1,5 +1,5 @@
 const playerTarget = "player__card-container",
-    playerSumTarget = "player__card-sum",
+    playerSumTarget = "player__card-sum0",
     dealerTarget = "dealer__card-container",
     dealerSumTarget = "dealer__card-sum";
 
@@ -11,9 +11,6 @@ let hand = 0;
 
 window.onload = () => {
     initiateGame();
-    game = new Game();
-    game.addRemotes(1);
-
     let slider = document.getElementById("player__bet--input");
     let output = document.getElementById("player__bet--amount");
     output.innerHTML = slider.value;
@@ -51,47 +48,60 @@ function handleHit(msg) {
 }
 
 function handleCards(msg) {
-    clearCardHolders();
+    //clearCardHolders();
 
     //Player
-    let player = msg.player;
+    let player = msg.player,
+        playerDeck = new Deck([]);
+
     for (let i = 0; i < player.cards.length; i++) {
         let card = player.cards[i],
             new_card = new Card(card.val.toString(), card.suit);
             
-        dealCard(playerTarget, new_card);
-        //playerDeck.deck.push(new_card)
+        playerDeck.cards.push(new_card);
     }
-    //playerDeck.update();
+    game.player.hands[player.hand] = playerDeck;
     document.getElementById(playerSumTarget).innerHTML = player.points;
 
     //Dealer
-    let dealer = msg.dealer;
+    let dealer = msg.dealer,
+        dealerDeck = new Deck([]);
     for (i = 0; i < dealer.cards.length; i++) {
         let card = dealer.cards[i],
             new_card = new Card(card.val.toString(), card.suit),
             visible = card.visible;
-        if (visible)
-            dealCard(dealerTarget, new_card);
-        else
-            dealCard(dealerTarget, new_card, visible);
+
+        if (visible) {
+           dealerDeck.cards.push(new_card);
+        }
+
     }
+    game.dealer.hands[0] = dealerDeck;
     document.getElementById(dealerSumTarget).innerHTML = dealer.points;
+    game.updateScreen();
 }
 
+//W.I.P -> Need to show based on each hand in the case of a split hand.
 function handleWinner(msg) {
-    clearCardHolders();
-    if (msg.winner == "D")
-        console.log("Winner: Draw");
-    else
-        console.log("Winner is: " + ((msg.winner == "W") ? "You" : "Dealer"));
-        
+    //clearCardHolders();
+    if (msg.win == "D")
+        game.toggleDrawScreen();
+    else {
+        if (msg.win == "W")
+            game.toggleWinScreen();
+        else
+            game.toggleLoseScreen();
+    }
     handleCards(msg);
 } 
 
+function handleSplit(msg) {
+    game.player.splitHand(msg.player.hand);
+}
+
 function clearCardHolders() {
     document.getElementById("player__card-container").innerHTML = "";
-    document.getElementById("dealer__card-container").innerHTML = "";
+    document.getElementById("dealer__card-container0").innerHTML = "";
 }
 
 //W.I.P - Still missing additional hands handling on client-side.
@@ -151,6 +161,7 @@ function gameHandler() {
             if (msg.type == "blackjack") {
                 switch (msg.content) {
                     case "game created":
+                        game = new Game();
                         handleCards(msg);
                         break;
                     case "card":
@@ -196,4 +207,22 @@ function doBet() {
     let value = parseInt(input.value);
 
     websocket.send(JSON.stringify({type: "game", content: "bet", amount: value}));
+}
+
+function doNewGame(grid_element) {
+    let id = grid_element.parentElement.id;
+    
+    switch(id) {
+        case "result__win":
+            game.toggleWinScreen();
+            break;
+        case "result__lose":
+            game.toggleLoseScreen();
+            break;
+        case "result__draw":
+            game.toggleDrawScreen();
+            break;
+    }
+
+    websocket.send(JSON.stringify({type: "game", content: "newgame"}));
 }

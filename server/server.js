@@ -29,7 +29,6 @@ class user {
 };
 
 let activeGames = [];
-activeGames.push(new bjackGame());
 
 //########  Webserver
 const webserv = http.createServer((req, res) => {
@@ -112,14 +111,22 @@ gameserv.on('request', (req) => {
     function gamehandler(message) {
         switch(message.content) {
             case "startgame":
-                //activeGames[0] = new bjackGame(); //Temp - Allows easy new games
+                activeGames.push(new bjackGame());
+                playerObj.join(activeGames[activeGames.length-1]);
+                game = playerObj.game;
+                initGame();
+                break;
+            case "newgame":
+                activeGames[0] = new bjackGame();
+                playerObj = new cardgame.Player();
+                playerObj.connection = connection;
                 playerObj.join(activeGames[0]);
                 game = playerObj.game;
                 initGame();
                 break;
-            case "joingame":
+            /* case "joingame":
                 handleNewJoin();
-                break;
+                break; */
             case "hit":
                 handleHit();
                 break;
@@ -216,7 +223,7 @@ gameserv.on('request', (req) => {
             handleHold();
         }
 
-        if (playerObj.hands.length > 1 && activeHand != (playerObj.hand.length -1 ) )
+        if (playerObj.hands.length > 1 && activeHand != (playerObj.hands.length -1 ) )
             activeHand++;
         else
             activeHand = 0;
@@ -230,9 +237,8 @@ gameserv.on('request', (req) => {
         response.dealer.cards = game.dealer;
         response.player.cards = playerObj.hands[activeHand].cards;
 
-        game.determineWinner();
         response.win = playerObj.hands[activeHand].winner;
-
+        
         send(response);
     }
 
@@ -250,8 +256,7 @@ gameserv.on('request', (req) => {
         if ( game.split(playerObj, hand) == true) {
 
             //Hand has been split, response with new hand
-            response.content = "card";
-            response.player.cards = playerObj.hands[activeHand].cards;
+            response.content = "split";
             updateResponsePoints();
             send(response);
         }
