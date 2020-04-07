@@ -132,9 +132,8 @@ function updateGame(msg) {
             for (let y = 0; y < hand.cards.length; y++) {
                 let card = hand.cards[y];
                 let new_card = new Card(card.val.toString(), card.suit);
-                //Currently only handling the first hand, needs further client-side hand visualization.
-                if (x > 0)
-                    continue;
+                
+                updateHand(hand, x);
 
                 remote_deck.cards.push(new_card);
             }
@@ -143,6 +142,21 @@ function updateGame(msg) {
         //Update the shown cards
         remote_deck.update(remote_id);
     }
+    game.updateScreen();
+}
+
+function updateHand(hand, index) {
+    let deck = new Deck([]);
+
+    for (let i = 0; i < hand.cards.length; i++) {
+        let card = hand.cards[i],
+            new_card = new Card(card.val.toString(), card.suit);
+            
+            deck.cards.push(new_card);
+    }
+    game.player.hands[index] = deck;
+    document.getElementById("player__card-sum" + index).innerHTML = hand.points;
+    
 }
 
 function gameHandler() {

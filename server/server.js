@@ -162,8 +162,9 @@ gameserv.on('request', (req) => {
             //For each hand active for the player
             for (let x = 0; x < player.hands.length; x++) {
                 let hand = player.hands[x];
+                let value = game.getCardsValue(hand.cards);
                 playersResponse.hands.push( {   cards: hand.cards, bet: hand.bet, 
-                                            isHolding: hand.isHolding, winner: hand.winner  }  );
+                                            isHolding: hand.isHolding, winner: hand.winner, points: value }  );
             }
 
             playersResponse.insurance = player.insurance;
