@@ -9,31 +9,47 @@ body{
     font-family: Montserrat, sans-serif;
     margin: 0;
     background-color: white;
+    min-height: 100vh;
+    &.form-open{
+        height: 100vh;
+        overflow-y: hidden;
+        padding-right: 15px;
+    }
 }  
 
 header{
     position: fixed;
     width: 100%;
-    .button-login{
+    .login-logout-button{
+        font-size: 2.4rem;
+        font-weight: bold;
+        color: $main-color;
+        text-decoration: none;
         float: right;
-        background-color: rgba(0,0,0,0);
-        border: 0;
-        padding: 1rem 3rem;
-        font-size: 2rem;
+        margin: 2rem 4rem;
         &:hover{
-            background-color: $main-color;
-            color: white;
-            cursor: pointer;
+            text-decoration: underline;
         }
     }
+    // .button-login{
+    //     float: right;
+    //     background-color: rgba(0,0,0,0);
+    //     border: 0;
+    //     padding: 1rem 3rem;
+    //     font-size: 2rem;
+    //     &:hover{
+    //         background-color: $main-color;
+    //         color: white;
+    //         cursor: pointer;
+    //     }
+    // }
 }
 
 main{
     display: flex;
-    height: 100vh;
+    min-height: 100vh;
     .button-big{
         width: 100%;
-        height: 100%;
         font-size: 8rem;
         font-weight: 600;
         background-color: rgba(0,0,0,0);
@@ -47,161 +63,9 @@ main{
     }
 }
 
-//-------------Blackjack page-------------
-
-.blackjack-container{
-    width: 100%;
-    height: 100%;
-    background-color: #ececec;
-
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    grid-template-rows: repeat(4, min-content);
-    grid-auto-flow: row;
-    
-    .main-game{
-        grid-column: 2 / -2;
-        grid-row: 1 / -1;
-        background-color: #f3f3f3;
-        height: 100vh;
-    }
+.hide{
+    display: none !important;
 }
-
-.dealer, .player{
-    width: auto;
-    padding: 0 4rem;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    &__title{
-        font-size: 5rem;
-        font-weight: bold;
-        color: $main-color;
-        margin-top: 4rem;
-    }
-    &__card-container{
-        margin-top: 2rem;
-        height: auto;
-        display: grid;
-        grid-auto-flow: column;
-        grid-gap: 1rem;
-        img{
-            height: 17rem;
-            box-shadow: 0 3px 8px rgba(0,0,0,0.08);
-            border-radius: 8px;
-        }
-    }
-    &__card-sum{
-        margin-top: 1rem;
-        font-size: 3rem;
-        font-weight: bold;
-    }
-}
-
-.player{
-    &__bet{
-        margin-top: 2rem;
-        &--amount{
-            font-size: 4rem;
-            font-weight: bold;
-            width: 10rem;
-            display: inline-block;
-            text-align: right;
-        }
-        &--input{
-            appearance: none;
-            margin: 0 3rem;
-            width: 40rem;
-            height: 1.5rem;
-            border-radius: 1.5rem;
-            background-color: #e2e2e2;
-            &::-webkit-slider-thumb{
-                appearance: none;
-                border-radius: 3rem;
-                width: 3rem;
-                height: 3rem;
-                background-color: $main-color;
-            }
-        }
-        &--submit{
-            font-size: 3rem;
-            color: #fff;
-            background-color: $main-color;
-            border: 0;
-            padding: 1rem 3rem;
-            border-radius: 5rem;
-            box-shadow: 0 3px 8px rgba(0,0,0,0.2);
-        }
-    }
-
-    &__buttons{
-        display: flex;
-        justify-content: space-around;
-        width: 100%;
-        button{
-            font-size: 3rem;
-            color: #fff;
-            background-color: $main-color;
-            border: 0;
-            padding: 1rem 3rem;
-            margin-top: 4rem;
-            border-radius: 5rem;
-            box-shadow: 0 3px 8px rgba(0,0,0,0.2);
-            cursor: pointer;
-            &:hover{
-                background-color: darken($main-color, 10);
-            }
-            &.inactive{
-                background-color: #aaa;
-                color: #e2e2e2;
-                cursor: default;
-            }
-            &:focus{
-                outline: 0;
-            }
-        }
-    }
-}
-
-.remote-player{
-    width: 80%;
-    background-color: #e2e2e2;
-    height: fit-content;
-    justify-self: center;
-    border-radius: 1rem;
-    padding: 1.5rem;
-    margin-top: 4rem;
-    &__title{
-        width: 100%;
-        display: block;
-        font-size: 2rem;
-        font-weight: bold;
-        color: $main-color;
-        text-transform: capitalize;
-    }
-    &__card-container{
-        margin-top: 1rem;
-        margin-bottom: 1rem;
-        height: auto;
-        display: grid;
-        grid-auto-flow: column;
-        grid-gap: 1rem;
-        grid-auto-columns: min-content;
-        border-radius: 8px;
-        img{
-            height: 8rem;
-            box-shadow: 0 3px 8px rgba(0,0,0,0.08);
-            border-radius: 5px;
-        }
-    }
-    &__card-sum{
-        font-size: 2rem;
-        font-weight: bold;
-        color: #888;
-    }
-}
-
-//------------Blackjack page end--------------
 
 @media screen and (max-width: 825px){
     main{

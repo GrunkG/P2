@@ -1,0 +1,317 @@
+.blackjack-container {
+  width: 100%;
+  height: 100%;
+  background-color: #ececec;
+  display: -ms-grid;
+  display: grid;
+  -ms-grid-columns: (1fr)[4];
+      grid-template-columns: repeat(4, 1fr);
+  -ms-grid-rows: (min-content)[4];
+      grid-template-rows: repeat(4, -webkit-min-content);
+      grid-template-rows: repeat(4, min-content);
+  grid-auto-flow: row;
+}
+
+.blackjack-container .main-game {
+  grid-column: 2 / -2;
+  grid-row: 1 / -1;
+  background-color: #f3f3f3;
+  min-height: 100vh;
+}
+
+.dealer, .player {
+  width: auto;
+  padding: 0 4rem;
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-orient: vertical;
+  -webkit-box-direction: normal;
+      -ms-flex-direction: column;
+          flex-direction: column;
+  -webkit-box-align: center;
+      -ms-flex-align: center;
+          align-items: center;
+}
+
+.dealer__title, .player__title {
+  font-size: 5rem;
+  font-weight: bold;
+  color: #1d34bd;
+  margin-top: 4rem;
+}
+
+.dealer__card-container, .dealer__card-container div, .player__card-container, .player__card-container div {
+  margin-top: 2rem;
+  height: auto;
+  display: -ms-grid;
+  display: grid;
+  grid-auto-flow: column;
+  grid-gap: 1rem;
+}
+
+.dealer__card-container img, .dealer__card-container div img, .player__card-container img, .player__card-container div img {
+  height: 17rem;
+  -webkit-box-shadow: 0 3px 8px rgba(0, 0, 0, 0.08);
+          box-shadow: 0 3px 8px rgba(0, 0, 0, 0.08);
+  border-radius: 8px;
+}
+
+.dealer__card-sum, .player__card-sum {
+  margin-top: 1rem;
+  font-size: 3rem;
+  font-weight: bold;
+}
+
+.player__info {
+  font-size: 3rem;
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  width: 80%;
+}
+
+.player__info--capital {
+  margin-left: auto;
+}
+
+.player__card-container {
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-orient: vertical;
+  -webkit-box-direction: normal;
+      -ms-flex-direction: column;
+          flex-direction: column;
+}
+
+.player__card-sum {
+  -ms-flex-item-align: center;
+      -ms-grid-row-align: center;
+      align-self: center;
+}
+
+.player__bet {
+  margin-top: 2rem;
+}
+
+.player__bet--amount {
+  font-size: 4rem;
+  font-weight: bold;
+  width: 10rem;
+  display: inline-block;
+  text-align: right;
+}
+
+.player__bet--input {
+  -webkit-appearance: none;
+     -moz-appearance: none;
+          appearance: none;
+  margin: 0 3rem;
+  width: 40rem;
+  height: 1.5rem;
+  border-radius: 1.5rem;
+  background-color: #e2e2e2;
+}
+
+.player__bet--input::-webkit-slider-thumb {
+  -webkit-appearance: none;
+          appearance: none;
+  border-radius: 3rem;
+  width: 3rem;
+  height: 3rem;
+  background-color: #1d34bd;
+}
+
+.player__bet--input::-webkit-slider-thumb:hover {
+  background-color: #162891;
+}
+
+.player__bet--input:focus {
+  outline: 0;
+}
+
+.player__bet--submit {
+  font-size: 3rem;
+  color: #fff;
+  background-color: #1d34bd;
+  border: 0;
+  padding: 1rem 3rem;
+  border-radius: 5rem;
+  -webkit-box-shadow: 0 3px 8px rgba(0, 0, 0, 0.2);
+          box-shadow: 0 3px 8px rgba(0, 0, 0, 0.2);
+}
+
+.player__bet--submit:hover {
+  background-color: #162891;
+}
+
+.player__buttons {
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -ms-flex-pack: distribute;
+      justify-content: space-around;
+  width: 100%;
+}
+
+.remote-player {
+  width: 80%;
+  background-color: #e2e2e2;
+  height: -webkit-fit-content;
+  height: -moz-fit-content;
+  height: fit-content;
+  -ms-grid-column-align: center;
+      justify-self: center;
+  border-radius: 1rem;
+  padding: 1.5rem;
+  margin-top: 4rem;
+}
+
+.remote-player:nth-of-type(3), .remote-player:nth-of-type(4) {
+  margin-top: 10rem;
+}
+
+.remote-player__title {
+  width: 100%;
+  display: block;
+  font-size: 2rem;
+  font-weight: bold;
+  color: #1d34bd;
+  text-transform: capitalize;
+}
+
+.remote-player__card-container div {
+  margin-top: 1rem;
+  margin-bottom: 1rem;
+  height: auto;
+  display: -ms-grid;
+  display: grid;
+  grid-auto-flow: column;
+  grid-gap: 1rem;
+  grid-auto-columns: -webkit-min-content;
+  grid-auto-columns: min-content;
+  border-radius: 8px;
+}
+
+.remote-player__card-container div img {
+  height: 8rem;
+  -webkit-box-shadow: 0 3px 8px rgba(0, 0, 0, 0.08);
+          box-shadow: 0 3px 8px rgba(0, 0, 0, 0.08);
+  border-radius: 5px;
+}
+
+.remote-player__card-sum {
+  font-size: 2rem;
+  font-weight: bold;
+  color: #888;
+}
+
+.result {
+  position: fixed;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.4);
+  z-index: 10;
+  display: -ms-grid;
+  display: grid;
+}
+
+.result span {
+  font-size: 8rem;
+  font-weight: bold;
+  color: #fff;
+      justify-self: center;
+  margin-top: 10rem;
+  -ms-grid-row: 1;
+  -ms-grid-column: 1;
+  -ms-grid-column-span: 2;
+  grid-area: result;
+}
+
+.result__win, .result__lose, .result__draw {
+  place-self: center;
+  width: 50rem;
+  height: 40rem;
+  -webkit-box-shadow: 0 3px 8px rgba(0, 0, 0, 0.08);
+          box-shadow: 0 3px 8px rgba(0, 0, 0, 0.08);
+  border-radius: 1rem;
+  position: relative;
+  display: -ms-grid;
+  display: grid;
+      grid-template-areas: "result result" "again logout";
+}
+
+.result__win {
+  background-color: #1d34bd;
+}
+
+.result__lose {
+  background-color: #BF4042;
+}
+
+.result__draw {
+  background-color: #f3c500;
+}
+
+.result button {
+  background-color: #fff;
+  color: #000;
+  width: -webkit-fit-content;
+  width: -moz-fit-content;
+  width: fit-content;
+  height: -webkit-fit-content;
+  height: -moz-fit-content;
+  height: fit-content;
+  -ms-grid-column-align: center;
+      justify-self: center;
+  -ms-flex-item-align: end;
+      -ms-grid-row-align: end;
+      align-self: end;
+}
+
+.result button:hover {
+  background-color: #eee;
+}
+
+.result button:nth-of-type(1) {
+  -ms-grid-row: 2;
+  -ms-grid-column: 1;
+  grid-area: again;
+}
+
+.result button:nth-of-type(2) {
+  -ms-grid-row: 2;
+  -ms-grid-column: 2;
+  grid-area: logout;
+}
+
+button {
+  font-size: 3rem;
+  color: #fff;
+  background-color: #1d34bd;
+  border: 0;
+  padding: 1rem 3rem;
+  margin: 4rem 0;
+  border-radius: 5rem;
+  -webkit-box-shadow: 0 3px 8px rgba(0, 0, 0, 0.2);
+          box-shadow: 0 3px 8px rgba(0, 0, 0, 0.2);
+  font-family: Montserrat;
+  cursor: pointer;
+}
+
+button:hover {
+  background-color: #162891;
+}
+
+button.inactive {
+  background-color: #aaa;
+  color: #e2e2e2;
+  cursor: default;
+}
+
+button:focus {
+  outline: 0;
+}
+/*# sourceMappingURL=blackjack-auto.css.map */

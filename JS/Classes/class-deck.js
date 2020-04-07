@@ -1,16 +1,14 @@
 //Needs cards class -- Use this class to store player decks
 class Deck{
-    constructor(cards, cardFront = "Default", cardBack = "default"){
+    constructor(cards){
         this.cards = cards;
-        this.cardFront = cardFront;
-        this.cardBack = cardBack;
     }
     //Makes a deck of cards
     static get getDeck(){
         let deck = [];
         for (let i = 0; i < Card.cardSuit.length; i++) {
             for (let j = 0; j < Card.cardValue.length; j++) {
-                let card = new Card(Card.cardValue[j], Card.cardSuit[i], cardFront, cardBack);
+                let card = new Card(Card.cardValue[j], Card.cardSuit[i]);
                 deck.push(card);
             }
         }
@@ -23,7 +21,7 @@ class Deck{
         }
         return this.cards;
     }
-    //Add shuffle method - Jonas har lavet dette, så læs det gerne kloge hoveder
+    //Shuffle method - Skal denne ikke fjerne det kort den finder i this.cards så den ikke kan blive taget flere gange?
     shuffleCards(){
         let shuffledDeck = [];
         for (let i = 0; i < this.cards.length; i++) {
@@ -32,17 +30,17 @@ class Deck{
         return shuffledDeck;
     }
     //Print all cards in the card container of id
-    print(id){
-        this.cards.forEach(card => card.printCardById(id + "__card-container", this.cardFront));
+    print(id, cardFront, containerId = "0"){
+        this.cards.forEach(card => card.printCardById(id + "__card-container" + containerId, cardFront));
         return this;
     }
     //Removes all printed cards in the card container of id
-    clear(id){
-        document.getElementById(id + "__card-container").innerHTML = "";
+    clear(id, containerId = "0"){
+        document.getElementById(id + "__card-container" + containerId).innerHTML = "";
         return this;
     }
     //Updates a printed deck of cards to match the current deck
-    update(id){
-        this.clear(id).print(id);
+    update(id, cardFront, containerId = "0"){
+        this.clear(id, containerId).print(id, cardFront, containerId);
     }
 }

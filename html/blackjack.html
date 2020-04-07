@@ -11,28 +11,35 @@
     <script src="../JS/Classes/class-game.js"></script>
     <script src="../JS/Classes/class-player.js"></script>
     <script src="../JS/client.js"></script>
+    <link rel="stylesheet" type="text/css" href="../Style/login-form-auto.css">
+    <link rel="stylesheet" type="text/css" href="../Style/blackjack-auto.css">
     <title>P2 projektet</title>
 </head>
 <body>
     <header>
-        <form action="" method="post">
-            <a class="logout" href=""></a>
-        </form>
+        <a href="#" onclick="toggleLogin();" class="login-logout-button" id="login-button">Log in</a>
+        <a href="#" onclick="logout();" class="login-logout-button" id="logout-button" style="display: none;">Log out</a>
     </header>
     <main>
         <div class="blackjack-container" id="blackjack-container">
             <div class="main-game">
                 <div class="dealer">
                     <span class="dealer__title">Dealer</span>
-                    <div class="dealer__card-container" id="dealer__card-container"></div>
+                    <div class="dealer__card-container" id="dealer__card-container0"></div>
                     <span class="dealer__card-sum" id="dealer__card-sum">30</span>
                 </div>
 
                 <div class="player">
                     <span class="player__title">You</span>
-                    <div class="player__card-container" id="player__card-container"></div>
-                    <span class="player__card-sum" id="player__card-sum">10</span>
-                    <form class="player__bet" id="player__bet" onsubmit="return false">
+                    <div class="player__info">
+                        <span class="player__info--bet">Bet: <span id="player__info--bet"></span></span>
+                        <span class="player__info--capital">Capital: <span id="player__info--capital"></span></span>
+                    </div>
+                    <div class="player__card-container" id="player__card-container">
+                        <div id="player__card-container0"></div>
+                        <span class="player__card-sum" id="player__card-sum0">10</span>
+                    </div>
+                    <form class="player__bet" id="player__bet">
                         <span class="player__bet--amount" id="player__bet--amount"></span>
                         <input class="player__bet--input" id="player__bet--input" type="range" name="bet" min="1" max="100" value="50">
                         <button class="player__bet--submit" onclick="doBet()">Place Bet</button>
@@ -46,7 +53,70 @@
                     </div>
                 </div>
             </div>
+
+            <div class="result" id="result" style="display: none;">
+                <div class="result__win" id="result__win" style="display: none;">
+                    <span>You Win</span>
+                    <button>Play Again</button>
+                    <button>Log out</button>
+                </div>
+                <div class="result__lose" id="result__lose" style="display: none;">
+                    <span>You Lose</span>
+                    <button>Play Again</button>
+                    <button>Log out</button>
+                </div>
+                <div class="result__draw" id="result__draw" style="display: none;">
+                    <span>Draw</span>
+                    <button>Play Again</button>
+                    <button>Log out</button>
+                </div>
+            </div>
         </div>
     </main>
+
+    <div class="login" id="login" style="display: none;">
+        <div class="login__container">
+            <a class="login__container--close hide" href="#"></a>
+            <h1 class="login__container--title">Login</h1>
+            <form class="login__container--form display-none" action="" method="">
+
+                <label for="username">Username</label>
+                <input type="text" name="username" id="username" required="required">
+
+                <label for="password">Password</label>
+                <input type="password" name="password" id="password" required="required">
+
+                <a class="login__container--form-forgot" href="#">Forgot password?</a>
+
+                <input type="submit" value="Login" onclick="login();">
+                <a class="login__container--form-register" href="#" onclick="hideLoginShowRegister();">New user?<span>REGISTER</span></a>
+            </form>
+        </div>
+    </div>
+
+    <div class="register" id="register" style="display: none;">
+        <div class="register__container">
+            <a class="register__container--close hide" href="#"></a>
+            <h1 class="register__container--title">Register</h1>
+            <form class="login__container--form display-none" action="" method="">
+
+                <label for="username">Username</label>
+                <input type="text" name="username" id="register__username" required="required">
+
+                <label for="password">Password</label>
+                <input type="password" name="password" id="register__password" required="required">
+
+                <input type="submit" value="Register" onclick="toggleRegister();">
+            </form>
+        </div>
+    </div>
 </body>
+<!-- <script src="../JS/global-functions.js"></script>
+<script src="../JS/Classes/class-cards.js"></script>
+<script src="../JS/Classes/class-deck.js"></script>
+<script src="../JS/Classes/class-player.js"></script>
+<script src="../JS/Classes/class-game.js"></script>
+<script src="../JS/bet-slider.js"></script>
+<script src="../JS/login.js"></script>
+<script src="../JS/test.js"></script> -->
 </html>

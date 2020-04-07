@@ -35,7 +35,7 @@ class Cards {
                 let value = 0,                  //Initiate value variable
                     current_suit = suits[suit]; //Current suit for easier read.
 
-                //If the card index is below 7 -> below picture cards and Ace.
+                //If the card index is below 8.
                 if (i >= 0 && i <= 8)
                     value = parseInt(values[i]); //Convert string to integer.
                 if (i > 8)

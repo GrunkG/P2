@@ -3,7 +3,7 @@ const playerTarget = "player__card-container",
     dealerTarget = "dealer__card-container",
     dealerSumTarget = "dealer__card-sum";
 
-let ws = null,
+let websocket = null,
     game = null,
     remoteDecks = [];
 
@@ -81,10 +81,10 @@ function handleCards(msg) {
 
 function handleWinner(msg) {
     clearCardHolders();
-    if (msg.win == "D")
+    if (msg.winner == "D")
         console.log("Winner: Draw");
     else
-        console.log("Winner is: " + ((msg.win == "W") ? "You" : "Dealer"));
+        console.log("Winner is: " + ((msg.winner == "W") ? "You" : "Dealer"));
         
     handleCards(msg);
 } 
@@ -136,12 +136,13 @@ function updateGame(msg) {
 }
 
 function gameHandler() {
-    ws = new WebSocket('ws://localhost:3000/');
-    ws.onopen = () => {
-        ws.send(JSON.stringify({type: "game", content: "startgame"}));
+    //                        ws = websocket
+    websocket = new WebSocket('ws://localhost:3000/');
+    websocket.onopen = () => {
+        websocket.send(JSON.stringify({type: "game", content: "startgame"}));
     }
 
-    ws.onmessage = (message) => {
+    websocket.onmessage = (message) => {
         try {
             let msg = JSON.parse(message.data),
                 cardObj,
@@ -156,6 +157,7 @@ function gameHandler() {
                         handleHit(msg);
                         break;
                     case "split":
+                        handleSplit(msg);
                         break;
                     case "winner":
                         handleWinner(msg);
@@ -174,24 +176,24 @@ function gameHandler() {
 }
 
 function doHit() {
-    ws.send(JSON.stringify({type: "game", content: "hit"}));
+    websocket.send(JSON.stringify({type: "game", content: "hit"}));
 }
 function doHold() {
-    ws.send(JSON.stringify({type: "game", content: "hold"}));
+    websocket.send(JSON.stringify({type: "game", content: "hold"}));
 }
 function doDouble() {
-    ws.send(JSON.stringify({type: "game", content: "double"}));
+    websocket.send(JSON.stringify({type: "game", content: "double"}));
 }
 function doSplit() {
-    ws.send(JSON.stringify({type: "game", content: "split"}));
+    websocket.send(JSON.stringify({type: "game", content: "split"}));
 }
 function doInsure() {
-    ws.send(JSON.stringify({type: "game", content: "insure"}));
+    websocket.send(JSON.stringify({type: "game", content: "insure"}));
 }
 
 function doBet() {
     let input = document.getElementById("player__bet--input");
     let value = parseInt(input.value);
 
-    ws.send(JSON.stringify({type: "game", content: "bet", amount: value}));
+    websocket.send(JSON.stringify({type: "game", content: "bet", amount: value}));
 }
