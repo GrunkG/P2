@@ -192,7 +192,7 @@ gameserv.on('request', (req) => {
             game.initialize(4);
         else
             handleNewJoin();
-
+        
         response.content = "game created";
         response.player.cards = playerObj.hands[activeHand].cards;
         response.dealer.cards = game.dealer;

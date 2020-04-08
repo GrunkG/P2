@@ -21,7 +21,7 @@ class Blackjack extends cardmod.Cards{
         for (let i = 0; i < 2; i++)
             this.dealPlayers();
 
-        //Deal the initial two dealer cards, one hidden and one hidden.
+        //Deal the initial two dealer cards, one hidden and one shown.
         let hidden_card = this.drawCard();
         hidden_card.visible = false;
         this.dealer.push(hidden_card);
@@ -31,6 +31,7 @@ class Blackjack extends cardmod.Cards{
     //Get the total card value of a card array.
     getCardsValue(cards) {
         let value = 0;
+        let aces = 0;
         for (let i = 0; i < cards.length; i++) {
             //Card: {suit: string, val: int/string, visible: bool}
             let card = cards[i];
@@ -53,14 +54,20 @@ class Blackjack extends cardmod.Cards{
                 continue; //Skip everything else -> next card;
             }
 
-            //Determine Ace value.
-            if (card.val == "A") {
-                if ((value + 11) <= 21) //If current value + 11 is less than 21, then add 11.
-                    value += 11;
-                else //Otherwise, add 1.
-                    value += 1;
-            }
+            //Ace value calculated after everything card.
+            if (card.val == "A")
+                aces++;
         }
+
+        //For each existing Ace
+        for (let  i = 0; i < aces; i++) {
+            //Determine Ace value.
+            if ((value + 11 + Math.max(aces-1, 0)) <= 21) //If current value + 11 is less than 21, then add 11.
+                value += 11;
+            else //Otherwise, add 1.
+                value += 1;
+        }
+
         return value;
     }
 
@@ -140,7 +147,7 @@ class Blackjack extends cardmod.Cards{
 
         //Check if everyone is currently holding
         if (this.isEveryoneDone()) {
-            //Show the hidden card.
+            //Show the hidden card. 
             this.dealer[0].visible = true;
             //Everyone is holding, get dealer value
             let dealer_value = this.getCardsValue(this.dealer);
