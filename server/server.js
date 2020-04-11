@@ -212,28 +212,37 @@ gameserv.on('request', (req) => {
         send(response);
     }
 
+    /* function updateWinnings() {
+        for(let i = 0; i < players.length; i++) {
+            for(let j = 0; j <= hands.length; j++) {
+                currencyCalculator(hand, player.insurance);
+            }
+        }
+    }
+
     //Currency update method to add/subtract currency in-game
-    function updateCurrency(message) {
+    //OBS!    playerObj.currencyAmount skal ændres til noget fra db'en
+    function currencyCalculator(message) {
         //Withdraws the correct amount of money in case the player insures
         if (insurance > 0 && "winner") {
-            playerObj.currencyAmount += bet.value / 2;
+            playerObj.currencyAmount += hand.bet / 2;
             return;
         }
         else if (insurance > 0 && !"winner") {
-            playerObj.currencyAmount -= bet.value * 1.5
+            playerObj.currencyAmount -= hand.bet * 1.5
             return;
         }
         
         //Withdraws the correct amount of money
         if ("winner") {
-            playerObj.currencyAmount += bet.value;
+            playerObj.currencyAmount += hand.bet;
             return;
         }
         else if (!"winner") {
-            playerObj.currencyAmount -= bet.value;
+            playerObj.currencyAmount -= hand.bet;
             return;
         }
-    }
+    } */
 
     function handleHit() {
         response.content = "card";
