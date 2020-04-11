@@ -212,6 +212,29 @@ gameserv.on('request', (req) => {
         send(response);
     }
 
+    //Currency update method to add/subtract currency in-game
+    function updateCurrency(message) {
+        //Withdraws the correct amount of money in case the player insures
+        if (insurance > 0 && "winner") {
+            playerObj.currencyAmount += bet.value / 2;
+            return;
+        }
+        else if (insurance > 0 && !"winner") {
+            playerObj.currencyAmount -= bet.value * 1.5
+            return;
+        }
+        
+        //Withdraws the correct amount of money
+        if ("winner") {
+            playerObj.currencyAmount += bet.value;
+            return;
+        }
+        else if (!"winner") {
+            playerObj.currencyAmount -= bet.value;
+            return;
+        }
+    }
+
     function handleHit() {
         response.content = "card";
         game.hit(playerObj.hands[activeHand]);
