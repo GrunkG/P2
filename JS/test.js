@@ -16,5 +16,9 @@ game.player.splitHand(0);
 
 game.updateScreen();
 
-//game.toggleDrawScreen();
+game.player.displayWinHand(0);
+
+game.player.resetResults();
+
+game.toggleBetInput();
 

@@ -27,19 +27,22 @@
                 <div class="player">
                     <span class="player__title">You</span>
                     <div class="player__info">
-                        <span class="player__info--bet">Bet: <span id="player__info--bet"></span></span>
                         <span class="player__info--capital">Capital: <span id="player__info--capital"></span></span>
+                        <span class="player__info--bet">Current Bet: <span id="player__info--bet"></span></span>
                     </div>
-                    <div class="player__card-container" id="player__card-container">
-                        <div id="player__card-container0"></div>
-                        <span class="player__card-sum" id="player__card-sum0">10</span>
+                    <div class="player__card-container" id="player__card-container" style="display: none;">
+                        <div class="player__hand" id="player__hand0">
+                            <div id="player__card-container0"></div>
+                            <span class="player__card-sum" id="player__card-sum0">10</span>
+                            <span class="player__result" id="player__result0"></span>
+                        </div>
                     </div>
                     <form class="player__bet" id="player__bet">
                         <span class="player__bet--amount" id="player__bet--amount"></span>
                         <input class="player__bet--input" id="player__bet--input" type="range" name="bet" min="1" max="100" value="50">
                         <button class="player__bet--submit" type="submit">Place Bet</button>
                     </form>
-                    <div class="player__buttons">
+                    <div class="player__buttons" id="player__buttons" style="display: none;">
                         <button>Hit</button>
                         <button>Hold</button>
                         <button id="button-double" class="inactive">Double</button>

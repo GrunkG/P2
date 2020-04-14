@@ -31,17 +31,22 @@ class Game{
         this.player.printHands();
         this.dealer.printHands();
     }
-    toggleWinScreen(){
+    toggleWinScreen(){ //Outdated - use the one in the player class
         toggleDisplayNone("result", "grid");
         toggleDisplayNone("result__win", "grid");
     }
-    toggleLoseScreen(){
+    toggleLoseScreen(){ //Outdated - use the one in the player class
         toggleDisplayNone("result", "grid");
         toggleDisplayNone("result__lose", "grid");
     }
-    toggleDrawScreen(){
+    toggleDrawScreen(){ //Outdated - use the one in the player class
         toggleDisplayNone("result", "grid");
         toggleDisplayNone("result__draw", "grid");
+    }
+    toggleBetInput(){
+        toggleDisplayNone("player__card-container", "grid");
+        toggleDisplayNone("player__buttons", "flex");
+        toggleDisplayNone("player__bet", "block");
     }
 }
 
