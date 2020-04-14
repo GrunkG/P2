@@ -22,3 +22,5 @@ game.player.resetResults();
 
 game.toggleBetInput();
 
+game.player.setActiveHand(0);
+

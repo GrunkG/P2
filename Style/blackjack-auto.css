@@ -167,6 +167,48 @@
   background-color: rgba(243, 197, 0, 0.5);
 }
 
+.player__hand.active {
+  -webkit-box-sizing: border-box;
+          box-sizing: border-box;
+  overflow: hidden;
+  position: relative;
+  z-index: 4;
+}
+
+.player__hand.active::before {
+  -webkit-box-sizing: border-box;
+          box-sizing: border-box;
+  content: '';
+  position: absolute;
+  z-index: -2;
+  left: -50%;
+  top: -50%;
+  width: 200%;
+  height: 200%;
+  background-color: #399953;
+  background-repeat: no-repeat;
+  background-size: 50% 50%, 50% 50%;
+  background-position: 0 0, 100% 0, 100% 100%, 0 100%;
+  background-image: -webkit-gradient(linear, left top, left bottom, from(#1d34bd), to(#1d34bd)), -webkit-gradient(linear, left top, left bottom, from(#e2e2e2), to(#e2e2e2)), -webkit-gradient(linear, left top, left bottom, from(#1d34bd), to(#1d34bd)), -webkit-gradient(linear, left top, left bottom, from(#e2e2e2), to(#e2e2e2));
+  background-image: linear-gradient(#1d34bd, #1d34bd), linear-gradient(#e2e2e2, #e2e2e2), linear-gradient(#1d34bd, #1d34bd), linear-gradient(#e2e2e2, #e2e2e2);
+  -webkit-animation: rotate 4s linear infinite;
+          animation: rotate 4s linear infinite;
+}
+
+.player__hand.active::after {
+  -webkit-box-sizing: border-box;
+          box-sizing: border-box;
+  content: '';
+  position: absolute;
+  z-index: -1;
+  left: 6px;
+  top: 6px;
+  width: calc(100% - 12px);
+  height: calc(100% - 12px);
+  background: #e2e2e2;
+  border-radius: 5px;
+}
+
 .player__card-sum {
   -ms-grid-row: 2;
   -ms-grid-column: 1;
@@ -424,5 +466,19 @@ button.inactive {
 
 button:focus {
   outline: 0;
+}
+
+@-webkit-keyframes rotate {
+  100% {
+    -webkit-transform: rotate(360deg);
+            transform: rotate(360deg);
+  }
+}
+
+@keyframes rotate {
+  100% {
+    -webkit-transform: rotate(360deg);
+            transform: rotate(360deg);
+  }
 }
 /*# sourceMappingURL=blackjack-auto.css.map */

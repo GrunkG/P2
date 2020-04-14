@@ -66,12 +66,28 @@ class Player{
     }
     //Loops through each hand removing the classes win/lose/draw and the innerHTML of the results container
     resetResults(){
+        this.resetAllHandsClassAttributes();
         for (let i = 0; i < this.hands.length; i++) {
-            let handContainer = document.getElementById(this.id + "__hand" + i.toString());
             let resultContainer = document.getElementById(this.id + "__result" + i.toString());
-            handContainer.setAttribute("class", this.id + "__hand");
             resultContainer.innerHTML = "";         
         }
+    }
+    //Removes all classes but player__hand from a hand
+    resetHandClassAttributes(hand){
+        let handContainer = document.getElementById(this.id + "__hand" + hand.toString());
+        handContainer.setAttribute("class", this.id + "__hand")
+    }
+    //Removes all classes but player__hand from each hand
+    resetAllHandsClassAttributes(){
+        for (let i = 0; i < this.hands.length; i++){
+            this.resetHandClassAttributes(i);
+        }
+    }
+    //Sets the active hand
+    setActiveHand(hand){
+        this.resetAllHandsClassAttributes();
+        let handContainer = document.getElementById(this.id + "__hand" + hand.toString());
+        handContainer.setAttribute("class", this.id + "__hand active")
     }
 }
 

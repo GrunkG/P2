@@ -127,6 +127,40 @@
                 background-color: rgba($draw-color, 0.5);
             }
         }
+        &.active{ //This is a slightly modified version of: https://codepen.io/Chester/pen/QPoyjN
+            box-sizing: border-box;
+            overflow: hidden;
+            position: relative;
+            z-index: 4;
+            &::before {
+                box-sizing: border-box;
+                content: '';
+                position: absolute;
+                z-index: -2;
+                left: -50%;
+                top: -50%;
+                width: 200%;
+                height: 200%;
+                background-color: #399953;
+                background-repeat: no-repeat;
+                background-size: 50% 50%, 50% 50%;
+                background-position: 0 0, 100% 0, 100% 100%, 0 100%;
+                background-image: linear-gradient($main-color, $main-color), linear-gradient(#e2e2e2, #e2e2e2), linear-gradient($main-color, $main-color), linear-gradient(#e2e2e2, #e2e2e2);
+                animation: rotate 4s linear infinite;
+            }
+            &::after {
+                box-sizing: border-box;
+                content: '';
+                position: absolute;
+                z-index: -1;
+                left: 6px;
+                top: 6px;
+                width: calc(100% - 12px);
+                height: calc(100% - 12px);
+                background: #e2e2e2;
+                border-radius: 5px;
+            }
+        }
     }
     &__card-sum{
         grid-area: sum;
@@ -322,4 +356,10 @@ button{
     &:focus{
         outline: 0;
     }
+}
+
+@keyframes rotate {
+	100% {
+		transform: rotate(360deg);
+	}
 }
