@@ -87,7 +87,7 @@ class Player{
     setActiveHand(hand){
         this.resetAllHandsClassAttributes();
         let handContainer = document.getElementById(this.id + "__hand" + hand.toString());
-        handContainer.setAttribute("class", this.id + "__hand active")
+        handContainer.setAttribute("class", this.id + "__hand active");
     }
 }
 

@@ -5,12 +5,12 @@ class Card {
         this.suit = suit;
         this.visible = visible;
     }
-    static get cardSuit(){
-        return ["S", "H", "C", "D"];
-    }
-    static get cardValue(){
-        return ["A", "2", "3", "4", "5", "6", "7", "8", "9", "10", "J", "Q", "K"];
-    }
+    // static get cardSuit(){
+    //     return ["S", "H", "C", "D"];
+    // }
+    // static get cardValue(){
+    //     return ["A", "2", "3", "4", "5", "6", "7", "8", "9", "10", "J", "Q", "K"];
+    // }
 
     //Size = width of card, posX = x position in html, posY = y position
     printCard(htmlLocation, front = "Default", back="default") {
@@ -25,9 +25,9 @@ class Card {
     printCardById(htmlId, front = "Default"){
         this.printCard(document.getElementById(htmlId), front);
     }
-    printCardFaceDown(htmlLocation, back = "default") { //Could be part of printCard
-        let card = document.createElement("img");
-        card.src = `../Resources/Cards/Back/${back}.png`;
-        htmlLocation.appendChild(card);
-    }
+    // printCardFaceDown(htmlLocation, back = "default") { //Could be part of printCard
+    //     let card = document.createElement("img");
+    //     card.src = `../Resources/Cards/Back/${back}.png`;
+    //     htmlLocation.appendChild(card);
+    // }
 }
