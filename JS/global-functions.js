@@ -15,3 +15,11 @@ function toggleDisplayNone(id, display){
 //         document.body.classList.add("form-open");
 //     }
 // }
+
+function writeLoginError(error){
+    document.getElementById("login__container--error").innerHTML = error;
+}
+
+function writeRegisterError(error){
+    document.getElementById("register__container--error").innerHTML = error;
+}
