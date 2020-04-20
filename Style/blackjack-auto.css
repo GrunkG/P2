@@ -539,6 +539,9 @@ button:focus {
     -ms-grid-columns: 1fr;
         grid-template-columns: 1fr;
   }
+  .dealer__title {
+    margin-bottom: 2rem;
+  }
 }
 
 @media only screen and (max-width: 800px) {
