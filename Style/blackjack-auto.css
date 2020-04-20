@@ -1,11 +1,12 @@
 .blackjack-container {
   width: 100%;
   height: 100%;
+  min-height: 100vh;
   background-color: #ececec;
   display: -ms-grid;
   display: grid;
-  -ms-grid-columns: (1fr)[4];
-      grid-template-columns: repeat(4, 1fr);
+  -ms-grid-columns: minmax(0, 1fr) 2fr minmax(0, 1fr);
+      grid-template-columns: minmax(0, 1fr) 2fr minmax(0, 1fr);
   -ms-grid-rows: (min-content)[4];
       grid-template-rows: repeat(4, -webkit-min-content);
       grid-template-rows: repeat(4, min-content);
@@ -80,6 +81,9 @@
   -ms-grid-columns: auto min-content;
       grid-template-columns: auto -webkit-min-content;
       grid-template-columns: auto min-content;
+  height: -webkit-fit-content;
+  height: -moz-fit-content;
+  height: fit-content;
 }
 
 .player__title {
@@ -126,7 +130,7 @@
 }
 
 .player__hand {
-  padding: 20px 20px 10px;
+  padding: 2rem 2rem 1rem;
   border-radius: 10px;
   background-color: #e2e2e2;
   display: -ms-grid;
@@ -138,6 +142,10 @@
   -ms-grid-row: 1;
   -ms-grid-column: 1;
   grid-area: cards;
+}
+
+.player__hand:last-of-type {
+  margin-bottom: 2rem;
 }
 
 .player__hand.win {
@@ -201,8 +209,8 @@
   content: '';
   position: absolute;
   z-index: -1;
-  left: 6px;
-  top: 6px;
+  left: .6rem;
+  top: .6rem;
   width: calc(100% - 12px);
   height: calc(100% - 12px);
   background: #e2e2e2;
@@ -479,6 +487,64 @@ button:focus {
   100% {
     -webkit-transform: rotate(360deg);
             transform: rotate(360deg);
+  }
+}
+
+@media only screen and (max-width: 1500px) {
+  .blackjack-container {
+    -ms-grid-columns: (1fr)[4];
+        grid-template-columns: repeat(4, 1fr);
+  }
+  .blackjack-container .main-game {
+    grid-column: 1 / -1;
+    display: -ms-grid;
+    display: grid;
+    -ms-grid-columns: 1fr 1fr;
+        grid-template-columns: 1fr 1fr;
+    min-height: 0;
+  }
+  .dealer__title {
+    margin-bottom: 9.6rem;
+  }
+  .remote-player:nth-of-type(3), .remote-player:nth-of-type(4) {
+    margin-top: 4rem;
+  }
+  .remote-player:last-of-type {
+    margin-bottom: 2rem;
+  }
+}
+
+@media only screen and (max-width: 1300px) {
+  .blackjack-container {
+    -ms-grid-columns: (1fr)[3];
+        grid-template-columns: repeat(3, 1fr);
+  }
+  .player__hand div img, .dealer__card-container img {
+    height: 13rem;
+  }
+  .player__buttons button {
+    font-size: 2rem;
+  }
+  body {
+    background-color: #ececec;
+  }
+}
+
+@media only screen and (max-width: 1100px) {
+  .blackjack-container {
+    -ms-grid-columns: 1fr 1fr;
+        grid-template-columns: 1fr 1fr;
+  }
+  .blackjack-container .main-game {
+    -ms-grid-columns: 1fr;
+        grid-template-columns: 1fr;
+  }
+}
+
+@media only screen and (max-width: 800px) {
+  .blackjack-container {
+    -ms-grid-columns: 1fr;
+        grid-template-columns: 1fr;
   }
 }
 /*# sourceMappingURL=blackjack-auto.css.map */
