@@ -43,10 +43,6 @@ const webserv = http.createServer((req, res) => {
                 break;
         }
     }
-
-    if (method == "POST") {
-
-    }
 });
 
 webserv.listen(port, ip, () => {
@@ -205,11 +201,13 @@ gameserv.on('request', (req) => {
             game.hit(playerObj.hands[activeHand]);
         }
 
-        response.content = "game created";
+        /* response.content = "game created";
         response.player.cards = playerObj.hands[activeHand].cards;
         response.dealer.cards = game.dealer;
         updateResponsePoints();
-        send(response);
+        send(response); */
+
+        return;
     }
 
     function handleHit() {
@@ -220,10 +218,12 @@ gameserv.on('request', (req) => {
         updateResponsePoints();
         send(response);
 
+        //In case of a bust or blackjack
         if (response.player.points >= 21) {
             handleHold();
         }
 
+        //Next hand
         if (playerObj.hands.length > 1 && activeHand != (playerObj.hands.length -1 ) )
             activeHand++;
         else

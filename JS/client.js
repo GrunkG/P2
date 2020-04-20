@@ -76,6 +76,7 @@ function handleCards(msg) {
         }
 
     }
+
     game.dealer.hands[0] = dealerDeck;
     document.getElementById(dealerSumTarget).innerHTML = dealer.points;
     game.updateScreen();
@@ -162,6 +163,7 @@ function updateHand(hand, index) {
 function gameHandler() {
     //                        ws = websocket
     websocket = new WebSocket('ws://localhost:3000/');
+    
     websocket.onopen = () => {
         websocket.send(JSON.stringify({type: "game", content: "startgame"}));
     }

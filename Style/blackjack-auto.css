@@ -21,7 +21,7 @@
 
 .dealer, .player {
   width: auto;
-  padding: 0 4rem;
+  padding: 0 3rem;
   display: -webkit-box;
   display: -ms-flexbox;
   display: flex;
@@ -38,12 +38,14 @@
   font-size: 5rem;
   font-weight: bold;
   color: #1d34bd;
-  margin-top: 4rem;
+  margin-top: 3rem;
 }
 
 .dealer__card-container, .dealer__card-container div, .player__card-container, .player__card-container div {
-  margin-top: 2rem;
   height: auto;
+  width: -webkit-fit-content;
+  width: -moz-fit-content;
+  width: fit-content;
   display: -ms-grid;
   display: grid;
   grid-auto-flow: column;
@@ -58,41 +60,181 @@
 }
 
 .dealer__card-sum, .player__card-sum {
-  margin-top: 1rem;
   font-size: 3rem;
   font-weight: bold;
 }
 
+.dealer__title {
+  margin-bottom: 2rem;
+}
+
+.dealer__card-sum {
+  margin-top: 1rem;
+}
+
+.player {
+  display: -ms-grid;
+  display: grid;
+  grid-gap: 2rem;
+      grid-template-areas: "title title" "info info" "hands buttons";
+  -ms-grid-columns: auto min-content;
+      grid-template-columns: auto -webkit-min-content;
+      grid-template-columns: auto min-content;
+}
+
+.player__title {
+  -ms-grid-row: 1;
+  -ms-grid-column: 1;
+  -ms-grid-column-span: 2;
+  grid-area: title;
+  text-align: center;
+}
+
 .player__info {
+  -ms-grid-row: 2;
+  -ms-grid-column: 1;
+  -ms-grid-column-span: 2;
+  grid-area: info;
   font-size: 3rem;
   display: -webkit-box;
   display: -ms-flexbox;
   display: flex;
-  width: 80%;
+  width: auto;
+  -webkit-box-pack: center;
+      -ms-flex-pack: center;
+          justify-content: center;
 }
 
 .player__info--capital {
-  margin-left: auto;
+  margin-right: 4rem;
 }
 
 .player__card-container {
-  display: -webkit-box;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-box-orient: vertical;
-  -webkit-box-direction: normal;
-      -ms-flex-direction: column;
-          flex-direction: column;
+  -ms-grid-row: 3;
+  -ms-grid-column: 1;
+  grid-area: hands;
+  display: -ms-grid;
+  display: grid;
+  -ms-grid-row-align: start;
+      align-self: start;
+  grid-gap: 2rem;
+  grid-auto-flow: row;
+  width: 100%;
+  -webkit-box-pack: center;
+      -ms-flex-pack: center;
+          justify-content: center;
+}
+
+.player__hand {
+  padding: 20px 20px 10px;
+  border-radius: 10px;
+  background-color: #e2e2e2;
+  display: -ms-grid;
+  display: grid;
+      grid-template-areas: "cards" "sum";
+}
+
+.player__hand div {
+  -ms-grid-row: 1;
+  -ms-grid-column: 1;
+  grid-area: cards;
+}
+
+.player__hand.win {
+  background-color: #1d34bd;
+  color: #fff;
+}
+
+.player__hand.win .player__result {
+  background-color: rgba(29, 52, 189, 0.5);
+}
+
+.player__hand.lose {
+  background-color: #BF4042;
+  color: #fff;
+}
+
+.player__hand.lose .player__result {
+  background-color: rgba(191, 64, 66, 0.5);
+}
+
+.player__hand.draw {
+  background-color: #f3c500;
+  color: #fff;
+}
+
+.player__hand.draw .player__result {
+  background-color: rgba(243, 197, 0, 0.5);
+}
+
+.player__hand.active {
+  -webkit-box-sizing: border-box;
+          box-sizing: border-box;
+  overflow: hidden;
+  position: relative;
+  z-index: 4;
+}
+
+.player__hand.active::before {
+  -webkit-box-sizing: border-box;
+          box-sizing: border-box;
+  content: '';
+  position: absolute;
+  z-index: -2;
+  left: -50%;
+  top: -50%;
+  width: 200%;
+  height: 200%;
+  background-color: #e2e2e2;
+  background-repeat: no-repeat;
+  background-size: 50% 50%, 50% 50%;
+  background-position: 0 0, 100% 0, 100% 100%, 0 100%;
+  background-image: -webkit-gradient(linear, left top, left bottom, from(#1d34bd), to(#1d34bd)), -webkit-gradient(linear, left top, left bottom, from(#e2e2e2), to(#e2e2e2)), -webkit-gradient(linear, left top, left bottom, from(#1d34bd), to(#1d34bd)), -webkit-gradient(linear, left top, left bottom, from(#e2e2e2), to(#e2e2e2));
+  background-image: linear-gradient(#1d34bd, #1d34bd), linear-gradient(#e2e2e2, #e2e2e2), linear-gradient(#1d34bd, #1d34bd), linear-gradient(#e2e2e2, #e2e2e2);
+  -webkit-animation: rotate 4s linear infinite;
+          animation: rotate 4s linear infinite;
+}
+
+.player__hand.active::after {
+  -webkit-box-sizing: border-box;
+          box-sizing: border-box;
+  content: '';
+  position: absolute;
+  z-index: -1;
+  left: 6px;
+  top: 6px;
+  width: calc(100% - 12px);
+  height: calc(100% - 12px);
+  background: #e2e2e2;
+  border-radius: 5px;
 }
 
 .player__card-sum {
-  -ms-flex-item-align: center;
-      -ms-grid-row-align: center;
-      align-self: center;
+  -ms-grid-row: 2;
+  -ms-grid-column: 1;
+  grid-area: sum;
+  text-align: center;
+}
+
+.player__result {
+  -ms-grid-row: 1;
+  -ms-grid-column: 1;
+  grid-area: cards;
+  font-size: 7rem;
+  font-weight: bold;
+  width: 100%;
+  height: 100%;
+  text-align: center;
+  line-height: 17rem;
 }
 
 .player__bet {
+  -ms-grid-row: 3;
+  grid-row: 3;
+  grid-column: span 2;
   margin-top: 2rem;
+  -ms-grid-column-align: center;
+      justify-self: center;
 }
 
 .player__bet--amount {
@@ -147,12 +289,22 @@
 }
 
 .player__buttons {
+  -ms-grid-row: 3;
+  -ms-grid-column: 2;
+  grid-area: buttons;
   display: -webkit-box;
   display: -ms-flexbox;
   display: flex;
-  -ms-flex-pack: distribute;
-      justify-content: space-around;
-  width: 100%;
+  -webkit-box-orient: vertical;
+  -webkit-box-direction: normal;
+      -ms-flex-direction: column;
+          flex-direction: column;
+  -ms-flex-item-align: start;
+      align-self: start;
+}
+
+.player__buttons button {
+  margin: 0 0 2rem 0;
 }
 
 .remote-player {
@@ -293,7 +445,7 @@ button {
   background-color: #1d34bd;
   border: 0;
   padding: 1rem 3rem;
-  margin: 4rem 0;
+  margin: 1rem 0;
   border-radius: 5rem;
   -webkit-box-shadow: 0 3px 8px rgba(0, 0, 0, 0.2);
           box-shadow: 0 3px 8px rgba(0, 0, 0, 0.2);
@@ -309,9 +461,24 @@ button.inactive {
   background-color: #aaa;
   color: #e2e2e2;
   cursor: default;
+  pointer-events: none;
 }
 
 button:focus {
   outline: 0;
+}
+
+@-webkit-keyframes rotate {
+  100% {
+    -webkit-transform: rotate(360deg);
+            transform: rotate(360deg);
+  }
+}
+
+@keyframes rotate {
+  100% {
+    -webkit-transform: rotate(360deg);
+            transform: rotate(360deg);
+  }
 }
 /*# sourceMappingURL=blackjack-auto.css.map */

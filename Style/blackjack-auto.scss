@@ -22,7 +22,7 @@
 //Shared style for dealer and player
 .dealer, .player{
     width: auto;
-    padding: 0 4rem;
+    padding: 0 3rem;
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -30,11 +30,11 @@
         font-size: 5rem;
         font-weight: bold;
         color: $main-color;
-        margin-top: 4rem;
+        margin-top: 3rem;
     }
     &__card-container, &__card-container div{
-        margin-top: 2rem;
         height: auto;
+        width: fit-content;
         display: grid;
         grid-auto-flow: column;
         grid-gap: 1rem;
@@ -45,31 +45,141 @@
         }
     }
     &__card-sum{
-        margin-top: 1rem;
         font-size: 3rem;
         font-weight: bold;
     }
 }
 
+//Dealer
+.dealer{
+    &__title{
+        margin-bottom: 2rem;
+    }
+    &__card-sum{
+        margin-top: 1rem;
+    }
+}
+
+
 //Player
 .player{
+    display: grid;
+    grid-gap: 2rem;
+    grid-template-areas: 
+        "title title"
+        "info info"
+        "hands buttons";
+    grid-template-columns: auto min-content;
+    &__title{
+        grid-area: title;
+        text-align: center;
+    }
     &__info{
+        grid-area: info;
         font-size: 3rem;
         display: flex;
-        width: 80%;
+        width: auto;
+        justify-content: center;
         &--capital{
-            margin-left: auto;
+            margin-right: 4rem;
         }
     }
     &__card-container{
-        display: flex;
-        flex-direction: column;
+        grid-area: hands;
+        display: grid;
+        align-self: start;
+        grid-gap: 2rem;
+        grid-auto-flow: row;
+        width: 100%;
+        justify-content: center;
+    }
+    &__hand{
+        padding: 20px 20px 10px;
+        //margin-bottom: 2rem;
+        border-radius: 10px;
+        background-color: #e2e2e2;
+        display: grid;
+        grid-template-areas: 
+            "cards"
+            "sum";
+        div{
+            grid-area: cards;
+
+        }
+        &.win{
+            background-color: $main-color;
+            color: #fff;
+            .player__result{
+                background-color: rgba($main-color, 0.5);
+            }
+        }
+        &.lose{
+            background-color: $lose-color;
+            color: #fff;
+            .player__result{
+                background-color: rgba($lose-color, 0.5);
+            }
+        }
+        &.draw{
+            background-color: $draw-color;
+            color: #fff;
+            .player__result{
+                background-color: rgba($draw-color, 0.5);
+            }
+        }
+        &.active{ //This is a slightly modified version of: https://codepen.io/Chester/pen/QPoyjN
+            box-sizing: border-box;
+            overflow: hidden;
+            position: relative;
+            z-index: 4;
+            &::before {
+                box-sizing: border-box;
+                content: '';
+                position: absolute;
+                z-index: -2;
+                left: -50%;
+                top: -50%;
+                width: 200%;
+                height: 200%;
+                background-color: #e2e2e2;
+                background-repeat: no-repeat;
+                background-size: 50% 50%, 50% 50%;
+                background-position: 0 0, 100% 0, 100% 100%, 0 100%;
+                background-image: linear-gradient($main-color, $main-color), linear-gradient(#e2e2e2, #e2e2e2), linear-gradient($main-color, $main-color), linear-gradient(#e2e2e2, #e2e2e2);
+                animation: rotate 4s linear infinite;
+            }
+            &::after {
+                box-sizing: border-box;
+                content: '';
+                position: absolute;
+                z-index: -1;
+                left: 6px;
+                top: 6px;
+                width: calc(100% - 12px);
+                height: calc(100% - 12px);
+                background: #e2e2e2;
+                border-radius: 5px;
+            }
+        }
     }
     &__card-sum{
-        align-self: center;
+        grid-area: sum;
+        text-align: center;
+    }
+    &__result{
+        grid-area: cards;
+        font-size: 7rem;
+        font-weight: bold;
+        width: 100%;
+        height: 100%;
+        text-align: center;
+        line-height: 17rem;
     }
     &__bet{
+        grid-row: 3;
+        grid-column: span 2;
         margin-top: 2rem;
+        justify-self: center;
         &--amount{
             font-size: 4rem;
             font-weight: bold;
@@ -113,9 +223,13 @@
     }
 
     &__buttons{
+        grid-area: buttons;
         display: flex;
-        justify-content: space-around;
-        width: 100%;
+        flex-direction: column;
+        align-self: start;
+        button{
+            margin: 0 0 2rem 0;
+        }
     }
 }
 
@@ -194,10 +308,10 @@
         background-color: $main-color;
     }
     &__lose{
-        background-color: #BF4042;
+        background-color: $lose-color;
     }
     &__draw{
-        background-color: #f3c500;
+        background-color: $draw-color;
     }
     button{
         background-color: #fff;
@@ -225,7 +339,7 @@ button{
     background-color: $main-color;
     border: 0;
     padding: 1rem 3rem;
-    margin: 4rem 0;
+    margin: 1rem 0;
     border-radius: 5rem;
     box-shadow: 0 3px 8px rgba(0,0,0,0.2);
     font-family: Montserrat;
@@ -237,8 +351,15 @@ button{
         background-color: #aaa;
         color: #e2e2e2;
         cursor: default;
+        pointer-events: none;
     }
     &:focus{
         outline: 0;
     }
+}
+
+@keyframes rotate {
+	100% {
+		transform: rotate(360deg);
+	}
 }

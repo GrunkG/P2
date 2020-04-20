@@ -8,7 +8,7 @@ const values = ["2", "3", "4", "5", "6", "7", "8", "9", "10", "J", "Q", "K", "A"
     Cards Class, handles general card game elements.
     Should for the most part function as an abstract class.
 */
-class Cards {
+class Cards { //Rename
     constructor() {
         this.players = [];  //Contains all player objects active in the current game.
         this.dealer = [];   //Contains all dealer cards
@@ -67,7 +67,7 @@ class Cards {
         // While there remain elements to shuffle…
         while (m) {
             // Pick a remaining element…
-            i = Math.floor(Math.random() * m--);
+            i = Math.floor(Math.random() * m--); //Math.random outputs a number from 0 to less than 1
         
             // And swap it with the current element.
             t = this.deck[m];

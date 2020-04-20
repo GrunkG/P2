@@ -8,10 +8,10 @@ function toggleDisplayNone(id, display){
     }
 }
 
-function toggleBodyFormOpen(){
-    if (document.body.classList.contains("form-open")) {
-        document.body.classList.remove("form-open");
-    } else {
-        document.body.classList.add("form-open");
-    }
-}
+// function toggleBodyFormOpen(){
+//     if (document.body.classList.contains("form-open")) {
+//         document.body.classList.remove("form-open");
+//     } else {
+//         document.body.classList.add("form-open");
+//     }
+// }
