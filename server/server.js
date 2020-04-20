@@ -1,17 +1,24 @@
 const http = require('http');
 const webtools = require('./modules/httptools');
+const sqltools = require('./modules/sqltools');
 
 const socket = require('websocket');
 const mysql = require('mysql'); // Not in use yet
 const cardgame = require('./modules/cards_foundation');
 const bjackGame = require('./modules/blackjack');
 
-let sql = { // Not in use yet
-    host: "localhost",
-    user: "username",
-    pass: "password",
-    db:   "database"
-};
+let sql = mysql.createConnection({ // Not in use yet
+    host: "vps269131.vps.ovh.ca",
+    user: "p2bois",
+    password: "Yc5dRx85dm",
+    database:   "P2"
+});
+
+sql.connect((err) => {
+    if (err) { throw err } else {
+        console.log("Connected to database successfully.");
+    };
+});
 
 let port = 3000,
     ip = "127.0.0.1",
@@ -32,16 +39,86 @@ let activeGames = [];
 
 //########  Webserver
 const webserv = http.createServer((req, res) => {
-    let method = req.method;
+    let method = req.method,
+        url = req.url;
+    
+    //Handle GET requests
     if (method == "GET") {
-        switch(req.url) {
+
+        //Adapt url in-case of a login/registration -- Find way to determine registration or login
+        if (req.url.indexOf("/?") == 0)
+            url = "loginSystem";
+
+        switch(url) {
             case "/":
                 webtools.fileResponse(defaultHTML, pathPublic, res)
+                break;
+            case "loginSystem": //--- Determine login or registration
+                let input = req.url.split("=");
+                let username = input[1].split("&")[0];
+                let password = input[2];
+                loginUser(username, password);
+                //registerUser(username, password);
                 break;
             default:
                 webtools.fileResponse(req.url, pathPublic, res)
                 break;
         }
+    } else {
+        console.log(`Method: ${req.method}, url: ${req.url}`);
+    }
+
+
+    async function registerUser(username, password) {
+        //Check for username
+        sql.query(`SELECT username FROM account WHERE username='${username}'`, (error, result, fields) => {
+            if (error) {
+                throw error;
+            } else {
+                if (result.length > 0) {
+                    //Notify user, user already exists
+                } else {
+                    //Check password isn't empty.
+                    if (password.length > 0) {
+                        //Register user
+                        sql.query(`INSERT INTO account (username, password) VALUES ('${username}', '${password}')`);
+                    }
+
+                    //Throw error, user had empty password
+                }
+            }
+            
+        });
+    }
+
+    async function loginUser(username, password) {
+        sql.query(`SELECT username, password FROM account WHERE username='${username}' AND password='${password}'`, (error, result, fields) => {
+            if (error) {
+                throw error;
+            } else {
+                if (password.length == 0) {
+                    //Notify user, error password empty
+                } else {
+
+                    if (result.length > 0) {
+                        //Login user
+                        console.log("Successful login");
+                        webtools.fileResponse(defaultHTML, pathPublic, res)
+
+                        /*Update user with relevant info
+                            - Currency
+                            - Secret
+                                - Random string -> generate on login                   
+                        */
+
+                    } else {
+                        //User doesn't exist or password is wrong
+                    }
+                    //Throw error, user had empty password
+                }
+            }
+            
+        });
     }
 });
 

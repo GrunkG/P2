@@ -29,6 +29,18 @@ class sqltools {
             });
         });
     }
+
+    doQuerySimple(command) {
+        let sql = this.makeConnection();
+        sql.connect((err) => {
+            if (err) throw err;
+            console.log("Connected to database successfully.");
+            sql.query(command, (err, result) => {
+                if (err) throw err;
+                return result;
+            });
+        });
+    }
 }
 
 module.exports = sqltools;
