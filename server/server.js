@@ -4,17 +4,13 @@ const sqltools = require('./modules/sqltools');
 
 const socket = require('websocket');
 const mysql = require('mysql'); // Not in use yet
+const dbConfig = require('./dbConfig.js')
 const cardgame = require('./modules/cards_foundation');
 const bjackGame = require('./modules/blackjack');
 
-let sql = mysql.createConnection({ // Not in use yet
-    host: "vps269131.vps.ovh.ca",
-    user: "p2bois",
-    password: "Yc5dRx85dm",
-    database:   "P2"
-});
+let connection = mysql.createConnection(dbConfig);
 
-sql.connect((err) => {
+connection.connect((err) => {
     if (err) { throw err } else {
         console.log("Connected to database successfully.");
     };
@@ -71,55 +67,46 @@ const webserv = http.createServer((req, res) => {
 
     async function registerUser(username, password) {
         //Check for username
-        sql.query(`SELECT username FROM account WHERE username='${username}'`, (error, result, fields) => {
+        connection.query(`SELECT username FROM account WHERE username='${username}'`, (error, result, fields) => {
             if (error) {
                 throw error;
-            } else {
-                if (result.length > 0) {
+            } else if (result.length > 0) {
                     //Notify user, user already exists
-                } else {
-                    //Check password isn't empty.
-                    if (password.length > 0) {
-                        //Register user
-                        sql.query(`INSERT INTO account (username, password) VALUES ('${username}', '${password}')`);
-                    }
-
-                    //Throw error, user had empty password
+            } else {
+                //Check password isn't empty.
+                if (password.length > 0) {
+                    //Register user
+                    connection.query(`INSERT INTO account (username, password) VALUES ('${username}', '${password}')`);
                 }
+
+                //Throw error, user had empty password
             }
-            
         });
     }
 
     async function loginUser(username, password) {
-        sql.query(`SELECT username, password FROM account WHERE username='${username}' AND password='${password}'`, (error, result, fields) => {
+        connection.query(`SELECT username, password FROM account WHERE username='${username}' AND password='${password}'`, (error, result, fields) => {
             if (error) {
                 throw error;
-            } else {
-                if (password.length == 0) {
+            } else if (password.length == 0) {
                     //Notify user, error password empty
-                } else {
+            } else if (result.length > 0) {
+                //Login user
+                console.log("Successful login");
+                webtools.fileResponse(defaultHTML, pathPublic, res)
 
-                    if (result.length > 0) {
-                        //Login user
-                        console.log("Successful login");
-                        webtools.fileResponse(defaultHTML, pathPublic, res)
-
-                        /*Update user with relevant info
-                            - Currency
-                            - Secret
-                                - Random string -> generate on login                   
-                        */
-
-                    } else {
-                        //User doesn't exist or password is wrong
-                    }
-                    //Throw error, user had empty password
-                }
+                /*Update user with relevant info
+                    - Currency
+                    - Secret
+                        - Random string -> generate on login                   
+                */
+            } else {
+                //User doesn't exist or password is wrong
             }
-            
+            //Throw error, user had empty password
         });
     }
+
 });
 
 webserv.listen(port, ip, () => {
