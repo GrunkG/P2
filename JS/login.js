@@ -28,6 +28,12 @@ function login(){
     toggleLogout();
 }
 
+function register(){
+    //Check if username exists
+    //Register the user
+    toggleRegister();
+}
+
 function logout(){
     //Log out the player
     //Hide log out button and show log in button
