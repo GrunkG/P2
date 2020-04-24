@@ -4,10 +4,11 @@
 .blackjack-container{
     width: 100%;
     height: 100%;
+    min-height: 100vh;
     background-color: #ececec;
 
     display: grid;
-    grid-template-columns: repeat(4, 1fr);
+    grid-template-columns: minmax(0, 1fr) 2fr minmax(0, 1fr);
     grid-template-rows: repeat(4, min-content);
     grid-auto-flow: row;
     
@@ -70,6 +71,7 @@
         "info info"
         "hands buttons";
     grid-template-columns: auto min-content;
+    height: fit-content;
     &__title{
         grid-area: title;
         text-align: center;
@@ -94,7 +96,7 @@
         justify-content: center;
     }
     &__hand{
-        padding: 20px 20px 10px;
+        padding: 2rem 2rem 1rem;
         //margin-bottom: 2rem;
         border-radius: 10px;
         background-color: #e2e2e2;
@@ -104,7 +106,9 @@
             "sum";
         div{
             grid-area: cards;
-
+        }
+        &:last-of-type{
+            margin-bottom: 2rem;
         }
         &.win{
             background-color: $main-color;
@@ -153,8 +157,8 @@
                 content: '';
                 position: absolute;
                 z-index: -1;
-                left: 6px;
-                top: 6px;
+                left: .6rem;
+                top: .6rem;
                 width: calc(100% - 12px);
                 height: calc(100% - 12px);
                 background: #e2e2e2;
@@ -362,4 +366,64 @@ button{
 	100% {
 		transform: rotate(360deg);
 	}
+}
+
+@media only screen and (max-width: 1500px){
+    .blackjack-container{
+        grid-template-columns: repeat(4, 1fr);
+        .main-game{
+            grid-column: 1 / -1;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            min-height: 0;
+        }
+    }
+    .dealer{
+        &__title{
+            margin-bottom: 2rem + 3rem + 2rem + 2rem + .6rem;
+        }
+    }
+    .remote-player{
+        &:nth-of-type(3), &:nth-of-type(4){
+            margin-top: 4rem;
+        }
+        &:last-of-type{
+            margin-bottom: 2rem;
+        }
+    }
+}
+
+@media only screen and (max-width: 1300px){
+    .blackjack-container{
+        grid-template-columns: repeat(3, 1fr);
+    }
+    .player__hand div img, .dealer__card-container img{
+        height: 13rem;
+    }
+    .player__buttons button{
+        font-size: 2rem;
+    }
+    body{
+        background-color: #ececec;
+    }
+}
+
+@media only screen and (max-width: 1100px){
+    .blackjack-container{
+        grid-template-columns: 1fr 1fr;
+        .main-game{
+            grid-template-columns: 1fr;
+        }
+    }
+    .dealer{
+        &__title{
+            margin-bottom: 2rem;
+        }
+    }
+}
+
+@media only screen and (max-width: 800px){
+    .blackjack-container{
+        grid-template-columns: 1fr;
+    }
 }

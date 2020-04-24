@@ -49,6 +49,11 @@
             font-size: 5rem;
             color: $main-color;
         }
+        &--error{
+            color: red;
+            margin: 0 5rem;
+            font-size: 1.6rem;
+        }
         &--form{
             margin: 0 5rem;
             display: flex;

@@ -59,6 +59,12 @@
   color: #1d34bd;
 }
 
+.login__container--error, .register__container--error {
+  color: red;
+  margin: 0 5rem;
+  font-size: 1.6rem;
+}
+
 .login__container--form, .register__container--form {
   margin: 0 5rem;
   display: -webkit-box;
