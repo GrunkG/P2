@@ -3,7 +3,8 @@ const webtools = require('./modules/httptools');
 const sqltools = require('./modules/sqltools');
 
 const socket = require('websocket');
-const mysql = require('mysql'); // Not in use yet
+const mysql = require('mysql');
+
 const dbConfig = require('./dbConfig.js')
 const cardgame = require('./modules/cards_foundation');
 const bjackGame = require('./modules/blackjack');

@@ -57,6 +57,7 @@
   margin-top: 4rem;
   font-size: 5rem;
   color: #1d34bd;
+  text-align: center;
 }
 
 .login__container--error, .register__container--error {

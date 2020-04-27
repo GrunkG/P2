@@ -4,28 +4,30 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <link rel="stylesheet" type="text/css" href="../Style/style.css">
+    <link rel="stylesheet" type="text/css" href="../Style/login-form-auto.css">
     <link rel="stylesheet" type="text/css" href="../Style/style-auto.css">
-    <title>P2 projektet</title>
+    <title>Login</title>
 </head>
 <body>
-    <h1>Velkommen</h1>
-    
-    <div class="loginbox">
-        <h1>Login Her</h1>
-        <form>
-            <p>Username</p>
-            <input type="text" name="" placeholder="Enter Username">
-            <p>Password</p>
-            <input type="password" name="" placeholder="Enter Password">
-            <input type="submit" name="" value="Log in">
-            <a href="./forgottenpassword.html">Glemt dit Password?</a><br>
-            <a href="./newaccount.html">Har du ikke en konto?</a>
-        </form>
-    </div>
+    <div class="login" id="login">
+        <div class="login__container">
+            <!-- <a class="login__container--close" href="#"></a> -->
+            <h1 class="login__container--title">Login</h1>
+            <p class="login__container--error" id="login__container--error"></p>
+            <form class="login__container--form" action="login" method="POST">
 
+                <label for="username">Username</label>
+                <input type="text" name="username" id="username" required="required">
+
+                <label for="password">Password</label>
+                <input type="password" name="password" id="password" required="required">
+
+                <a class="login__container--form-forgot" href="#">Forgot password?</a>
+
+                <input type="submit" value="Login">
+                <a class="login__container--form-register" href="register.html">New user?<span>REGISTER</span></a>
+            </form>
+        </div>
+    </div>
 </body>
-<script src="../JS/Classes/class-cards.js"></script>
-<script src="../JS/Classes/class-deck.js"></script>
-<script src="../JS/test.js"></script>
 </html>
