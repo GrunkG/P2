@@ -6,14 +6,19 @@
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <link rel="stylesheet" type="text/css" href="../Style/style.css">
     <link rel="stylesheet" type="text/css" href="../Style/style-auto.css">
+    <script src="../JS/Classes/class-cards.js"></script>
+    <script src="../JS/Classes/class-deck.js"></script>
+    <script src="../JS/Classes/class-game.js"></script>
+    <script src="../JS/Classes/class-player.js"></script>
+    <script src="../JS/client.js"></script>
     <link rel="stylesheet" type="text/css" href="../Style/login-form-auto.css">
     <link rel="stylesheet" type="text/css" href="../Style/blackjack-auto.css">
     <title>P2 projektet</title>
 </head>
 <body>
     <header>
-        <a href="#" onclick="toggleLogin();" class="login-logout-button" id="login-button">Log in</a>
-        <a href="#" onclick="logout();" class="login-logout-button" id="logout-button" style="display: none;">Log out</a>
+        <a href="#" onclick="toggleLogin()" class="login-logout-button" id="login-button">Log in</a>
+        <a href="#" onclick="logout()" class="login-logout-button" id="logout-button" style="display: none;">Log out</a>
     </header>
     <main>
         <div class="blackjack-container" id="blackjack-container">
@@ -40,14 +45,14 @@
                     <form class="player__bet" id="player__bet">
                         <span class="player__bet--amount" id="player__bet--amount"></span>
                         <input class="player__bet--input" id="player__bet--input" type="range" name="bet" min="1" max="100" value="50">
-                        <button class="player__bet--submit" type="submit">Place Bet</button>
+                        <button class="player__bet--submit" onclick="doBet()">Place Bet</button>
                     </form>
                     <div class="player__buttons" id="player__buttons" style="display: none;">
-                        <button>Hit</button>
-                        <button>Hold</button>
-                        <button id="button-double">Double</button>
-                        <button id="button-split">Split</button>
-                        <button id="button-insurance">Insurance</button>
+                        <button onclick="doHit()">Hit</button>
+                        <button onclick="doHold()">Hold</button>
+                        <button id="button-double" onclick="doDouble()">Double</button>
+                        <button id="button-split" onclick="doSplit()">Split</button>
+                        <button id="button-insurance" onclick="doInsure()">Insurance</button>
                     </div>
                 </div>
             </div>
@@ -55,17 +60,17 @@
             <div class="result" id="result" style="display: none;">
                 <div class="result__win" id="result__win" style="display: none;">
                     <span>You Win</span>
-                    <button>Play Again</button>
+                    <button onclick="doNewGame(this)">Play Again</button>
                     <button>Log out</button>
                 </div>
                 <div class="result__lose" id="result__lose" style="display: none;">
                     <span>You Lose</span>
-                    <button>Play Again</button>
+                    <button onclick="doNewGame(this)">Play Again</button>
                     <button>Log out</button>
                 </div>
                 <div class="result__draw" id="result__draw" style="display: none;">
                     <span>Draw</span>
-                    <button>Play Again</button>
+                    <button onclick="doNewGame(this)">Play Again</button>
                     <button>Log out</button>
                 </div>
             </div>
@@ -87,8 +92,8 @@
 
                 <a class="login__container--form-forgot" href="#">Forgot password?</a>
 
-                <input type="submit" value="Login" onclick="login();">
-                <a class="login__container--form-register" href="#" onclick="hideLoginShowRegister();">New user?<span>REGISTER</span></a>
+                <input type="submit" value="Login" onclick="login()">
+                <a class="login__container--form-register" href="#" onclick="hideLoginShowRegister()">New user?<span>REGISTER</span></a>
             </form>
         </div>
     </div>
@@ -106,17 +111,17 @@
                 <label for="password">Password</label>
                 <input type="password" name="password" id="register__password" required="required">
 
-                <input type="submit" value="Register" onclick="toggleRegister();">
+                <input type="submit" value="Register" onclick="doregister()">
             </form>
         </div>
     </div>
 </body>
 <script src="../JS/global-functions.js"></script>
-<script src="../JS/Classes/class-cards.js"></script>
+<!-- <script src="../JS/Classes/class-cards.js"></script>
 <script src="../JS/Classes/class-deck.js"></script>
 <script src="../JS/Classes/class-player.js"></script>
 <script src="../JS/Classes/class-game.js"></script>
-<script src="../JS/bet-slider.js"></script>
+<script src="../JS/bet-slider.js"></script> -->
 <script src="../JS/login.js"></script>
-<script src="../JS/test.js"></script>
+<!-- <script src="../JS/test.js"></script> -->
 </html>
