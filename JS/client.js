@@ -225,6 +225,10 @@ function doBet() {
     websocket.send(JSON.stringify({type: "game", content: "bet", amount: value}));
 }
 
+function doregister(){
+    websocket.send(JSON.stringify({content:"register"}));
+}
+
 function doNewGame(grid_element) {
     let id = grid_element.parentElement.id;
     
