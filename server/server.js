@@ -3,8 +3,7 @@ const webtools = require('./modules/httptools');
 const sqltools = require('./modules/sqltools');
 
 const socket = require('websocket');
-const mysql = require('mysql');
-
+const mysql = require('mysql'); // Not in use yet
 const dbConfig = require('./dbConfig.js')
 const cardgame = require('./modules/cards_foundation');
 const bjackGame = require('./modules/blackjack');
@@ -67,8 +66,9 @@ const webserv = http.createServer((req, res) => {
 
 
     async function registerUser(username, password) {
+        console.log("i fucknig hate this stupid ass nigga bitch group");
         //Check for username
-        connection.query(`SELECT username FROM account WHERE username='${username}'`, (error, result, fields) => {
+       /* connection.query(`SELECT username FROM account WHERE username='${username}'`, (error, result, fields) => {
             if (error) {
                 throw error;
             } else if (result.length > 0) {
@@ -82,7 +82,7 @@ const webserv = http.createServer((req, res) => {
 
                 //Throw error, user had empty password
             }
-        });
+        }); */
     }
 
     async function loginUser(username, password) {
@@ -167,6 +167,19 @@ gameserv.on('request', (req) => {
         //Remove player from its active game
         //Destroy player
     });
+
+
+    function userhandler(message) {
+        switch(message.content) {
+            case "register":
+                registerUser();
+                break;
+            case "login":
+                loginUser();
+                break;
+            default:  break;
+            }
+        }
 
     //Handles all the blackjack game logic
     function gamehandler(message) {

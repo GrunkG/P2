@@ -17,8 +17,8 @@
 </head>
 <body>
     <header>
-        <a href="login.html" onclick="toggleLogin();" class="login-logout-button" id="login-button">Log in</a>
-        <a href="#" onclick="logout();" class="login-logout-button" id="logout-button" style="display: none;">Log out</a>
+        <a href="#" onclick="toggleLogin()" class="login-logout-button" id="login-button">Log in</a>
+        <a href="#" onclick="logout()" class="login-logout-button" id="logout-button" style="display: none;">Log out</a>
     </header>
     <main>
         <div class="blackjack-container" id="blackjack-container">
@@ -76,13 +76,52 @@
             </div>
         </div>
     </main>
+
+    <div class="login" id="login" style="display: none;">
+        <div class="login__container">
+            <a class="login__container--close hide" href="#"></a>
+            <h1 class="login__container--title">Login</h1>
+            <p class="login__container--error" id="login__container--error"></p>
+            <form class="login__container--form display-none" action="" method="">
+
+                <label for="username">Username</label>
+                <input type="text" name="username" id="username" required="required">
+
+                <label for="password">Password</label>
+                <input type="password" name="password" id="password" required="required">
+
+                <a class="login__container--form-forgot" href="#">Forgot password?</a>
+
+                <input type="submit" value="Login" onclick="login()">
+                <a class="login__container--form-register" href="#" onclick="hideLoginShowRegister()">New user?<span>REGISTER</span></a>
+            </form>
+        </div>
+    </div>
+
+    <div class="register" id="register" style="display: none;">
+        <div class="register__container">
+            <a class="register__container--close hide" href="#"></a>
+            <h1 class="register__container--title">Register</h1>
+            <p class="register__container--error" id="register__container--error"></p>
+            <form class="login__container--form display-none" action="" method="">
+
+                <label for="username">Username</label>
+                <input type="text" name="username" id="register__username" required="required">
+
+                <label for="password">Password</label>
+                <input type="password" name="password" id="register__password" required="required">
+
+                <input type="submit" value="Register" onclick="doregister()">
+            </form>
+        </div>
+    </div>
 </body>
 <script src="../JS/global-functions.js"></script>
 <!-- <script src="../JS/Classes/class-cards.js"></script>
 <script src="../JS/Classes/class-deck.js"></script>
 <script src="../JS/Classes/class-player.js"></script>
-<script src="../JS/Classes/class-game.js"></script> -->
-<script src="../JS/bet-slider.js"></script>
+<script src="../JS/Classes/class-game.js"></script>
+<script src="../JS/bet-slider.js"></script> -->
 <script src="../JS/login.js"></script>
 <!-- <script src="../JS/test.js"></script> -->
 </html>
