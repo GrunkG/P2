@@ -17,8 +17,9 @@
 </head>
 <body>
     <header>
-        <a href="login.html" onclick="toggleLogin();" class="login-logout-button" id="login-button">Log in</a>
-        <a href="#" onclick="logout();" class="login-logout-button" id="logout-button" style="display: none;">Log out</a>
+        <form action="/logout?_method=DELETE" method="POST">
+            <button type="submit" class="login-logout-button">Log out</button>
+        </form>
     </header>
     <main>
         <div class="blackjack-container" id="blackjack-container">
