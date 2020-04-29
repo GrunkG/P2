@@ -406,6 +406,7 @@
       "resolved": "https://registry.npmjs.org/setprototypeof/-/setprototypeof-1.1.1.tgz",
       "version": "1.1.1"
     },
+    "socket.io": "^2.3.0",
     "sqlstring": {
       "integrity": "sha1-R1OT/56RR5rqYtyvDKPRSYOn+0A=",
       "resolved": "https://registry.npmjs.org/sqlstring/-/sqlstring-2.3.1.tgz",
@@ -471,18 +472,7 @@
       "resolved": "https://registry.npmjs.org/vary/-/vary-1.1.2.tgz",
       "version": "1.1.2"
     },
-    "websocket": {
-      "integrity": "sha512-VAouplvGKPiKFDTeCCO65vYHsyay8DqoBSlzIO3fayrfOgU94lQN5a1uWVnFrMLceTJw/+fQXR5PGbUVRaHshQ==",
-      "requires": {
-        "debug": "^2.2.0",
-        "es5-ext": "^0.10.50",
-        "nan": "^2.14.0",
-        "typedarray-to-buffer": "^3.1.5",
-        "yaeti": "^0.0.6"
-      },
-      "resolved": "https://registry.npmjs.org/websocket/-/websocket-1.0.31.tgz",
-      "version": "1.0.31"
-    },
+    "websocket": "^1.0.31",
     "yaeti": {
       "integrity": "sha1-8m9ITXJoTPQr7ft2lwqhYI+/lXc=",
       "resolved": "https://registry.npmjs.org/yaeti/-/yaeti-0.0.6.tgz",

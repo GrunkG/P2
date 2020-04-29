@@ -12,12 +12,13 @@
 .login__container, .register__container {
   place-self: center;
   width: 50rem;
-  height: 60rem;
+  height: auto;
   background-color: #f0f0f0;
   -webkit-box-shadow: 0 3px 8px rgba(0, 0, 0, 0.08);
           box-shadow: 0 3px 8px rgba(0, 0, 0, 0.08);
   border-radius: 1rem;
   position: relative;
+  padding-bottom: 3rem;
 }
 
 .login__container--close, .register__container--close {
@@ -162,10 +163,6 @@
 
 .login__container--form-register span:hover, .register__container--form-register span:hover {
   text-decoration: underline;
-}
-
-.register__container {
-  height: 50rem;
 }
 
 .hide {
