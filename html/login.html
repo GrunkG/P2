@@ -6,6 +6,8 @@
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <link rel="stylesheet" type="text/css" href="../Style/login-form-auto.css">
     <link rel="stylesheet" type="text/css" href="../Style/style-auto.css">
+    <script src="../JS/common.js"></script>
+    <script src="../JS/login.js"></script>
     <title>Login</title>
 </head>
 <body>
@@ -14,7 +16,7 @@
             <!-- <a class="login__container--close" href="#"></a> -->
             <h1 class="login__container--title">Login</h1>
             <p class="login__container--error" id="login__container--error"></p>
-            <form class="login__container--form" action="login" method="POST">
+            <form class="login__container--form" action method>
 
                 <label for="username">Username</label>
                 <input type="text" name="username" id="username" required="required">
@@ -24,7 +26,7 @@
 
                 <a class="login__container--form-forgot" href="#">Forgot password?</a>
 
-                <input type="submit" value="Login">
+                <input type="button" onclick="login()" value="Login">
                 <a class="login__container--form-register" href="register.html">New user?<span>REGISTER</span></a>
             </form>
         </div>
