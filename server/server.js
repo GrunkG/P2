@@ -235,20 +235,19 @@ gameserv.on('request', (req) => {
         }
 
         async function loginUser(username, password) {
-           let test = sqlconnection.query(`SELECT currency, ID FROM account WHERE username='${username}' AND password='${password}'`, (error, result, fields) => {
+            let temp_currency = 0;
+            let test = sqlconnection.query(`SELECT currency, ID FROM account WHERE username='${username}' AND password='${password}'`, (error, result, fields) => {
                 if (error) {
                     throw error;
                 } else if (password.length == 0) {
                         //Notify user, error password empty
                         send({type: "login", state: "zeropassword"});
                 } else if (result.length > 0) {
-                    let testo = Object.assign({}, result[0])
-                    console.log(testo);
                     //Login user
                     console.log("Successful login");
                     //console.log(`Results: ${JSON.stringify(result)} :: fields: ${JSON.stringify(fields)}`);
                     send({type: "login", state: "success", currency: result[0].currency});
-                    currency = testo.currency;
+                    temp_currency = testo.currency;
                     userID = testo.ID;
                     console.log("#0:::currency:" + currency + ", ID: " + userID);
                 } else {
@@ -258,7 +257,8 @@ gameserv.on('request', (req) => {
                 //Throw error, user had empty password
             });
             
-            
+            currency = temp_currency;
+            console.log("#1:::currency:" + currency + ", ID: " + userID);
         }
     
     

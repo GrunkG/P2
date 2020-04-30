@@ -31,5 +31,3 @@ class Card {
     //     htmlLocation.appendChild(card);
     // }
 }
-
-module.exports = Card;

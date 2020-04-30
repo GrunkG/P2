@@ -1,5 +1,4 @@
 //Needs cards class -- Use this class to store player decks
-const Card = require("./class-cards.js");
 
 class Deck{
     constructor(cards){
@@ -46,5 +45,3 @@ class Deck{
     //     return shuffledDeck;
     // }
 }
-
-module.exports = Deck;

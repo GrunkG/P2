@@ -1,4 +1,3 @@
-const Deck = require("./class-deck.js");
 
 class Player{
     constructor(id, hands = [new Deck([])], cardFront = "Default", cardBack = "default") { //Hands is an array of card arrays
@@ -138,5 +137,3 @@ class RemotePlayer extends Player{
         this.printHand(index);
     }
 }
-
-module.exports = Player;
