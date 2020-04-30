@@ -37,7 +37,7 @@ function initialize(passport){
 }
 
 //Handles the registration process
-const registerUser = function(request, username, password, done) {
+const registerUser = function (request, username, password, done) {
     connection.query("SELECT * FROM account WHERE username = ? ", [username], (error, rows) => {
         if (error) {
             return done(error);
@@ -61,7 +61,7 @@ const registerUser = function(request, username, password, done) {
 }
 
 //Handles the login process
-const loginUser = function loginUser(request, username, password, done) {
+const loginUser = function (request, username, password, done) {
     connection.query("SELECT * FROM account WHERE username = ? ", [username], (error, rows) => {
         if (error) {
             return done(error);

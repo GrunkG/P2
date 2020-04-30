@@ -8,9 +8,9 @@ const dbConfig = require('./dbConfig.js')
 const cardgame = require('./modules/cards_foundation');
 const bjackGame = require('./modules/blackjack');
 
-let connection = mysql.createConnection(dbConfig);
+let sqlconnection = mysql.createConnection(dbConfig);
 
-connection.connect((err) => {
+sqlconnection.connect((err) => {
     if (err) { throw err } else {
         console.log("Connected to database successfully.");
     };
@@ -49,26 +49,49 @@ const webserv = http.createServer((req, res) => {
             case "/":
                 webtools.fileResponse(defaultHTML, pathPublic, res)
                 break;
-            case "loginSystem": //--- Determine login or registration
+            /* case "loginSystem": //--- Determine login or registration
                 let input = req.url.split("=");
                 let username = input[1].split("&")[0];
                 let password = input[2];
                 loginUser(username, password);
                 //registerUser(username, password);
-                break;
+                break; */
             default:
                 webtools.fileResponse(req.url, pathPublic, res)
                 break;
         }
+    } else if (method == "POST") {
+      /*   let data = [];
+        req.on('data', (chunk) => {
+            data.push(chunk);
+        }).on('end', () => {
+            data = Buffer.concat(data).toString();
+            console.log("url: " + req.url + ": " + data);
+
+            let username = data.split("&")[0].split("=")[1];
+            let password = data.split("&")[1].split("=")[1];
+
+            switch(req.url) {
+                case "/html/login":
+                    loginUser(username, password);
+                    break;
+                case "/html/register":
+                    registerUser(username, password);
+                    break;
+                default: break;
+            }
+
+            // res.statusCode = 200;
+            // res.end('\n'); //response is empty 
+        });*/
     } else {
         console.log(`Method: ${req.method}, url: ${req.url}`);
     }
 
 
-    async function registerUser(username, password) {
-        console.log("i fucknig hate this stupid ass nigga bitch group");
+    /* async function registerUser(username, password) {
         //Check for username
-       /* connection.query(`SELECT username FROM account WHERE username='${username}'`, (error, result, fields) => {
+       connection.query(`SELECT username FROM account WHERE username='${username}'`, (error, result, fields) => {
             if (error) {
                 throw error;
             } else if (result.length > 0) {
@@ -82,10 +105,10 @@ const webserv = http.createServer((req, res) => {
 
                 //Throw error, user had empty password
             }
-        }); */
-    }
+        }); 
+    } */
 
-    async function loginUser(username, password) {
+    /* async function loginUser(username, password) {
         connection.query(`SELECT username, password FROM account WHERE username='${username}' AND password='${password}'`, (error, result, fields) => {
             if (error) {
                 throw error;
@@ -96,17 +119,20 @@ const webserv = http.createServer((req, res) => {
                 console.log("Successful login");
                 webtools.fileResponse(defaultHTML, pathPublic, res)
 
-                /*Update user with relevant info
-                    - Currency
-                    - Secret
-                        - Random string -> generate on login                   
-                */
+                //Update user with relevant info
+                //    - Currency
+                //    - Secret
+                //        - Random string -> generate on login                   
+                
+
+                res.statusCode = 200;
+                res.end('\n'); //response is empty 
             } else {
                 //User doesn't exist or password is wrong
             }
             //Throw error, user had empty password
         });
-    }
+    }  */
 
 });
 
@@ -156,6 +182,7 @@ gameserv.on('request', (req) => {
         //try { 
             let msg = JSON.parse(message.utf8Data);
             if (msg.type == "game") gamehandler(msg);
+            if (msg.type == "loginsystem") userhandler(msg);
        /*  } catch (err) { //Wrong type of message, print error.
             console.error(err);
             return;
@@ -172,15 +199,67 @@ gameserv.on('request', (req) => {
     function userhandler(message) {
         switch(message.content) {
             case "register":
-                registerUser();
+                registerUser(message.user, message.pass);
                 break;
             case "login":
-                loginUser();
+                loginUser(message.user, message.pass);
                 break;
             default:  break;
             }
         }
 
+        function registerUser(username, password) {
+            //Check for username
+           sqlconnection.query(`SELECT username FROM account WHERE username='${username}'`, (error, result, fields) => {
+                if (error) {
+                    throw error;
+                } else if (result.length > 0) {
+                        //Notify user, user already exists
+                        console.log("Was ehreee");
+                        send({type: "register", state: "exists"});
+                } else {
+                    //Check password isn't empty.
+                    if (password.length > 0) {
+                        //Register user
+                        sqlconnection.query(`INSERT INTO account (username, password) VALUES ('${username}', '${password}')`);
+                        send({type: "register", state: "success"});
+                    } else if (password.length == 0) {
+                        send({type: "register", state: "zeropassword"});
+                    }
+                    
+                    //Throw error, user had empty password
+                }
+            }); 
+        }
+
+        function loginUser(username, password) {
+            sqlconnection.query(`SELECT username, password FROM account WHERE username='${username}' AND password='${password}'`, (error, result, fields) => {
+                if (error) {
+                    throw error;
+                } else if (password.length == 0) {
+                        //Notify user, error password empty
+                        send({type: "login", state: "zeropassword"});
+                } else if (result.length > 0) {
+                    //Login user
+                    console.log("Successful login");
+                    
+                    send({type: "login", state: "success"});
+                    /*Update user with relevant info
+                        - Currency
+                        - Secret
+                            - Random string -> generate on login                   
+                    */
+    
+                } else {
+                    //User doesn't exist or password is wrong
+                    send({type: "login", state: "noexist"});
+                }
+                //Throw error, user had empty password
+            });
+        }
+
+    
+    
     //Handles all the blackjack game logic
     function gamehandler(message) {
         switch(message.content) {

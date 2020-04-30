@@ -3,14 +3,13 @@ const playerTarget = "player__card-container",
     dealerTarget = "dealer__card-container",
     dealerSumTarget = "dealer__card-sum";
 
-let websocket = null,
-    game = null,
+let game = null,
     remoteDecks = [];
 
 let hand = 0;
 
 window.onload = () => {
-    initiateGame();
+    //initiateGame();
     let slider = document.getElementById("player__bet--input");
     let output = document.getElementById("player__bet--amount");
     output.innerHTML = slider.value;
@@ -19,6 +18,8 @@ window.onload = () => {
         let output = document.getElementById("player__bet--amount");
         output.innerHTML = this.value;
     }
+
+    toggleLogin();
 };
 
 function initiateGame() {
