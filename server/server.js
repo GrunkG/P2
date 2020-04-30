@@ -170,7 +170,9 @@ gameserv.on('request', (req) => {
                     player: {hand: 0, cards: [], points: 0, winner: null, bet: 0, insurance: 0},
                     //Dealer response object
                     dealer: {cards: [], points: 0} },
-        activeHand = 0; //Current playing hand -> 0 unless player has been able to split.
+        activeHand = 0, //Current playing hand -> 0 unless player has been able to split.
+        currency,
+        userID;
 
     playerObj.connection = connection;
 
@@ -205,8 +207,8 @@ gameserv.on('request', (req) => {
                 loginUser(message.user, message.pass);
                 break;
             default:  break;
-            }
         }
+    }
 
         function registerUser(username, password) {
             //Check for username
@@ -232,32 +234,32 @@ gameserv.on('request', (req) => {
             }); 
         }
 
-        function loginUser(username, password) {
-            sqlconnection.query(`SELECT username, password FROM account WHERE username='${username}' AND password='${password}'`, (error, result, fields) => {
+        async function loginUser(username, password) {
+           let test = sqlconnection.query(`SELECT currency, ID FROM account WHERE username='${username}' AND password='${password}'`, (error, result, fields) => {
                 if (error) {
                     throw error;
                 } else if (password.length == 0) {
                         //Notify user, error password empty
                         send({type: "login", state: "zeropassword"});
                 } else if (result.length > 0) {
+                    let testo = Object.assign({}, result[0])
+                    console.log(testo);
                     //Login user
                     console.log("Successful login");
-                    
-                    send({type: "login", state: "success"});
-                    /*Update user with relevant info
-                        - Currency
-                        - Secret
-                            - Random string -> generate on login                   
-                    */
-    
+                    //console.log(`Results: ${JSON.stringify(result)} :: fields: ${JSON.stringify(fields)}`);
+                    send({type: "login", state: "success", currency: result[0].currency});
+                    currency = testo.currency;
+                    userID = testo.ID;
+                    console.log("#0:::currency:" + currency + ", ID: " + userID);
                 } else {
                     //User doesn't exist or password is wrong
                     send({type: "login", state: "noexist"});
                 }
                 //Throw error, user had empty password
             });
+            
+            
         }
-
     
     
     //Handles all the blackjack game logic
@@ -336,7 +338,7 @@ gameserv.on('request', (req) => {
     function updateResponsePoints() {
         response.player.points = game.getCardsValue(playerObj.hands[activeHand].cards);
         response.dealer.points = game.getCardsValue(game.dealer);
-        response.bet = playerObj.hands[activeHand].bet;
+        response.player.bet = playerObj.hands[activeHand].bet;
         response.player.hand = activeHand;
     }
 
@@ -367,37 +369,46 @@ gameserv.on('request', (req) => {
         return;
     }
 
-    /* function updateWinnings() {
-        for(let i = 0; i < players.length; i++) {
-            for(let j = 0; j <= hands.length; j++) {
-                currencyCalculator(hand, player.insurance);
+    function updateWinnings() {
+        for(let i = 0; i < game.players.length; i++) {
+            let player = game.players[i];
+            for(let j = 0; j < player.hands.length; j++) {
+                let hand = player.hands[j];
+                currencyCalculator(hand, playerObj.insurance);
             }
         }
+
+        //Update database
+        console.log("currency:" + currency);
+        sqlconnection.query(`UPDATE account SET currency = '${currency}' WHERE ID = '${userID}'`, (error, result, fields) => {
+            if (error) {
+                throw error;
+            } else {
+                //Success
+            }
+        });
     }
 
     //Currency update method to add/subtract currency in-game
     //OBS!    playerObj.currencyAmount skal ændres til noget fra db'en
-    function currencyCalculator(message) {
+    function currencyCalculator(hand, insurance) {
         //Withdraws the correct amount of money in case the player insures
-        if (insurance > 0 && "winner") {
-            playerObj.currencyAmount += hand.bet / 2;
-            return;
-        }
-        else if (insurance > 0 && !"winner") {
-            playerObj.currencyAmount -= hand.bet * 1.5
-            return;
+        if (insurance > 0 && hand.winner == "W") {
+            currency += insurance * 2;
+
+        } else if (insurance > 0 && hand.winner != "W") {
+            currency -= insurance;
         }
         
         //Withdraws the correct amount of money
-        if ("winner") {
-            playerObj.currencyAmount += hand.bet;
-            return;
+        if (hand.winner == "W") {
+            currency += hand.bet;
+            
         }
-        else if (!"winner") {
-            playerObj.currencyAmount -= hand.bet;
-            return;
+        else if (hand.winner != "W") {
+            currency -= hand.bet;
         }
-    } */
+    }
 
     function handleHit() {
         response.content = "card";
@@ -427,9 +438,10 @@ gameserv.on('request', (req) => {
         response.dealer.cards = game.dealer;
         response.player.cards = playerObj.hands[activeHand].cards;
 
-        response.win = playerObj.hands[activeHand].winner;
+        response.player.winner = playerObj.hands[activeHand].winner;
         
         send(response);
+        updateWinnings();
     }
 
     function handleDouble() {

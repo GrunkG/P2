@@ -6,7 +6,8 @@ const playerTarget = "player__card-container",
 let game = null,
     remoteDecks = [];
 
-let hand = 0;
+let hand = 0,
+    handBets = [];
 
 window.onload = () => {
     //initiateGame();
@@ -54,6 +55,8 @@ function handleCards(msg) {
     //Player
     let player = msg.player,
         playerDeck = new Deck([]);
+    
+    handBets[player.hand] = player.bet;
 
     for (let i = 0; i < player.cards.length; i++) {
         let card = player.cards[i],
@@ -80,19 +83,31 @@ function handleCards(msg) {
 
     game.dealer.hands[0] = dealerDeck;
     document.getElementById(dealerSumTarget).innerHTML = dealer.points;
+    updateTotalBet(player.insurance);
     game.updateScreen();
+}
+
+function updateTotalBet(insurance = 0) {
+    let total = 0;
+    for (let i = 0; i < handBets.length; i++) {
+        total += handBets[i];
+    }
+
+    total += insurance;
+
+    document.getElementById("player__info--bet").innerHTML = total;
 }
 
 //W.I.P -> Need to show based on each hand in the case of a split hand.
 function handleWinner(msg) {
     //clearCardHolders();
-    if (msg.win == "D")
-        game.toggleDrawScreen();
+    if (msg.player.winner == "D")
+        game.player.displayDrawHand(msg.player.hand);
     else {
-        if (msg.win == "W")
-            game.toggleWinScreen();
+        if (msg.player.winner == "W")
+        game.player.displayWinHand(msg.player.hand);
         else
-            game.toggleLoseScreen();
+        game.player.displayLoseHand(msg.player.hand);
     }
     handleCards(msg);
 } 
@@ -122,6 +137,7 @@ function updateGame(msg) {
         let remote_deck = remoteDecks[i],
             player = players[i],
             remote_id = "remote-player-p" + (i+1);
+
             console.log(remote_id);
         //Clean up remote deck for new cards
         remote_deck = new Deck([]);
@@ -223,7 +239,13 @@ function doBet() {
     let input = document.getElementById("player__bet--input");
     let value = parseInt(input.value);
 
+    let currency = parseInt(document.getElementById("player__info--capital").innerHTML);
+    currency -= value;
+
+    document.getElementById("player__info--capital").innerHTML = currency;
+
     websocket.send(JSON.stringify({type: "game", content: "bet", amount: value}));
+    game.toggleBetInput();
 }
 
 function doregister(){
