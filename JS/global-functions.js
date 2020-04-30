@@ -1,5 +1,5 @@
 //Id = id of element in html, toggles display between "none" and the input display
-function toggleDisplayNone(id, display){
+export function toggleDisplayNone(id, display){
     let element = document.getElementById(id);
     if (element.style.display === "none") {
         element.style.display = display;
@@ -16,10 +16,10 @@ function toggleDisplayNone(id, display){
 //     }
 // }
 
-function writeLoginError(error){
+export function writeLoginError(error){
     document.getElementById("login__container--error").innerHTML = error;
 }
 
-function writeRegisterError(error){
+export function writeRegisterError(error){
     document.getElementById("register__container--error").innerHTML = error;
 }
