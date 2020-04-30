@@ -105,7 +105,7 @@
   border: 1px solid #1d34bd;
 }
 
-.login__container--form input[type=submit], .register__container--form input[type=submit], .register__container--form input[type=button] {
+.login__container--form input[type=submit], .login__container--form input[type=button], .register__container--form input[type=submit], .register__container--form input[type=button] {
   font-size: 2.5rem;
   color: #fff;
   background-color: #1d34bd;
@@ -122,11 +122,11 @@
   font-family: Montserrat;
 }
 
-.login__container--form input[type=submit]:focus, .register__container--form input[type=submit]:focus {
+.login__container--form input[type=submit]:focus, .login__container--form input[type=button]:focus, .register__container--form input[type=submit]:focus, .register__container--form input[type=button]:focus {
   outline: 0;
 }
 
-.login__container--form input[type=submit]:hover, .register__container--form input[type=submit]:hover {
+.login__container--form input[type=submit]:hover, .login__container--form input[type=button]:hover, .register__container--form input[type=submit]:hover, .register__container--form input[type=button]:hover {
   background-color: #162891;
   cursor: pointer;
 }

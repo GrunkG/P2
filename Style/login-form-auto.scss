@@ -82,7 +82,7 @@
                     border: 1px solid $main-color;
                 }
             }
-            input[type=submit]{
+            input[type=submit], input[type=button]{
                 font-size: 2.5rem;
                 color: #fff;
                 background-color: $main-color;
