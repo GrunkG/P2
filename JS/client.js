@@ -244,7 +244,7 @@ function doBet() {
 
     document.getElementById("player__info--capital").innerHTML = currency;
 
-    websocket.send(JSON.stringify({type: "game", content: "bet", amount: value}));
+    websocket.send(JSON.stringify({type: "game", content: "bet", amount: value, secret: getCookie("secret")}));
     game.toggleBetInput();
 }
 

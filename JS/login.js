@@ -63,6 +63,7 @@ websocket.onmessage = (message) => {
                 case "success":
                     //toggleLogin();
                     document.getElementById("player__info--capital").innerHTML = msg.currency;
+                    document.cookie = "secret = " + msg.identity;
                     initiateGame();
                     toggleLogin();
                     toggleLogout();

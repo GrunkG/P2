@@ -171,8 +171,8 @@ gameserv.on('request', (req) => {
                     //Dealer response object
                     dealer: {cards: [], points: 0} },
         activeHand = 0, //Current playing hand -> 0 unless player has been able to split.
-        currency,
-        userID;
+        currency = 0,
+        userID = "";
 
     playerObj.connection = connection;
 
@@ -210,56 +210,70 @@ gameserv.on('request', (req) => {
         }
     }
 
-        function registerUser(username, password) {
-            //Check for username
-           sqlconnection.query(`SELECT username FROM account WHERE username='${username}'`, (error, result, fields) => {
-                if (error) {
-                    throw error;
-                } else if (result.length > 0) {
-                        //Notify user, user already exists
-                        console.log("Was ehreee");
-                        send({type: "register", state: "exists"});
-                } else {
-                    //Check password isn't empty.
-                    if (password.length > 0) {
-                        //Register user
-                        sqlconnection.query(`INSERT INTO account (username, password) VALUES ('${username}', '${password}')`);
-                        send({type: "register", state: "success"});
-                    } else if (password.length == 0) {
-                        send({type: "register", state: "zeropassword"});
-                    }
-                    
-                    //Throw error, user had empty password
-                }
-            }); 
-        }
-
-        async function loginUser(username, password) {
-            let temp_currency = 0;
-            let test = sqlconnection.query(`SELECT currency, ID FROM account WHERE username='${username}' AND password='${password}'`, (error, result, fields) => {
-                if (error) {
-                    throw error;
+    function registerUser(username, password) {
+        //Check for username
+        sqlconnection.query(`SELECT username FROM account WHERE username='${username}'`, (error, result, fields) => {
+            if (error) {
+                throw error;
+            } else if (result.length > 0) {
+                    //Notify user, user already exists
+                    console.log("Was ehreee");
+                    send({type: "register", state: "exists"});
+            } else {
+                //Check password isn't empty.
+                if (password.length > 0) {
+                    //Register user
+                    sqlconnection.query(`INSERT INTO account (username, password) VALUES ('${username}', '${password}')`);
+                    send({type: "register", state: "success"});
                 } else if (password.length == 0) {
-                        //Notify user, error password empty
-                        send({type: "login", state: "zeropassword"});
-                } else if (result.length > 0) {
-                    //Login user
-                    console.log("Successful login");
-                    //console.log(`Results: ${JSON.stringify(result)} :: fields: ${JSON.stringify(fields)}`);
-                    send({type: "login", state: "success", currency: result[0].currency});
-                    temp_currency = testo.currency;
-                    userID = testo.ID;
-                    console.log("#0:::currency:" + currency + ", ID: " + userID);
-                } else {
-                    //User doesn't exist or password is wrong
-                    send({type: "login", state: "noexist"});
+                    send({type: "register", state: "zeropassword"});
                 }
+                
                 //Throw error, user had empty password
-            });
-            
-            currency = temp_currency;
-            console.log("#1:::currency:" + currency + ", ID: " + userID);
-        }
+            }
+        }); 
+    }
+
+    function loginUser(username, password) {
+        let test = sqlconnection.query(`SELECT currency, ID FROM account WHERE username='${username}' AND password='${password}'`, (error, result, fields) => {
+            if (error) {
+                throw error;
+            } else if (password.length == 0) {
+                    //Notify user, error password empty
+                    send({type: "login", state: "zeropassword"});
+            } else if (result.length > 0) {
+                //Login user
+                console.log("Successful login");
+                //console.log(`Results: ${JSON.stringify(result)} :: fields: ${JSON.stringify(fields)}`);
+                
+
+                //Generate random secret string to identify a session
+                let secret = generateSecret();
+
+                sqlconnection.query(`UPDATE account SET secret = '${secret}' WHERE ID = '${result[0].ID}'`, (error, result, fields) => {
+                    if (error) {
+                        throw error;
+                    } else {
+                        //Success
+                    }
+                });
+
+                send({type: "login", state: "success", currency: result[0].currency, identity: secret});
+            } else {
+                //User doesn't exist or password is wrong
+                send({type: "login", state: "noexist"});
+            }
+            //Throw error, user had empty password
+        });
+
+        test.on('result', (row) => {
+            console.log(row);
+        });
+    }
+
+    function generateSecret() {
+        return Math.random().toString(16).substring(2);
+    }
     
     
     //Handles all the blackjack game logic
@@ -379,14 +393,8 @@ gameserv.on('request', (req) => {
         }
 
         //Update database
-        console.log("currency:" + currency);
-        sqlconnection.query(`UPDATE account SET currency = '${currency}' WHERE ID = '${userID}'`, (error, result, fields) => {
-            if (error) {
-                throw error;
-            } else {
-                //Success
-            }
-        });
+        sqlconnection.query(`UPDATE account SET currency = currency + ${currency} WHERE secret = '${userID}'`);
+        //                                                          + - = negative, + + = positive
     }
 
     //Currency update method to add/subtract currency in-game
@@ -404,8 +412,7 @@ gameserv.on('request', (req) => {
         if (hand.winner == "W") {
             currency += hand.bet;
             
-        }
-        else if (hand.winner != "W") {
+        } else if (hand.winner == "L") {
             currency -= hand.bet;
         }
     }
@@ -477,18 +484,8 @@ gameserv.on('request', (req) => {
 
     function handleBet(msg) {
         let bet = msg.amount;
-        /*
-            let currency = getPlayerCurrencyOfSomeSort();
-            if (currency >= bet) {
-                game.bet(playerObj.hands[activeHand], bet);
-
-                //Response code
-                response.content = "card";
-                response.player.cards = playerObj.hands[activeHand].cards;
-                updateResponsePoints();
-                send(response);
-            }
-        */
+        
+        userID = msg.secret;
 
         game.bet(playerObj.hands[activeHand], bet);
         //Reponse code
