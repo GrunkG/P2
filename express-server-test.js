@@ -1,6 +1,6 @@
 const express = require("express");
 const session = require("express-session");
-const bodyParser = require("body-parser");
+//const bodyParser = require("body-parser");
 const cookieParser = require("cookie-parser");
 const flash = require("connect-flash");
 
@@ -19,7 +19,8 @@ app.use(session({
     saveUninitialized: true
 }));
 
-app.use(bodyParser.urlencoded({extended: true})); //Lets the server use bodyParser
+//app.use(bodyParser.urlencoded({extended: true})); //Lets the server use bodyParser
+app.use(express.urlencoded());
 app.use(cookieParser()); //Lets the server use cookieParser
 app.use(flash()); //Lets the server use express-flash
 

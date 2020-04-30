@@ -11,12 +11,12 @@
     &__container{
         place-self: center;
         width: 50rem;
-        height: 60rem;
+        height: auto;
         background-color: rgb(240, 240, 240);
         box-shadow: 0 3px 8px rgba(0,0,0,0.08);
         border-radius: 1rem;
         position: relative;
-
+        padding-bottom: 3rem;
         &--close{
             position: absolute;
             width: 3.5rem;
@@ -82,7 +82,7 @@
                     border: 1px solid $main-color;
                 }
             }
-            input[type=submit]{
+            input[type=submit], input[type=button]{
                 font-size: 2.5rem;
                 color: #fff;
                 background-color: $main-color;
@@ -129,10 +129,6 @@
             }
         }
     }
-}
-
-.register__container{
-    height: 50rem;
 }
 
 .hide{

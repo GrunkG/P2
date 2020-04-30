@@ -1,3 +1,6 @@
+import {toggleDisplayNone} from "../global-functions.js";
+const Player = require("./class-player.js");
+
 class Game{
     constructor(player = Game.getPlayer, dealer = Game.getDealer, remotes = []){
         this.player = player; //Class player
@@ -48,5 +51,10 @@ class Game{
         toggleDisplayNone("player__buttons", "flex");
         toggleDisplayNone("player__bet", "block");
     }
+    togglePlayAgain(){
+        toggleDisplayNone("player__buttons", "flex");
+        toggleDisplayNone("player__play-again", "flex");
+    }
 }
 
+module.exports = Game;
