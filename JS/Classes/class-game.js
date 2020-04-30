@@ -51,6 +51,10 @@ class Game{
         toggleDisplayNone("player__buttons", "flex");
         toggleDisplayNone("player__bet", "block");
     }
+    togglePlayAgain(){
+        toggleDisplayNone("player__buttons", "flex");
+        toggleDisplayNone("player__play-again", "flex");
+    }
 }
 
 module.exports = Game;
