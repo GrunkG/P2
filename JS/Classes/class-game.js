@@ -53,4 +53,8 @@ class Game{
         toggleDisplayNone("player__buttons", "flex");
         toggleDisplayNone("player__play-again", "flex");
     }
+    togglePlayAgainOnPress(){
+        toggleDisplayNone("player__play-again", "flex");
+        toggleDisplayNone("player__bet", "block");
+    }
 }

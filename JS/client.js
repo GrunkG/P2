@@ -248,24 +248,13 @@ function doBet() {
     game.toggleBetInput();
 }
 
-function doregister(){
+function doRegister(){
     websocket.send(JSON.stringify({content:"register"}));
 }
 
-function doNewGame(grid_element) {
-    let id = grid_element.parentElement.id;
-    
-    switch(id) {
-        case "result__win":
-            game.toggleWinScreen();
-            break;
-        case "result__lose":
-            game.toggleLoseScreen();
-            break;
-        case "result__draw":
-            game.toggleDrawScreen();
-            break;
-    }
+function doNewGame() {
+    togglePlayAgainOnPress();
+    resetResults();
 
     websocket.send(JSON.stringify({type: "game", content: "newgame"}));
 }
