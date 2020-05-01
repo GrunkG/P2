@@ -67,6 +67,14 @@ function handleCards(msg) {
     game.player.hands[player.hand] = playerDeck;
     document.getElementById(playerSumTarget).innerHTML = player.points;
 
+    //Update dealer cards
+    updateDealer(msg);
+
+    updateTotalBet(player.insurance);
+    game.updateScreen();
+}
+
+function updateDealer(msg) {
     //Dealer
     let dealer = msg.dealer,
         dealerDeck = new Deck([]);
@@ -83,8 +91,6 @@ function handleCards(msg) {
 
     game.dealer.hands[0] = dealerDeck;
     document.getElementById(dealerSumTarget).innerHTML = dealer.points;
-    updateTotalBet(player.insurance);
-    game.updateScreen();
 }
 
 function updateTotalBet(insurance = 0) {
@@ -96,20 +102,6 @@ function updateTotalBet(insurance = 0) {
     total += insurance;
 
     document.getElementById("player__info--bet").innerHTML = total;
-}
-
-//W.I.P -> Need to show based on each hand in the case of a split hand.
-function handleWinner(msg) {
-    //clearCardHolders();
-    if (msg.player.winner == "D")
-        game.player.displayDrawHand(msg.player.hand);
-    else {
-        if (msg.player.winner == "W")
-        game.player.displayWinHand(msg.player.hand);
-        else
-        game.player.displayLoseHand(msg.player.hand);
-    }
-    handleCards(msg);
 } 
 
 function handleSplit(msg) {
@@ -195,6 +187,7 @@ function gameHandler() {
                 switch (msg.content) {
                     case "game created":
                         game = new Game();
+                        game.player.setActiveHand(hand);
                         handleCards(msg);
                         break;
                     case "card":
@@ -203,9 +196,10 @@ function gameHandler() {
                     case "split":
                         handleSplit(msg);
                         break;
-                    case "winner":
+                    case "winner": //Likely to be useless
                         handleWinner(msg);
                     case "done":
+                        handleGameDone(msg);
                         break;
                     case "update":
                         updateGame(msg);
@@ -219,17 +213,84 @@ function gameHandler() {
     }
 }
 
+function handleGameDone(msg) {
+    let hand_states = msg.wins;
+    for (let i = 0; i < hand_states.length; i++) {
+        let state = hand_states[i];
+
+        handleWinner(i, state);
+    }
+    
+    updateDealer(msg);
+    game.updateScreen();
+    game.togglePlayAgain();
+}
+
+function handleWinner(hand, state) {
+    //clearCardHolders();
+    if (state == "D")
+        game.player.displayDrawHand(hand);
+    else {
+        if (state == "W")
+        game.player.displayWinHand(hand);
+        else
+        game.player.displayLoseHand(hand);
+    }
+}
+
+function isGameDone() {
+    //Got through each hand, to determine if every hand has either lost, won or tied.
+    for (let i = 0; i < handBets.length; i++) {
+        let handContainer = document.getElementById("player__hand" + i.toString());
+        let status = false; //Determines the end result
+
+        if (handContainer.className.indexOf("win") > -1)
+            status = true;
+        if (handContainer.className.indexOf("lose") > -1)
+            status = true;
+        if (handContainer.className.indexOf("draw") > -1)
+            status = true;
+
+        if (status == false)
+            return false;
+    }
+
+    return true;
+}
+
+function determineActiveHand() {
+    if (handBets.length > 1) {
+        hand++;
+
+        if (game.player.hands[hand].hold)
+            hand++;
+    }
+
+    if (hand == handBets.length-1)
+        hand = 0;
+
+    if (!game.player.hands[hand].hold)
+        game.player.setActiveHand(hand);
+    else
+        game.player.setActiveHand(-1);
+}
+
 function doHit() {
+    determineActiveHand();
     websocket.send(JSON.stringify({type: "game", content: "hit"}));
 }
 function doHold() {
+    determineActiveHand();
+    game.player.hands[hand].hold = true;
     websocket.send(JSON.stringify({type: "game", content: "hold"}));
 }
 function doDouble() {
+    determineActiveHand();
     websocket.send(JSON.stringify({type: "game", content: "double"}));
 }
 function doSplit() {
     websocket.send(JSON.stringify({type: "game", content: "split"}));
+    game.player.setActiveHand(hand);
 }
 function doInsure() {
     websocket.send(JSON.stringify({type: "game", content: "insure"}));
@@ -253,8 +314,8 @@ function doRegister(){
 }
 
 function doNewGame() {
-    togglePlayAgainOnPress();
-    resetResults();
+    game.togglePlayAgainOnPress();
+    game.player.resetResults();
 
     websocket.send(JSON.stringify({type: "game", content: "newgame"}));
 }

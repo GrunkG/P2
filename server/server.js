@@ -319,7 +319,7 @@ gameserv.on('request', (req) => {
         update();
     }
     function update() {
-        let updateResponse = {  type: "blackjack", content: "update", players: []   };
+        let updateResponse = {  type: "blackjack", content: "update" , players: []   };
         
         //For each player active in the game
         for (let i = 0; i < game.players.length; i++) {
@@ -438,7 +438,7 @@ gameserv.on('request', (req) => {
     }
 
     function handleHold() {
-        response.content = "winner";
+        /* response.content = "hold";
         game.hold(playerObj.hands[activeHand]);
 
         updateResponsePoints();
@@ -448,7 +448,28 @@ gameserv.on('request', (req) => {
         response.player.winner = playerObj.hands[activeHand].winner;
         
         send(response);
-        updateWinnings();
+        updateWinnings(); */
+        console.log("Holding fast!");
+        game.hold(playerObj.hands[activeHand]);
+        if (game.isEveryoneDone())
+            announceWinner();
+    }
+
+    function announceWinner() {
+        console.log("Announced winner");
+        if (game.isEveryoneDone()) {
+            let response = {type: "blackjack", content: "done", wins: [], dealer: {cards: [], points: 0} };
+
+            for (let i = 0; i < playerObj.hands.length; i++) {
+                response.wins.push(playerObj.hands[i].winner);
+            }
+
+            response.dealer.cards = game.dealer;
+            response.dealer.points = game.getCardsValue(game.dealer);
+
+            send(response);
+            updateWinnings();
+        }
     }
 
     function handleDouble() {
@@ -482,7 +503,7 @@ gameserv.on('request', (req) => {
         }
     }
 
-    function handleBet(msg) {
+    function handleBet(msg) { //Send cards here
         let bet = msg.amount;
         
         userID = msg.secret;
