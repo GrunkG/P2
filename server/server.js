@@ -313,40 +313,54 @@ gameserv.on('request', (req) => {
                 break;
             case "bet":
                 handleBet(message);
+                newGame();
                 break;
             default:  break;
         }
         update();
     }
     function update() {
-        let updateResponse = {  type: "blackjack", content: "update" , players: []   };
-        
-        //For each player active in the game
-        for (let i = 0; i < game.players.length; i++) {
-            let playersResponse = {hands: [], insurance: 0};
+        if (hasEveryoneBet()) {
+            let updateResponse = {  type: "blackjack", content: "update" , players: []   };
+            
+            //For each player active in the game
+            for (let i = 0; i < game.players.length; i++) {
+                let playersResponse = {hands: [], insurance: 0};
 
-            let player = game.players[i];
-            let hands = player.hands;
+                let player = game.players[i];
+                let hands = player.hands;
 
-            //For each hand active for the player
-            for (let x = 0; x < player.hands.length; x++) {
-                let hand = player.hands[x];
-                let value = game.getCardsValue(hand.cards);
-                playersResponse.hands.push( {   cards: hand.cards, bet: hand.bet, 
-                                            isHolding: hand.isHolding, winner: hand.winner, points: value }  );
+                //For each hand active for the player
+                for (let x = 0; x < player.hands.length; x++) {
+                    let hand = player.hands[x];
+                    let value = game.getCardsValue(hand.cards);
+                    playersResponse.hands.push( {   cards: hand.cards, bet: hand.bet, 
+                                                isHolding: hand.isHolding, winner: hand.winner, points: value }  );
+                }
+
+                playersResponse.insurance = player.insurance;
+                updateResponse.players.push(playersResponse);
             }
 
-            playersResponse.insurance = player.insurance;
-            updateResponse.players.push(playersResponse);
+            //send(updateResponse);
+            //Send to all
+            for (let i = 0; i < game.players.length; i++) {
+                let player = game.players[i];
+                player.connection.send( JSON.stringify(updateResponse) );
+            }
         }
 
-        //send(updateResponse);
-        //Send to all
+    }
+
+    function hasEveryoneBet() {
         for (let i = 0; i < game.players.length; i++) {
             let player = game.players[i];
-            player.connection.send( JSON.stringify(updateResponse) );
+            let hand = player.hands[0];
+            
+            if (hand.bet == 0)
+                return false;
         }
-
+        return true;
     }
 
     function updateResponsePoints() {
@@ -362,6 +376,10 @@ gameserv.on('request', (req) => {
         else
             handleNewJoin();
         
+        //newGame();
+    }
+
+    function newGame() {
         response.content = "game created";
         response.player.cards = playerObj.hands[activeHand].cards;
         response.dealer.cards = game.dealer;
@@ -373,14 +391,6 @@ gameserv.on('request', (req) => {
         for (let i = 0; i < 2; i ++) {
             game.hit(playerObj.hands[activeHand]);
         }
-
-        /* response.content = "game created";
-        response.player.cards = playerObj.hands[activeHand].cards;
-        response.dealer.cards = game.dealer;
-        updateResponsePoints();
-        send(response); */
-
-        return;
     }
 
     function updateWinnings() {
@@ -395,6 +405,8 @@ gameserv.on('request', (req) => {
         //Update database
         sqlconnection.query(`UPDATE account SET currency = currency + ${currency} WHERE secret = '${userID}'`);
         //                                                          + - = negative, + + = positive
+        currency = 0;
+
     }
 
     //Currency update method to add/subtract currency in-game
@@ -467,8 +479,9 @@ gameserv.on('request', (req) => {
             response.dealer.cards = game.dealer;
             response.dealer.points = game.getCardsValue(game.dealer);
 
-            send(response);
             updateWinnings();
+
+            send(response);
         }
     }
 

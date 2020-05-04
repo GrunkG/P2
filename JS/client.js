@@ -130,7 +130,6 @@ function updateGame(msg) {
             player = players[i],
             remote_id = "remote-player-p" + (i+1);
 
-            console.log(remote_id);
         //Clean up remote deck for new cards
         remote_deck = new Deck([]);
 
@@ -149,10 +148,14 @@ function updateGame(msg) {
             }
         }
 
+        if (remoteDecks[i] == null)
+            remoteDecks.push(remote_deck);
+        
         //Update the shown cards
+        game.updateScreen();
         remote_deck.update(remote_id);
     }
-    game.updateScreen();
+    //game.updateScreen();
 }
 
 function updateHand(hand, index) {
@@ -189,6 +192,7 @@ function gameHandler() {
                         game = new Game();
                         game.player.setActiveHand(hand);
                         handleCards(msg);
+                        game.toggleBetInput();
                         break;
                     case "card":
                         handleHit(msg);
@@ -227,15 +231,20 @@ function handleGameDone(msg) {
 }
 
 function handleWinner(hand, state) {
+    let currency = parseInt(document.getElementById("player__info--capital").innerHTML);
     //clearCardHolders();
-    if (state == "D")
+    if (state == "D") {
         game.player.displayDrawHand(hand);
-    else {
-        if (state == "W")
+        currency += handBets[hand];
+    } else if (state == "W") {
         game.player.displayWinHand(hand);
-        else
+        currency += handBets[hand] * 2;
+    } else {
         game.player.displayLoseHand(hand);
     }
+
+    document.getElementById("player__info--capital").innerHTML = currency;
+    document.getElementById("player__info--bet").innerHTML = 0;
 }
 
 function isGameDone() {
@@ -306,7 +315,6 @@ function doBet() {
     document.getElementById("player__info--capital").innerHTML = currency;
 
     websocket.send(JSON.stringify({type: "game", content: "bet", amount: value, secret: getCookie("secret")}));
-    game.toggleBetInput();
 }
 
 function doRegister(){
