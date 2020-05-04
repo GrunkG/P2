@@ -56,5 +56,6 @@ class Game{
     togglePlayAgainOnPress(){
         toggleDisplayNone("player__play-again", "flex");
         toggleDisplayNone("player__bet", "block");
+        toggleDisplayNone("player__card-container", "grid");
     }
 }

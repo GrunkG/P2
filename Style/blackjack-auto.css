@@ -78,9 +78,9 @@
   display: grid;
   grid-gap: 2rem;
       grid-template-areas: "title title" "info info" "hands buttons";
-  -ms-grid-columns: auto min-content;
-      grid-template-columns: auto -webkit-min-content;
-      grid-template-columns: auto min-content;
+  -ms-grid-columns: auto max-content;
+      grid-template-columns: auto -webkit-max-content;
+      grid-template-columns: auto max-content;
   height: -webkit-fit-content;
   height: -moz-fit-content;
   height: fit-content;

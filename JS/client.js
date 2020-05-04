@@ -253,7 +253,7 @@ function doRegister(){
 }
 
 function doNewGame() {
-    togglePlayAgainOnPress();
+    game.togglePlayAgainOnPress();
     resetResults();
 
     websocket.send(JSON.stringify({type: "game", content: "newgame"}));
