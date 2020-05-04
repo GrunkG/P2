@@ -7,7 +7,8 @@ let game = null,
     remoteDecks = [];
 
 let hand = 0,
-    handBets = [];
+    handBets = [],
+    insurance = 0;
 
 window.onload = () => {
     //initiateGame();
@@ -72,6 +73,7 @@ function handleCards(msg) {
 
     updateTotalBet(player.insurance);
     game.updateScreen();
+    
 }
 
 function updateDealer(msg) {
@@ -106,6 +108,7 @@ function updateTotalBet(insurance = 0) {
 
 function handleSplit(msg) {
     game.player.splitHand(msg.player.hand);
+    handBets.push(handBets[hand]);
 }
 
 function clearCardHolders() {
@@ -200,8 +203,9 @@ function gameHandler() {
                     case "split":
                         handleSplit(msg);
                         break;
-                    case "winner": //Likely to be useless
-                        handleWinner(msg);
+                    case "insurance":
+                        handleInsurance(msg);
+                        break;
                     case "done":
                         handleGameDone(msg);
                         break;
@@ -209,12 +213,22 @@ function gameHandler() {
                         updateGame(msg);
                         break;
                 }
+                disableButtons(game.player.hands[hand]);
             }
         } catch (err) {
             console.log(err);
         }
         
     }
+}
+
+function handleInsurance(msg) {
+    let bet = parseInt(document.getElementById("player__info--bet").innerHTML);
+    let player_insurance = msg.player.insurance;
+    bet += player_insurance;
+    insurance = player_insurance;
+    document.getElementById("player__info--bet").innerHTML = bet;
+
 }
 
 function handleGameDone(msg) {
@@ -244,7 +258,13 @@ function handleWinner(hand, state) {
     }
 
     document.getElementById("player__info--capital").innerHTML = currency;
+    resetGameValues();
+}
+
+function resetGameValues() {
     document.getElementById("player__info--bet").innerHTML = 0;
+    insurance = 0;
+    handBets = [];
 }
 
 function isGameDone() {
@@ -271,17 +291,23 @@ function determineActiveHand() {
     if (handBets.length > 1) {
         hand++;
 
-        if (game.player.hands[hand].hold)
-            hand++;
+        if ( (hand+1) < handBets.length-1) {
+            if (game.player.hands[hand].hold)
+                hand++;
+            else
+                hand--;
+        }
     }
 
-    if (hand == handBets.length-1)
+    if (hand == handBets.length)
         hand = 0;
 
     if (!game.player.hands[hand].hold)
         game.player.setActiveHand(hand);
     else
         game.player.setActiveHand(-1);
+
+    disableButtons(game.player.hands[hand]);
 }
 
 function doHit() {
@@ -329,9 +355,9 @@ function doNewGame() {
 }
 
 function disableButtons(activeHand) {
-    enableButtonIf(activeHand.length == 2, "double");
-    enableButtonIf(activeHand.length == 2 && activeHand.cards[0].value == activeHand.cards[1].value, "split");
-    enableButtonIf(game.dealer.hands[0].cards[0].value == "A", "insurance");
+    enableButtonIf(activeHand.cards.length == 2, "double");
+    enableButtonIf(activeHand.cards.length == 2 && activeHand.cards[0].value == activeHand.cards[1].value, "split");
+    enableButtonIf(game.dealer.hands[0].cards[0].value == "A" && insurance == 0 && handBets.length == 1, "insurance");
 }
 
 function enableButtonIf(enable, button) {

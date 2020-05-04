@@ -3,6 +3,7 @@
 class Deck{
     constructor(cards){
         this.cards = cards;
+        this.hold = false;
     }
     //Print all cards in the card container of id
     print(id, cardFront, containerId = "0"){

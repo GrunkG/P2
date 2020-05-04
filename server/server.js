@@ -197,6 +197,13 @@ gameserv.on('request', (req) => {
         //Destroy player
     });
 
+    function clearResponse() {
+        response = { type: "blackjack", content: "",
+        //Player response object
+        player: {hand: 0, cards: [], points: 0, winner: null, bet: 0, insurance: 0},
+        //Dealer response object
+        dealer: {cards: [], points: 0} };
+    }
 
     function userhandler(message) {
         switch(message.content) {
@@ -284,6 +291,8 @@ gameserv.on('request', (req) => {
                 playerObj.join(activeGames[activeGames.length-1]);
                 game = playerObj.game;
                 initGame();
+                game.dealer[1] = {suit: "C", val: "A", visible: true}
+                playerObj.hands[0].cards = [{suit: "C", val: 3, visible: true}, {suit: "C", val: 3, visible: true}]
                 break;
             case "newgame":
                 activeGames[0] = new bjackGame();
@@ -292,6 +301,7 @@ gameserv.on('request', (req) => {
                 playerObj.join(activeGames[0]);
                 game = playerObj.game;
                 initGame();
+                game.dealer[1] = {suit: "C", val: "A", visible: true}
                 break;
             /* case "joingame":
                 handleNewJoin();
@@ -406,6 +416,7 @@ gameserv.on('request', (req) => {
         sqlconnection.query(`UPDATE account SET currency = currency + ${currency} WHERE secret = '${userID}'`);
         //                                                          + - = negative, + + = positive
         currency = 0;
+        clearResponse();
 
     }
 
@@ -413,11 +424,12 @@ gameserv.on('request', (req) => {
     //OBS!    playerObj.currencyAmount skal ændres til noget fra db'en
     function currencyCalculator(hand, insurance) {
         //Withdraws the correct amount of money in case the player insures
-        if (insurance > 0 && hand.winner == "W") {
+        if (insurance > 0 && dealerHasBlackjack()) {
             currency += insurance * 2;
-
-        } else if (insurance > 0 && hand.winner != "W") {
+            console.log("Won insurance");
+        } else if (insurance > 0 && !dealerHasBlackjack()) {
             currency -= insurance;
+            console.log("Lost insurance");
         }
         
         //Withdraws the correct amount of money
@@ -427,6 +439,15 @@ gameserv.on('request', (req) => {
         } else if (hand.winner == "L") {
             currency -= hand.bet;
         }
+    }
+
+    function dealerHasBlackjack() {
+        let dealer = game.dealer;
+        let total = game.getCardsValue(dealer);
+        if (dealer[1].val == "A" && total == 21)
+            return true;
+        else
+            return false;
     }
 
     function handleHit() {
@@ -442,10 +463,14 @@ gameserv.on('request', (req) => {
             handleHold();
         }
 
+        setNextHand();
+    }
+
+    function setNextHand() {
         //Next hand
-        if (playerObj.hands.length > 1 && activeHand != (playerObj.hands.length -1 ) )
+        if (playerObj.hands.length > 1)
             activeHand++;
-        else
+        if (activeHand == playerObj.hands.length)
             activeHand = 0;
     }
 
@@ -461,8 +486,9 @@ gameserv.on('request', (req) => {
         
         send(response);
         updateWinnings(); */
-        console.log("Holding fast!");
+        console.log("Holding fast! on: " + activeHand);
         game.hold(playerObj.hands[activeHand]);
+        setNextHand();
         if (game.isEveryoneDone())
             announceWinner();
     }
