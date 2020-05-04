@@ -319,3 +319,17 @@ function doNewGame() {
 
     websocket.send(JSON.stringify({type: "game", content: "newgame"}));
 }
+
+function disableButtons(activeHand) {
+    enableButtonIf(activeHand.length == 2, "double");
+    enableButtonIf(activeHand.length == 2 && activeHand.cards[0].value == activeHand.cards[1].value, "split");
+    enableButtonIf(game.dealer.hands[0].cards[0].value == "A", "insurance");
+}
+
+function enableButtonIf(enable, button) {
+    if (enable) { //Enable button
+        document.getElementById("button-" + button).setAttribute("class", "button-" + button);
+    } else { //Disable button
+        document.getElementById("button-" + button).setAttribute("class", "button-" + button + " inactive");
+    }
+}
