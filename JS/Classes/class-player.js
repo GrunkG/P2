@@ -96,39 +96,45 @@ class Player{
 class RemotePlayer extends Player{
     //Method to create the html of a remote player
     addToHtml() {
-        //Creates some like this:
-        // <div class="remote-player">
-        //         <span class="remote-player__title">P1</span>
-        //         <div class="remote-player__card-container" id="remote-player-p1__card-container">
-        //             <div id="remote-player-p1__card-container0"></div>
-        //         </div>
-        //         <span class="remote-player__card-sum" id="remote-player-p1__card-sum">42</span>
-        // </div>
+        //Creates something like this:
+            // <div class="remote-player">
+            //         <span class="remote-player__title">P1</span>
+            //         <div class="remote-player__card-container" id="remote-player-p1__card-container">
+            //             <div class="remote-player__hand" id="remote-player-p1__hand0">
+            //                 <div id="remote-player-p1__card-container0"></div>
+            //                 <span class="remote-player__card-sum" id="remote-player-p1__card-sum0">10</span>
+            //                 <span class="remote-player__result" id="remote-player-p1__result0"></span>
+            //             </div>
+            //         </div>
+            // </div>
+    
         let parent = document.getElementById("blackjack-container");
         let newRemote = document.createElement("div");
         let newRemoteTitle = document.createElement("span");
         let newRemoteCardContainer = document.createElement("div");
-        let newRemoteInnerCardContainer = document.createElement("div");
-        let newRemoteCardSum = document.createElement("span");
+        // let newRemoteInnerCardContainer = document.createElement("div");
+        // let newRemoteCardSum = document.createElement("span");
 
         newRemote.setAttribute("class", "remote-player");
 
         newRemoteTitle.setAttribute("class", "remote-player__title"); //Title container
-        newRemoteTitle.textContent = `${this.id.slice(14)}`;
+        newRemoteTitle.textContent = `${this.id.slice(14)}`; //"remote-player-" is sliced off
         newRemote.appendChild(newRemoteTitle);
 
         newRemoteCardContainer.setAttribute("class", "remote-player__card-container"); //Card container
         newRemoteCardContainer.setAttribute("id", `${this.id}__card-container`);
         newRemote.appendChild(newRemoteCardContainer);
 
-        newRemoteInnerCardContainer.setAttribute("id", this.id + "__card-container0");
-        newRemoteCardContainer.appendChild(newRemoteInnerCardContainer);
+        // newRemoteInnerCardContainer.setAttribute("id", this.id + "__card-container0");
+        // newRemoteCardContainer.appendChild(newRemoteInnerCardContainer);
 
-        newRemoteCardSum.setAttribute("class", "remote-player__card-sum"); //Sum container
-        newRemoteCardSum.setAttribute("id", `${this.id}__card-sum0`);
-        newRemoteCardContainer.appendChild(newRemoteCardSum);
+        // newRemoteCardSum.setAttribute("class", "remote-player__card-sum"); //Sum container
+        // newRemoteCardSum.setAttribute("id", `${this.id}__card-sum0`);
+        // newRemoteCardContainer.appendChild(newRemoteCardSum);
 
         parent.appendChild(newRemote);
+        
+        this.initializeHand(0);
 
         return this;
     }
