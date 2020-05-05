@@ -145,7 +145,7 @@ function updateGame(msg) {
                 let card = hand.cards[y];
                 let new_card = new Card(card.val.toString(), card.suit);
                 
-                updateHand(hand, x);
+                //updateHand(hand, x);
 
                 remote_deck.cards.push(new_card);
             }
@@ -177,7 +177,7 @@ function updateHand(hand, index) {
 
 function gameHandler() {
     //                        ws = websocket
-    websocket = new WebSocket('ws://localhost:3000/');
+    websocket = new WebSocket(`ws://${host}:${port}/`);
     
     websocket.onopen = () => {
         websocket.send(JSON.stringify({type: "game", content: "startgame"}));
@@ -241,7 +241,7 @@ function handleGameDone(msg) {
     
     handleInsuranceWin(msg.insurance);
     resetGameValues();
-    
+
     updateDealer(msg);
     game.updateScreen();
     game.togglePlayAgain();

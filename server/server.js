@@ -357,6 +357,7 @@ gameserv.on('request', (req) => {
             activeGames.push(new bjackGame()); //Starts new game
             playerObj.join(activeGames[activeGames.length-1]); //length -1 due to 0 index
             game = playerObj.game;
+            console.log("Game set! -> " + game);
             initGame();
         }
     }
@@ -571,7 +572,7 @@ gameserv.on('request', (req) => {
         let bet = msg.amount;
         
         userID = msg.secret;
-
+        console.log("Game: " + game + ", HL: " + playerObj.hands.length);
         game.bet(playerObj.hands[activeHand], bet);
         //Reponse code
         response.content = "card";
