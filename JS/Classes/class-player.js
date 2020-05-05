@@ -90,6 +90,7 @@ class Player{
         let handContainer = document.getElementById(this.id + "__hand" + hand.toString());
         handContainer.setAttribute("class", this.id + "__hand active");
     }
+
 }
 
 class RemotePlayer extends Player{
@@ -135,5 +136,8 @@ class RemotePlayer extends Player{
         this.addToHtml();
         this.cardFront = "Simple Black";
         this.printHand(index);
+    }
+    removeRemoteFromHtml(){
+        remove(document.getElementById(this.id));
     }
 }
