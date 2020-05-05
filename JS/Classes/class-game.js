@@ -22,6 +22,18 @@ class Game{
             this.addRemote();      
         }
     }
+    //Method to remove one remote
+    removeRemote(index){
+        this.remotes[i].removeRemoteFromHtml();
+        this.remotes.splice(index, 1);
+    }
+    //Method to remove all remotes
+    removeAllRemotes(){
+        for (let i = 0; i < this.remotes.length; i++) {
+            this.remotes[i].removeRemoteFromHtml();      
+        }
+        this.remotes = [];
+    }
     //Method to print all remotes
     printRemotes(){
         this.remotes.forEach(remote => remote.printHands());
