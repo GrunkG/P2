@@ -76,6 +76,19 @@ class Cards { //Rename
         }
     }
 
+    resetGame() {
+        this.deck = [];
+        this.dealer = [];
+        resetPlayerHands();
+    }
+
+    resetPlayerHands() {
+        for (let i = 0; i < this.players.length; i++) {
+            let player  = this.players[i];
+            player.resetHands();
+        }
+    }
+
     //Deals each player a card
     dealPlayers() {
         //Runs through each player currently in the player array
@@ -104,6 +117,15 @@ class Cards { //Rename
         hand.bet = amount;
     }
 
+    //Remove player from the game in the case a player leaves or is forced a leave.
+    removePlayer(playerToRemove) {
+        for (let i = 0; i < this.players.length; i++) {
+            let current = this.players[i];
+            if (current == playerToRemove)
+                this.players[i].pop();
+        }
+    }
+
 }
 
 class Player {
@@ -117,6 +139,11 @@ class Player {
     join(game) {
         this.game = game;
         game.players.push(this);
+    }
+
+    resetHands() {
+        this.hands = [];
+        this.hands.push(new Hand());
     }
 }
 

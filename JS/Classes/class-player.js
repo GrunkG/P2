@@ -69,8 +69,12 @@ class Player{
     resetResults(){
         this.resetAllHandsClassAttributes();
         for (let i = 0; i < this.hands.length; i++) {
+            let hand = document.getElementById(this.id + "__hand" + i.toString());
             let resultContainer = document.getElementById(this.id + "__result" + i.toString());
-            resultContainer.innerHTML = "";         
+            resultContainer.innerHTML = "";
+
+            if (i > 0)
+                hand.remove();
         }
     }
     //Removes all classes but player__hand from a hand

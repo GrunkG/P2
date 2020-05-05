@@ -239,6 +239,9 @@ function handleGameDone(msg) {
         handleWinner(i, state);
     }
     
+    handleInsuranceWin(msg.insurance);
+    resetGameValues();
+    
     updateDealer(msg);
     game.updateScreen();
     game.togglePlayAgain();
@@ -258,7 +261,14 @@ function handleWinner(hand, state) {
     }
 
     document.getElementById("player__info--capital").innerHTML = currency;
-    resetGameValues();
+}
+
+function handleInsuranceWin(insuranceState) {
+    let currency = parseInt(document.getElementById("player__info--capital").innerHTML);
+    if (insuranceState == "W") {
+        currency += insurance * 2;
+    }
+    document.getElementById("player__info--capital").innerHTML = currency;
 }
 
 function resetGameValues() {
@@ -290,12 +300,16 @@ function isGameDone() {
 function determineActiveHand() {
     if (handBets.length > 1) {
         hand++;
+        console.log("Step 1 -- " + hand);
 
-        if ( (hand+1) < handBets.length-1) {
+        if ( (hand+1) < handBets.length) {
+            console.log("Step 2 -- " + hand);
             if (game.player.hands[hand].hold)
                 hand++;
             else
                 hand--;
+
+            console.log("Step 3 -- " + hand);
         }
     }
 

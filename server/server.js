@@ -194,7 +194,10 @@ gameserv.on('request', (req) => {
     //Handle closed connection
     connection.on('close', (connection) => {
         //Remove player from its active game
-        //Destroy player
+       // game.removePlayer(playerObj);
+
+        //Check if no players are left
+            //Remove game if true
     });
 
     function clearResponse() {
@@ -253,16 +256,12 @@ gameserv.on('request', (req) => {
                 console.log("Successful login");
                 //console.log(`Results: ${JSON.stringify(result)} :: fields: ${JSON.stringify(fields)}`);
                 
-
                 //Generate random secret string to identify a session
                 let secret = generateSecret();
 
                 sqlconnection.query(`UPDATE account SET secret = '${secret}' WHERE ID = '${result[0].ID}'`, (error, result, fields) => {
-                    if (error) {
+                    if (error)
                         throw error;
-                    } else {
-                        //Success
-                    }
                 });
 
                 send({type: "login", state: "success", currency: result[0].currency, identity: secret});
@@ -287,20 +286,22 @@ gameserv.on('request', (req) => {
     function gamehandler(message) {
         switch(message.content) {
             case "startgame":
-                activeGames.push(new bjackGame());
-                playerObj.join(activeGames[activeGames.length-1]);
-                game = playerObj.game;
-                initGame();
+                handleStartGame()
+
+                //Debug
                 game.dealer[1] = {suit: "C", val: "A", visible: true}
                 playerObj.hands[0].cards = [{suit: "C", val: 3, visible: true}, {suit: "C", val: 3, visible: true}]
                 break;
             case "newgame":
-                activeGames[0] = new bjackGame();
+                /* activeGames[0] = new bjackGame();
                 playerObj = new cardgame.Player();
                 playerObj.connection = connection;
                 playerObj.join(activeGames[0]);
-                game = playerObj.game;
+                game = playerObj.game; */
+                game.resetGame();
                 initGame();
+
+                //Debug
                 game.dealer[1] = {suit: "C", val: "A", visible: true}
                 break;
             /* case "joingame":
@@ -329,6 +330,37 @@ gameserv.on('request', (req) => {
         }
         update();
     }
+
+    function handleStartGame() {
+        let joined = false;
+
+        for (let i = 0; i < activeGames.length; i++) {
+            if (activeGames[i].players.length < 8) { // 8 is max players
+                //Game isn't full
+                if (activeGames[i].isGameStarted()) {
+                    playerObj.join(activeGames[i]);
+                    game = playerObj.game;
+                    game.hold(playerObj.hands[0]); //Player isn't active in this game, hold from the start.
+                    joined = true;
+                } else {
+                    //Game hasn't started fully
+                    playerObj.join(activeGames[i]);
+                    game = playerObj.game;
+                    initGame(); //-> handleNewJoin() -> gives 2 cards to new players
+                    joined = true;
+                }
+            }
+        }
+
+        if (!joined) {
+            //Too many players in all active games, start new game.
+            activeGames.push(new bjackGame()); //Starts new game
+            playerObj.join(activeGames[activeGames.length-1]); //length -1 due to 0 index
+            game = playerObj.game;
+            initGame();
+        }
+    }
+
     function update() {
         if (hasEveryoneBet()) {
             let updateResponse = {  type: "blackjack", content: "update" , players: []   };
@@ -387,6 +419,7 @@ gameserv.on('request', (req) => {
             handleNewJoin();
         
         //newGame();
+        activeHand = 0;
     }
 
     function newGame() {
@@ -475,17 +508,6 @@ gameserv.on('request', (req) => {
     }
 
     function handleHold() {
-        /* response.content = "hold";
-        game.hold(playerObj.hands[activeHand]);
-
-        updateResponsePoints();
-        response.dealer.cards = game.dealer;
-        response.player.cards = playerObj.hands[activeHand].cards;
-
-        response.player.winner = playerObj.hands[activeHand].winner;
-        
-        send(response);
-        updateWinnings(); */
         console.log("Holding fast! on: " + activeHand);
         game.hold(playerObj.hands[activeHand]);
         setNextHand();
@@ -496,7 +518,7 @@ gameserv.on('request', (req) => {
     function announceWinner() {
         console.log("Announced winner");
         if (game.isEveryoneDone()) {
-            let response = {type: "blackjack", content: "done", wins: [], dealer: {cards: [], points: 0} };
+            let response = {type: "blackjack", content: "done", wins: [], insurance: "L", dealer: {cards: [], points: 0} };
 
             for (let i = 0; i < playerObj.hands.length; i++) {
                 response.wins.push(playerObj.hands[i].winner);
@@ -504,6 +526,9 @@ gameserv.on('request', (req) => {
 
             response.dealer.cards = game.dealer;
             response.dealer.points = game.getCardsValue(game.dealer);
+
+            if (dealerHasBlackjack())
+                response.insurance = "W";
 
             updateWinnings();
 

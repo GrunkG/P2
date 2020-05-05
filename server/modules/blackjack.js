@@ -252,6 +252,16 @@ class Blackjack extends cardmod.Cards{
 
         return false; //Something went wrong, or client is attempting to cheat.
    }
+
+   isGameStarted() {
+        for (let i = 0; i < this.players.length; i++) {
+            let player = this.players[i];
+            if (player.hands.length > 1 || player.hands[0].cards.length > 2)
+                return true;
+        }
+        return false;
+   }
+
 }
 
 module.exports = Blackjack;
