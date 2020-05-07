@@ -152,6 +152,6 @@ class RemotePlayer extends Player{
         this.printHand(index);
     }
     removeRemoteFromHtml(){
-        remove(document.getElementById(this.id));
+        document.getElementById(this.id).remove();
     }
 }
