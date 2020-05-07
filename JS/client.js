@@ -3,8 +3,7 @@ const playerTarget = "player__card-container",
     dealerTarget = "dealer__card-container",
     dealerSumTarget = "dealer__card-sum";
 
-let game = null,
-    remoteDecks = [];
+let game = null;
 
 let hand = 0,
     handBets = [],
@@ -129,36 +128,32 @@ function updateGame(msg) {
 
     //For each active player
     for (let i = 0; i < players.length; i++) {
-        let remote_deck = remoteDecks[i],
-            player = players[i],
-            remote_id = "remote-player-p" + (i+1);
-
-        //Clean up remote deck for new cards
-        remote_deck = new Deck([]);
+        let remote_deck = game.remotes[i],
+            player = players[i];
 
         //For each active player hand
         for (let x = 0; x < player.hands.length; x++) {
-            let hand = player.hands[x];
+            let hand = player.hands[x],
+                remote_length = remote_deck.hands[x].cards.length;
+
+            if (remote_length == hand.cards.length)
+                continue;
 
             //-> Add hand cards to a hand element for each separat hand
-            for (let y = 0; y < hand.cards.length; y++) {
+            for (let y = remote_length; y < hand.cards.length; y++) {
                 let card = hand.cards[y];
                 let new_card = new Card(card.val.toString(), card.suit);
                 
                 //updateHand(hand, x);
 
-                remote_deck.cards.push(new_card);
+                remote_deck.hands[x].cards.push(new_card);
             }
         }
-
-        if (remoteDecks[i] == null)
-            remoteDecks.push(remote_deck);
         
         //Update the shown cards
-        game.updateScreen();
-        remote_deck.update(remote_id);
+        //game.updateScreen();
     }
-    //game.updateScreen();
+    game.updateScreen();
 }
 
 function updateHand(hand, index) {

@@ -6,7 +6,8 @@ const socket = require('websocket');
 const mysql = require('mysql'); // Not in use yet
 const dbConfig = require('./dbConfig.js')
 const cardgame = require('./modules/cards_foundation');
-const bjackGame = require('./modules/blackjack');
+const blackjackGame = require('./modules/blackjack').Blackjack;
+const blackjackPlayer = require('./modules/blackjack').Blackjack_player;
 
 let sqlconnection = mysql.createConnection(dbConfig);
 
@@ -164,15 +165,14 @@ gameserv.on('request', (req) => {
     console.log("Connection accepted from origin: " + req.origin);
 
     let game, //Active game
-        playerObj = new cardgame.Player(),
+        playerObj = new blackjackPlayer(),
         response = { type: "blackjack", content: "",
                     //Player response object
                     player: {hand: 0, cards: [], points: 0, winner: null, bet: 0, insurance: 0},
                     //Dealer response object
                     dealer: {cards: [], points: 0} },
         activeHand = 0, //Current playing hand -> 0 unless player has been able to split.
-        currency = 0,
-        userID = "";
+        currency = 0;
 
     playerObj.connection = connection;
 
@@ -287,22 +287,13 @@ gameserv.on('request', (req) => {
         switch(message.content) {
             case "startgame":
                 handleStartGame()
-
-                //Debug
-                game.dealer[1] = {suit: "C", val: "A", visible: true}
-                playerObj.hands[0].cards = [{suit: "C", val: 3, visible: true}, {suit: "C", val: 3, visible: true}]
                 break;
             case "newgame":
-                /* activeGames[0] = new bjackGame();
-                playerObj = new cardgame.Player();
-                playerObj.connection = connection;
-                playerObj.join(activeGames[0]);
-                game = playerObj.game; */
                 game.resetGame();
                 initGame();
 
                 //Debug
-                game.dealer[1] = {suit: "C", val: "A", visible: true}
+                //game.dealer[1] = {suit: "C", val: "A", visible: true}
                 break;
             /* case "joingame":
                 handleNewJoin();
@@ -354,12 +345,13 @@ gameserv.on('request', (req) => {
 
         if (!joined) {
             //Too many players in all active games, start new game.
-            activeGames.push(new bjackGame()); //Starts new game
+            activeGames.push(new blackjackGame()); //Starts new game
             playerObj.join(activeGames[activeGames.length-1]); //length -1 due to 0 index
             game = playerObj.game;
-            console.log("Game set! -> " + game);
             initGame();
         }
+
+        
     }
 
     function update() {
@@ -421,6 +413,8 @@ gameserv.on('request', (req) => {
         
         //newGame();
         activeHand = 0;
+        currency = 0;
+        clearResponse();
     }
 
     function newGame() {
@@ -442,16 +436,12 @@ gameserv.on('request', (req) => {
             let player = game.players[i];
             for(let j = 0; j < player.hands.length; j++) {
                 let hand = player.hands[j];
-                currencyCalculator(hand, playerObj.insurance);
+                currencyCalculator(hand, player.insurance);
             }
+
+            //Update database                                           + - = negative / + + = positive
+            sqlconnection.query(`UPDATE account SET currency = currency + ${currency} WHERE secret = '${player.secret}'`);
         }
-
-        //Update database
-        sqlconnection.query(`UPDATE account SET currency = currency + ${currency} WHERE secret = '${userID}'`);
-        //                                                          + - = negative, + + = positive
-        currency = 0;
-        clearResponse();
-
     }
 
     //Currency update method to add/subtract currency in-game
@@ -519,21 +509,26 @@ gameserv.on('request', (req) => {
     function announceWinner() {
         console.log("Announced winner");
         if (game.isEveryoneDone()) {
-            let response = {type: "blackjack", content: "done", wins: [], insurance: "L", dealer: {cards: [], points: 0} };
+            //Send announcement to everyone, not just the last player to trigger a hold
+            for (let i = 0; i < game.players.length; i++) {
+                let player = game.players[i];
+            
+                let response = {type: "blackjack", content: "done", wins: [], insurance: "L", dealer: {cards: [], points: 0} };
 
-            for (let i = 0; i < playerObj.hands.length; i++) {
-                response.wins.push(playerObj.hands[i].winner);
+                for (let i = 0; i < player.hands.length; i++) {
+                    response.wins.push(player.hands[i].winner);
+                }
+
+                response.dealer.cards = game.dealer;
+                response.dealer.points = game.getCardsValue(game.dealer);
+
+                if (dealerHasBlackjack())
+                    response.insurance = "W";
+
+                updateWinnings();
+
+                player.connection.send( JSON.stringify(response) );
             }
-
-            response.dealer.cards = game.dealer;
-            response.dealer.points = game.getCardsValue(game.dealer);
-
-            if (dealerHasBlackjack())
-                response.insurance = "W";
-
-            updateWinnings();
-
-            send(response);
         }
     }
 
@@ -571,7 +566,7 @@ gameserv.on('request', (req) => {
     function handleBet(msg) { //Send cards here
         let bet = msg.amount;
         
-        userID = msg.secret;
+        playerObj.secret = msg.secret; // Hackfix?
         console.log("Game: " + game + ", HL: " + playerObj.hands.length);
         game.bet(playerObj.hands[activeHand], bet);
         //Reponse code
