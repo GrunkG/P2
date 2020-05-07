@@ -1,10 +1,11 @@
 
 class Player{
-    constructor(id, hands = [new Deck([])], cardFront = "Default", cardBack = "default") { //Hands is an array of card arrays
+    constructor(id, hands = [new Deck([])], cardFront = "Default", cardBack = "default", username = "") { //Hands is an array of card arrays
         this.hands = hands;
         this.cardFront = cardFront;
         this.cardBack = cardBack;
         this.id = id;
+        this.username = username;
     }
     printHand(index) {
         this.hands[index].update(this.id, this.cardFront, index.toString());
@@ -119,9 +120,13 @@ class RemotePlayer extends Player{
         // let newRemoteCardSum = document.createElement("span");
 
         newRemote.setAttribute("class", "remote-player");
+        newRemote.setAttribute("id", this.id);
 
         newRemoteTitle.setAttribute("class", "remote-player__title"); //Title container
         newRemoteTitle.textContent = `${this.id.slice(14)}`; //"remote-player-" is sliced off
+        if (this.username.length) {
+            newRemoteTitle.textContent = this.username;
+        }
         newRemote.appendChild(newRemoteTitle);
 
         newRemoteCardContainer.setAttribute("class", "remote-player__card-container"); //Card container
@@ -147,6 +152,6 @@ class RemotePlayer extends Player{
         this.printHand(index);
     }
     removeRemoteFromHtml(){
-        remove(document.getElementById(this.id));
+        document.getElementById(this.id).remove();
     }
 }
