@@ -264,4 +264,11 @@ class Blackjack extends cardmod.Cards{
 
 }
 
-module.exports = Blackjack;
+class Blackjack_player extends cardmod.Player{
+    constructor() {
+        super();
+        this.insurance = 0;
+    }
+}
+
+module.exports = {Blackjack, Blackjack_player};
