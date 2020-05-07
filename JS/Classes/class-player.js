@@ -121,6 +121,7 @@ class RemotePlayer extends Player{
         // let newRemoteCardSum = document.createElement("span");
 
         newRemote.setAttribute("class", "remote-player");
+        newRemote.setAttribute("id", this.id);
 
         newRemoteTitle.setAttribute("class", "remote-player__title"); //Title container
         newRemoteTitle.textContent = `${this.id.slice(14)}`; //"remote-player-" is sliced off
