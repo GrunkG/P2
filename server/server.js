@@ -355,7 +355,7 @@ gameserv.on('request', (req) => {
     }
 
     function update() {
-        if (hasEveryoneBet()) {
+        //if (hasEveryoneBet()) {
             let updateResponse = {  type: "blackjack", content: "update" , players: []   };
             
             //For each player active in the game
@@ -383,7 +383,7 @@ gameserv.on('request', (req) => {
                 let player = game.players[i];
                 player.connection.send( JSON.stringify(updateResponse) );
             }
-        }
+       // }
 
     }
 

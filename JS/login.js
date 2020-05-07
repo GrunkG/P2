@@ -61,6 +61,7 @@ websocket.onmessage = (message) => {
         if (msg.type == "login") {
             switch(msg.state) {
                 case "success":
+                    console.log("Was in login!");
                     //toggleLogin();
                     document.getElementById("player__info--capital").innerHTML = msg.currency;
                     document.cookie = "secret = " + msg.identity;

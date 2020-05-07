@@ -36,15 +36,7 @@ function dealCard(target, card, visible = true) {
 }
 
 function handleHit(msg) {
-    /* let player = msg.player;
-    let card = player.cards,
-        new_card = new Card(card.val.toString(), card.suit);
-            
-    dealCard(playerTarget, new_card);
-    playerDeck.deck.push(new_card)
-    playerDeck.update();
-    document.getElementById(playerSumTarget).innerHTML = player.points;
-    document.getElementById(remoteSumTarget).innerHTML = player.points; */
+
     //Currently sending all cards at a time, rather than just 1 card.
     handleCards(msg);
 }
@@ -121,7 +113,7 @@ function updateGame(msg) {
     let remote_players = document.getElementsByClassName("remote-player");
     let players = msg.players;
     
-    resetRemotes();
+    game.removeAllRemotes();
     game.addRemotes(players.length);
 
     //For each active player
@@ -367,6 +359,7 @@ function doRegister(){
 function doNewGame() {
     game.togglePlayAgainOnPress();
     game.player.resetResults();
+    game.removeAllRemotes();
     websocket.send(JSON.stringify({type: "game", content: "newgame"}));
 }
 
