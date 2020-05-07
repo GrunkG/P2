@@ -120,11 +120,9 @@ function updateGame(msg) {
     //Add new remote players if necessary
     let remote_players = document.getElementsByClassName("remote-player");
     let players = msg.players;
-    let difference = remote_players.length - players.length;
     
-    //If the difference is greater than 0
-    if (Math.abs(difference) > 0)
-        game.addRemotes(Math.abs(difference));
+    resetRemotes();
+    game.addRemotes(players.length);
 
     //For each active player
     for (let i = 0; i < players.length; i++) {
@@ -154,6 +152,15 @@ function updateGame(msg) {
         //game.updateScreen();
     }
     game.updateScreen();
+}
+
+function resetRemotes() {
+    let remotes = document.getElementsByClassName("remote-player");
+    for (let i = 0; i < remotes.length; i++) {
+        remotes[i].remove();
+    }
+
+    game.remotes = [];
 }
 
 function updateHand(hand, index) {
@@ -326,6 +333,7 @@ function doHit() {
 function doHold() {
     determineActiveHand();
     game.player.hands[hand].hold = true;
+    game.player.resetHandClassAttributes(hand);
     websocket.send(JSON.stringify({type: "game", content: "hold"}));
 }
 function doDouble() {
@@ -359,7 +367,6 @@ function doRegister(){
 function doNewGame() {
     game.togglePlayAgainOnPress();
     game.player.resetResults();
-
     websocket.send(JSON.stringify({type: "game", content: "newgame"}));
 }
 
