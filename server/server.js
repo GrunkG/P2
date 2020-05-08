@@ -245,7 +245,7 @@ gameserv.on('request', (req) => {
     }
 
     function loginUser(username, password) {
-        let test = sqlconnection.query(`SELECT currency, ID FROM account WHERE username='${username}' AND password='${password}'`, (error, result, fields) => {
+        let test = sqlconnection.query(`SELECT currency, games_won, games_lost, games_played, ID FROM account WHERE username='${username}' AND password='${password}'`, (error, result, fields) => {
             if (error) {
                 throw error;
             } else if (password.length == 0) {
@@ -264,7 +264,7 @@ gameserv.on('request', (req) => {
                         throw error;
                 });
 
-                send({type: "login", state: "success", currency: result[0].currency, identity: secret});
+                send({type: "login", state: "success", currency: result[0].currency, games_won: result[0].games_won, games_lost: result[0].games_lost, games_played: result[0].games_played, identity: secret});
             } else {
                 //User doesn't exist or password is wrong
                 send({type: "login", state: "noexist"});
@@ -441,6 +441,9 @@ gameserv.on('request', (req) => {
 
             //Update database                                           + - = negative / + + = positive
             sqlconnection.query(`UPDATE account SET currency = currency + ${currency} WHERE secret = '${player.secret}'`);
+            //sqlconnection.query(`UPDATE account SET games_won = games_won + ${games_won} WHERE secret = '${player.secret}'`);
+            //sqlconnection.query(`UPDATE account SET games_lost = games_lost + ${games_lost} WHERE secret = '${player.secret}'`);
+            //sqlconnection.query(`UPDATE account SET games_played = games_played + ${games_played} WHERE secret = '${player.secret}'`);
         }
     }
 
