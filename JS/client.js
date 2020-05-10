@@ -357,7 +357,7 @@ function doBet() {
     let value = parseInt(input.value);
 
     let currency = parseInt(document.getElementById("player__info--capital").innerHTML);
-    if ((currency - value) > 0){    
+    if ((currency - value) >= 0){    
         currency -= value;
 
         document.getElementById("player__info--capital").innerHTML = currency;
