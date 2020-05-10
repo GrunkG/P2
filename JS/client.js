@@ -357,11 +357,13 @@ function doBet() {
     let value = parseInt(input.value);
 
     let currency = parseInt(document.getElementById("player__info--capital").innerHTML);
-    currency -= value;
+    if ((currency - value) > 0){    
+        currency -= value;
 
-    document.getElementById("player__info--capital").innerHTML = currency;
+        document.getElementById("player__info--capital").innerHTML = currency;
 
-    websocket.send(JSON.stringify({type: "game", content: "bet", amount: value, secret: getCookie("secret")}));
+        websocket.send(JSON.stringify({type: "game", content: "bet", amount: value, secret: getCookie("secret")}));
+    } else alert("You have insufficient currency, try a smaller bet :)!")
 }
 
 function doRegister(){
