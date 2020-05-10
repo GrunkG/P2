@@ -242,19 +242,31 @@ function handleGameDone(msg) {
 }
 
 function handleWinner(hand, state) {
-    let currency = parseInt(document.getElementById("player__info--capital").innerHTML);
+    let currency = parseInt(document.getElementById("player__info--capital").innerHTML),
+        wins = parseInt(document.getElementById("player__info--wins").innerHTML),
+        losses = parseInt(document.getElementById("player__info--losses").innerHTML),
+        draws = parseInt(document.getElementById("player__info--draws").innerHTML),
+        played = parseInt(document.getElementById("player__info--played").innerHTML);
     //clearCardHolders();
+    played++;
     if (state == "D") {
         game.player.displayDrawHand(hand);
         currency += handBets[hand];
+        draws++;
     } else if (state == "W") {
         game.player.displayWinHand(hand);
         currency += handBets[hand] * 2;
+        wins++;
     } else {
         game.player.displayLoseHand(hand);
+        losses++;
     }
 
     document.getElementById("player__info--capital").innerHTML = currency;
+    document.getElementById("player__info--wins").innerHTML = wins;
+    document.getElementById("player__info--losses").innerHTML = losses;
+    document.getElementById("player__info--draws").innerHTML = draws;
+    document.getElementById("player__info--played").innerHTML = played;
 }
 
 function handleInsuranceWin(insuranceState) {

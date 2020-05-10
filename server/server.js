@@ -172,7 +172,11 @@ gameserv.on('request', (req) => {
                     //Dealer response object
                     dealer: {cards: [], points: 0} },
         activeHand = 0, //Current playing hand -> 0 unless player has been able to split.
-        currency = 0;
+        currency = 0,
+        games_played = 0,
+        games_won = 0,
+        games_lost = 0,
+        games_drawn = 0;
 
     playerObj.connection = connection;
 
@@ -245,7 +249,7 @@ gameserv.on('request', (req) => {
     }
 
     function loginUser(username, password) {
-        let test = sqlconnection.query(`SELECT currency, games_won, games_lost, games_played, ID FROM account WHERE username='${username}' AND password='${password}'`, (error, result, fields) => {
+        let test = sqlconnection.query(`SELECT currency, games_won, games_drawn, games_lost, games_played, ID FROM account WHERE username='${username}' AND password='${password}'`, (error, result, fields) => {
             if (error) {
                 throw error;
             } else if (password.length == 0) {
@@ -264,7 +268,8 @@ gameserv.on('request', (req) => {
                         throw error;
                 });
 
-                send({type: "login", state: "success", currency: result[0].currency, games_won: result[0].games_won, games_lost: result[0].games_lost, games_played: result[0].games_played, identity: secret});
+                send({type: "login", state: "success", currency: result[0].currency, games_won: result[0].games_won, games_lost: result[0].games_lost,
+                                                       games_played: result[0].games_played, games_drawn: result[0].games_drawn, identity: secret});
             } else {
                 //User doesn't exist or password is wrong
                 send({type: "login", state: "noexist"});
@@ -441,9 +446,10 @@ gameserv.on('request', (req) => {
 
             //Update database                                           + - = negative / + + = positive
             sqlconnection.query(`UPDATE account SET currency = currency + ${currency} WHERE secret = '${player.secret}'`);
-            //sqlconnection.query(`UPDATE account SET games_won = games_won + ${games_won} WHERE secret = '${player.secret}'`);
-            //sqlconnection.query(`UPDATE account SET games_lost = games_lost + ${games_lost} WHERE secret = '${player.secret}'`);
-            //sqlconnection.query(`UPDATE account SET games_played = games_played + ${games_played} WHERE secret = '${player.secret}'`);
+            sqlconnection.query(`UPDATE account SET games_won = games_won + ${games_won} WHERE secret = '${player.secret}'`);
+            sqlconnection.query(`UPDATE account SET games_lost = games_lost + ${games_lost} WHERE secret = '${player.secret}'`);
+            sqlconnection.query(`UPDATE account SET games_drawn = games_drawn + ${games_drawn} WHERE secret = '${player.secret}'`);
+            sqlconnection.query(`UPDATE account SET games_played = games_played + ${games_played} WHERE secret = '${player.secret}'`);
         }
     }
 
@@ -459,12 +465,16 @@ gameserv.on('request', (req) => {
             console.log("Lost insurance");
         }
         
-        //Withdraws the correct amount of money
+        //Withdraws the correct amount of money and add stats
+        games_played++;
         if (hand.winner == "W") {
             currency += hand.bet;
-            
+            games_won++;           
         } else if (hand.winner == "L") {
             currency -= hand.bet;
+            games_lost++;
+        } else {
+            games_drawn++;
         }
     }
 
