@@ -24,11 +24,15 @@ let port = 3000,
 const pathPublic = "./";
 const defaultHTML = "html/blackjack.html";
 
-class user {
-    constructor(connection) {
-        this.ID = null,
-        this.playerObj = null;
-        this.connection = connection;
+class user_stats extends blackjackPlayer {
+    constructor() {
+        super();
+        this.games_played = 0;
+        this.games_won = 0;
+        this.games_lost = 0;
+        this.games_drawn = 0;
+        this.exp = 0,
+        this.username = null;
     }
 };
 
@@ -165,18 +169,13 @@ gameserv.on('request', (req) => {
     console.log("Connection accepted from origin: " + req.origin);
 
     let game, //Active game
-        playerObj = new blackjackPlayer(),
+        playerObj = new user_stats(),
         response = { type: "blackjack", content: "",
                     //Player response object
                     player: {hand: 0, cards: [], points: 0, winner: null, bet: 0, insurance: 0},
                     //Dealer response object
                     dealer: {cards: [], points: 0} },
-        activeHand = 0, //Current playing hand -> 0 unless player has been able to split.
-        currency = 0,
-        games_played = 0,
-        games_won = 0,
-        games_lost = 0,
-        games_drawn = 0;
+        activeHand = 0; //Current playing hand -> 0 unless player has been able to split.
 
     playerObj.connection = connection;
 
@@ -196,9 +195,14 @@ gameserv.on('request', (req) => {
     });
 
     //Handle closed connection
+    //TODO: Remove player from remotes in an active game
     connection.on('close', (connection) => {
         //Remove player from its active game
-       // game.removePlayer(playerObj);
+        if (game != null) {
+            game.leave(playerObj);
+            cleanUpInactiveGames();
+        }
+        
 
         //Check if no players are left
             //Remove game if true
@@ -267,9 +271,8 @@ gameserv.on('request', (req) => {
                     if (error)
                         throw error;
                 });
-
                 send({type: "login", state: "success", currency: result[0].currency, games_won: result[0].games_won, games_lost: result[0].games_lost,
-                                                       games_played: result[0].games_played, games_drawn: result[0].games_drawn, identity: secret});
+                                                       games_played: result[0].games_played, games_drawn: result[0].games_drawn, identity: secret, username: username});
             } else {
                 //User doesn't exist or password is wrong
                 send({type: "login", state: "noexist"});
@@ -280,6 +283,7 @@ gameserv.on('request', (req) => {
         test.on('result', (row) => {
             console.log(row);
         });
+        playerObj.username = username;
     }
 
     function generateSecret() {
@@ -292,11 +296,14 @@ gameserv.on('request', (req) => {
         switch(message.content) {
             case "startgame":
                 handleStartGame()
+                playerObj.username = message.username;
+                playerObj.secret = message.secret;
                 break;
             case "newgame":
                 game.resetGame();
-                initGame();
-
+                game.resetPlayers();
+                //initGame();
+                handleNewGame();
                 //Debug
                 //game.dealer[1] = {suit: "C", val: "A", visible: true}
                 break;
@@ -333,18 +340,20 @@ gameserv.on('request', (req) => {
         for (let i = 0; i < activeGames.length; i++) {
             if (activeGames[i].players.length < 8) { // 8 is max players
                 //Game isn't full
-                if (activeGames[i].isGameStarted()) {
+                //game.isEveryoneDone()
+                if (!activeGames[i].isGameStarted()) {
                     playerObj.join(activeGames[i]);
                     game = playerObj.game;
-                    game.hold(playerObj.hands[0]); //Player isn't active in this game, hold from the start.
+                    //game.hold(playerObj.hands[0]); //Player isn't active in this game, hold from the start.
+                    initGame();
                     joined = true;
-                } else {
+                } /* else {
                     //Game hasn't started fully
                     playerObj.join(activeGames[i]);
                     game = playerObj.game;
                     initGame(); //-> handleNewJoin() -> gives 2 cards to new players
                     joined = true;
-                }
+                } */
             }
         }
 
@@ -359,27 +368,47 @@ gameserv.on('request', (req) => {
         
     }
 
+    function handleNewGame() {
+        game.leave(playerObj);
+        cleanUpInactiveGames();
+
+        handleStartGame();
+    }
+
+    //Remove in-active games from the activeGames array.
+    function cleanUpInactiveGames() {
+        for (let i = 0; i < activeGames.length; i++) {
+            let players = activeGames[i].players.length;
+            if (players == 0)
+                activeGames.splice(i, 1);
+        }
+    }
+
     function update() {
-        //if (hasEveryoneBet()) {
             let updateResponse = {  type: "blackjack", content: "update" , players: []   };
             
             //For each player active in the game
             for (let i = 0; i < game.players.length; i++) {
-                let playersResponse = {hands: [], insurance: 0};
+                let playersResponse = {hands: [], insurance: 0, username: null},
+                    player = game.players[i],
+                    bet = 0;
 
-                let player = game.players[i];
-                let hands = player.hands;
-
+                playersResponse.username = player.username;
                 //For each hand active for the player
                 for (let x = 0; x < player.hands.length; x++) {
-                    let hand = player.hands[x];
-                    let value = game.getCardsValue(hand.cards);
+                    let hand = player.hands[x],
+                        value = game.getCardsValue(hand.cards);;
+                    bet += hand.bet;
                     playersResponse.hands.push( {   cards: hand.cards, bet: hand.bet, 
                                                 isHolding: hand.isHolding, winner: hand.winner, points: value }  );
                 }
 
-                playersResponse.insurance = player.insurance;
-                updateResponse.players.push(playersResponse);
+                //Don't push the player for update, unless they have bet.
+                //If the player hasn't bet, then they're not in play.
+                if (bet > 0) {
+                    playersResponse.insurance = player.insurance;
+                    updateResponse.players.push(playersResponse);
+                }
             }
 
             //send(updateResponse);
@@ -388,19 +417,6 @@ gameserv.on('request', (req) => {
                 let player = game.players[i];
                 player.connection.send( JSON.stringify(updateResponse) );
             }
-       // }
-
-    }
-
-    function hasEveryoneBet() {
-        for (let i = 0; i < game.players.length; i++) {
-            let player = game.players[i];
-            let hand = player.hands[0];
-            
-            if (hand.bet == 0)
-                return false;
-        }
-        return true;
     }
 
     function updateResponsePoints() {
@@ -418,7 +434,7 @@ gameserv.on('request', (req) => {
         
         //newGame();
         activeHand = 0;
-        currency = 0;
+        playerObj.currency = 0;
         clearResponse();
     }
 
@@ -441,40 +457,54 @@ gameserv.on('request', (req) => {
             let player = game.players[i];
             for(let j = 0; j < player.hands.length; j++) {
                 let hand = player.hands[j];
-                currencyCalculator(hand, player.insurance);
+                currencyCalculator(hand, player, player.insurance);
             }
 
+            updatePlayerStats(player);
+
             //Update database                                           + - = negative / + + = positive
-            sqlconnection.query(`UPDATE account SET currency = currency + ${currency} WHERE secret = '${player.secret}'`);
-            sqlconnection.query(`UPDATE account SET games_won = games_won + ${games_won} WHERE secret = '${player.secret}'`);
-            sqlconnection.query(`UPDATE account SET games_lost = games_lost + ${games_lost} WHERE secret = '${player.secret}'`);
-            sqlconnection.query(`UPDATE account SET games_drawn = games_drawn + ${games_drawn} WHERE secret = '${player.secret}'`);
-            sqlconnection.query(`UPDATE account SET games_played = games_played + ${games_played} WHERE secret = '${player.secret}'`);
+            sqlconnection.query(`UPDATE account SET currency = currency + ${player.currency} WHERE secret = '${player.secret}'`);
+            sqlconnection.query(`UPDATE account SET games_won = games_won + ${player.games_won} WHERE secret = '${player.secret}'`);
+            sqlconnection.query(`UPDATE account SET games_lost = games_lost + ${player.games_lost} WHERE secret = '${player.secret}'`);
+            sqlconnection.query(`UPDATE account SET games_drawn = games_drawn + ${player.games_drawn} WHERE secret = '${player.secret}'`);
+            sqlconnection.query(`UPDATE account SET games_played = games_played + ${player.games_played} WHERE secret = '${player.secret}'`);
         }
     }
 
     //Currency update method to add/subtract currency in-game
     //OBS!    playerObj.currencyAmount skal ændres til noget fra db'en
-    function currencyCalculator(hand, insurance) {
+    function currencyCalculator(hand, player, insurance) {
         //Withdraws the correct amount of money in case the player insures
         if (insurance > 0 && dealerHasBlackjack()) {
-            currency += insurance * 2;
+            player.currency += insurance * 2;
             console.log("Won insurance");
         } else if (insurance > 0 && !dealerHasBlackjack()) {
-            currency -= insurance;
+            player.currency -= insurance;
             console.log("Lost insurance");
         }
         
         //Withdraws the correct amount of money and add stats
-        games_played++;
+        
         if (hand.winner == "W") {
-            currency += hand.bet;
-            games_won++;           
+            player.currency += hand.bet;          
         } else if (hand.winner == "L") {
-            currency -= hand.bet;
-            games_lost++;
-        } else {
-            games_drawn++;
+            player.currency -= hand.bet;
+        }
+    }
+
+    function updatePlayerStats(player) {
+        //console.log("Updating player stats");
+        //console.log(playerObj);
+        for (let i = 0; i < player.hands.length; i++) {
+            let hand = player.hands[i];
+            player.games_played++;
+            if (hand.winner == "W") {
+                player.games_won++;           
+            } else if (hand.winner == "L") {
+                player.games_lost++;
+            } else {
+                player.games_drawn++;
+            }
         }
     }
 
@@ -578,9 +608,8 @@ gameserv.on('request', (req) => {
 
     function handleBet(msg) { //Send cards here
         let bet = msg.amount;
-        
-        playerObj.secret = msg.secret; // Hackfix?
-        console.log("Game: " + game + ", HL: " + playerObj.hands.length);
+
+        //playerObj.secret = msg.secret; // Hackfix?
         game.bet(playerObj.hands[activeHand], bet);
         //Reponse code
         response.content = "card";

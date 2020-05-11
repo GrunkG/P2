@@ -82,6 +82,10 @@ class Cards { //Rename
         this.resetPlayerHands();
     }
 
+    resetPlayers() {
+        this.players = [];
+    }
+
     resetPlayerHands() {
         for (let i = 0; i < this.players.length; i++) {
             let player  = this.players[i];
@@ -117,15 +121,33 @@ class Cards { //Rename
         hand.bet = amount;
     }
 
+    hasEveryoneBet() {
+        for (let i = 0; i < this.players.length; i++) {
+            let player = this.players[i];
+            let hand = player.hands[0];
+            
+            if (hand.bet == 0)
+                return false;
+        }
+        return true;
+    }
+
     //Remove player from the game in the case a player leaves or is forced a leave.
     removePlayer(playerToRemove) {
         for (let i = 0; i < this.players.length; i++) {
             let current = this.players[i];
             if (current == playerToRemove)
-                this.players[i].pop();
+                this.players.splice(i, 1);
         }
     }
 
+    leave(playerObject) {
+        if (this.players.length > 1) {
+            this.removePlayer(playerObject);
+        } else {
+            this.players = [];
+        }
+    }
 }
 
 class Player {

@@ -69,6 +69,10 @@ websocket.onmessage = (message) => {
                     document.getElementById("player__info--draws").innerHTML = msg.games_drawn;
                     document.getElementById("player__info--played").innerHTML = msg.games_played;
                     document.cookie = "secret = " + msg.identity;
+
+                    //websocket = new WebSocket(`ws://${host}:${port}/`);
+                    //
+
                     initiateGame();
                     toggleLogin();
                     toggleLogout();
