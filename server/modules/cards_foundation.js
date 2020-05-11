@@ -79,7 +79,7 @@ class Cards { //Rename
     resetGame() {
         this.deck = [];
         this.dealer = [];
-        resetPlayerHands();
+        this.resetPlayerHands();
     }
 
     resetPlayerHands() {

@@ -36,15 +36,7 @@ function dealCard(target, card, visible = true) {
 }
 
 function handleHit(msg) {
-    /* let player = msg.player;
-    let card = player.cards,
-        new_card = new Card(card.val.toString(), card.suit);
-            
-    dealCard(playerTarget, new_card);
-    playerDeck.deck.push(new_card)
-    playerDeck.update();
-    document.getElementById(playerSumTarget).innerHTML = player.points;
-    document.getElementById(remoteSumTarget).innerHTML = player.points; */
+
     //Currently sending all cards at a time, rather than just 1 card.
     handleCards(msg);
 }
@@ -120,11 +112,9 @@ function updateGame(msg) {
     //Add new remote players if necessary
     let remote_players = document.getElementsByClassName("remote-player");
     let players = msg.players;
-    let difference = remote_players.length - players.length;
     
-    //If the difference is greater than 0
-    if (Math.abs(difference) > 0)
-        game.addRemotes(Math.abs(difference));
+    game.removeAllRemotes();
+    game.addRemotes(players.length);
 
     //For each active player
     for (let i = 0; i < players.length; i++) {
@@ -154,6 +144,15 @@ function updateGame(msg) {
         //game.updateScreen();
     }
     game.updateScreen();
+}
+
+function resetRemotes() {
+    let remotes = document.getElementsByClassName("remote-player");
+    for (let i = 0; i < remotes.length; i++) {
+        remotes[i].remove();
+    }
+
+    game.remotes = [];
 }
 
 function updateHand(hand, index) {
@@ -243,19 +242,31 @@ function handleGameDone(msg) {
 }
 
 function handleWinner(hand, state) {
-    let currency = parseInt(document.getElementById("player__info--capital").innerHTML);
+    let currency = parseInt(document.getElementById("player__info--capital").innerHTML),
+        wins = parseInt(document.getElementById("player__info--wins").innerHTML),
+        losses = parseInt(document.getElementById("player__info--losses").innerHTML),
+        draws = parseInt(document.getElementById("player__info--draws").innerHTML),
+        played = parseInt(document.getElementById("player__info--played").innerHTML);
     //clearCardHolders();
+    played++;
     if (state == "D") {
         game.player.displayDrawHand(hand);
         currency += handBets[hand];
+        draws++;
     } else if (state == "W") {
         game.player.displayWinHand(hand);
         currency += handBets[hand] * 2;
+        wins++;
     } else {
         game.player.displayLoseHand(hand);
+        losses++;
     }
 
     document.getElementById("player__info--capital").innerHTML = currency;
+    document.getElementById("player__info--wins").innerHTML = wins;
+    document.getElementById("player__info--losses").innerHTML = losses;
+    document.getElementById("player__info--draws").innerHTML = draws;
+    document.getElementById("player__info--played").innerHTML = played;
 }
 
 function handleInsuranceWin(insuranceState) {
@@ -326,6 +337,7 @@ function doHit() {
 function doHold() {
     determineActiveHand();
     game.player.hands[hand].hold = true;
+    game.player.resetHandClassAttributes(hand);
     websocket.send(JSON.stringify({type: "game", content: "hold"}));
 }
 function doDouble() {
@@ -345,11 +357,13 @@ function doBet() {
     let value = parseInt(input.value);
 
     let currency = parseInt(document.getElementById("player__info--capital").innerHTML);
-    currency -= value;
+    if ((currency - value) >= 0){    
+        currency -= value;
 
-    document.getElementById("player__info--capital").innerHTML = currency;
+        document.getElementById("player__info--capital").innerHTML = currency;
 
-    websocket.send(JSON.stringify({type: "game", content: "bet", amount: value, secret: getCookie("secret")}));
+        websocket.send(JSON.stringify({type: "game", content: "bet", amount: value, secret: getCookie("secret")}));
+    } else alert("You have insufficient currency, try a smaller bet :)!")
 }
 
 function doRegister(){
@@ -359,7 +373,7 @@ function doRegister(){
 function doNewGame() {
     game.togglePlayAgainOnPress();
     game.player.resetResults();
-
+    game.removeAllRemotes();
     websocket.send(JSON.stringify({type: "game", content: "newgame"}));
 }
 
