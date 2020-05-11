@@ -9,6 +9,8 @@ const cardgame = require('./modules/cards_foundation');
 const blackjackGame = require('./modules/blackjack').Blackjack;
 const blackjackPlayer = require('./modules/blackjack').Blackjack_player;
 
+const bcrypt = require("bcrypt-nodejs"); //Used for cryptation
+
 let sqlconnection = mysql.createConnection(dbConfig);
 
 sqlconnection.connect((err) => {
@@ -233,7 +235,8 @@ gameserv.on('request', (req) => {
                 //Check password isn't empty.
                 if (password.length > 0) {
                     //Register user
-                    sqlconnection.query(`INSERT INTO account (username, password) VALUES ('${username}', '${password}')`);
+                    let passwordEncrypted = bcrypt.hashSync(password, null, null);
+                    sqlconnection.query(`INSERT INTO account (username, password) VALUES ('${username}', '${passwordEncrypted}')`);
                     send({type: "register", state: "success"});
                 } else if (password.length == 0) {
                     send({type: "register", state: "zeropassword"});
@@ -245,13 +248,15 @@ gameserv.on('request', (req) => {
     }
 
     function loginUser(username, password) {
-        let test = sqlconnection.query(`SELECT currency, ID FROM account WHERE username='${username}' AND password='${password}'`, (error, result, fields) => {
+        //let test = sqlconnection.query(`SELECT currency, ID FROM account WHERE username='${username}' AND password='${password}'`, (error, result, fields) => {
+            //connection.query("SELECT * FROM account WHERE username = ? ", [username], (error, rows) => {
+        let test = sqlconnection.query(`SELECT currency, ID, password FROM account WHERE username='${username}'`, (error, result, fields) => {
             if (error) {
                 throw error;
             } else if (password.length == 0) {
                     //Notify user, error password empty
                     send({type: "login", state: "zeropassword"});
-            } else if (result.length > 0) {
+            } else if (result.length > 0 && result[0].password.length > 15 && bcrypt.compareSync(password, result[0].password)) {
                 //Login user
                 console.log("Successful login");
                 //console.log(`Results: ${JSON.stringify(result)} :: fields: ${JSON.stringify(fields)}`);
