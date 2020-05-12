@@ -1,7 +1,7 @@
 let host = "localhost",
     port = 3000;
 
-let websocket = new WebSocket(`ws://${host}:${port}/`);
+let websocket = null //new WebSocket(`ws://${host}:${port}/`);
 
 function getCookie(name) {
     var value = "; " + document.cookie;

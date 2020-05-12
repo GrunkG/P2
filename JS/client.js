@@ -21,6 +21,8 @@ window.onload = () => {
     }
 
     toggleLogin();
+    handleLoginsystem();
+    document.onkeydown = keyHandling;
 };
 
 function initiateGame() {
@@ -177,14 +179,15 @@ function gameHandler() {
     websocket = new WebSocket(`ws://${host}:${port}/`);
     
     websocket.onopen = () => {
-        websocket.send(JSON.stringify({type: "game", content: "startgame", username: document.getElementById("username").value, secret: getCookie("secret")}));
+        let playerName = document.getElementById("username").value,
+            playerSecret = getCookie("secret"),
+            playerCurrency = document.getElementById("player__info--capital").innerHTML;
+        websocket.send(JSON.stringify({type: "game", content: "startgame", username: playerName, currency: playerCurrency, secret: playerSecret}));
     }
 
     websocket.onmessage = (message) => {
         try {
-            let msg = JSON.parse(message.data),
-                cardObj,
-                newCard;
+            let msg = JSON.parse(message.data);
             console.log(msg);
             if (msg.type == "blackjack") {
                 switch (msg.content) {
@@ -244,6 +247,21 @@ function handleGameDone(msg) {
     updateDealer(msg);
     game.updateScreen();
     game.togglePlayAgain();
+}
+
+function resetGamePlatform() {
+    if (game != null) {
+        game.player.resetResults();
+        game.player.hands[0].cards = [];
+        game.dealer.hands[0].cards = [];
+        game.updateScreen();
+        game.removeAllRemotes();
+        game.toggleBetInput();
+    }
+
+    document.getElementById(dealerSumTarget).innerHTML = "";
+    document.getElementById(playerSumTarget).innerHTML = "";
+    
 }
 
 function handleWinner(hand, state) {

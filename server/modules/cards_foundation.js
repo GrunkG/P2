@@ -136,8 +136,10 @@ class Cards { //Rename
     removePlayer(playerToRemove) {
         for (let i = 0; i < this.players.length; i++) {
             let current = this.players[i];
-            if (current == playerToRemove)
+            if (current == playerToRemove) {
+                playerToRemove.game = null;
                 this.players.splice(i, 1);
+            }
         }
     }
 
@@ -147,6 +149,14 @@ class Cards { //Rename
         } else {
             this.players = [];
         }
+    }
+
+    isPlayerInGame(playerToCheck) {
+        for(let i = 0; i < this.players.length; i++) {
+            if (playerToCheck == this.players[i])
+                return true;
+        }
+        return false;
     }
 }
 

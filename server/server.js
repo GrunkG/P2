@@ -26,7 +26,7 @@ let port = 3000,
 const pathPublic = "./";
 const defaultHTML = "html/blackjack.html";
 
-class user_stats extends blackjackPlayer {
+class user extends blackjackPlayer {
     constructor() {
         super();
         this.games_played = 0;
@@ -35,8 +35,30 @@ class user_stats extends blackjackPlayer {
         this.games_drawn = 0;
         this.exp = 0,
         this.username = null;
+        this.secret = null;
+        this.connection = null;
     }
 };
+
+class multiplayer_blackjack extends blackjackGame {
+    constructor() {
+        super();
+    }
+
+    kickAFK() {
+        for (let i = 0; i < this.players.length; i++) {
+            let player = this.players[i];
+            for (let h = 0; h < player.hands.length; h++) {
+                let hand = player.hands[h];
+                if (!hand.isHolding) {
+                    this.removePlayer(player);
+                }
+            }
+        }
+
+        this.endGame();
+    }
+}
 
 let activeGames = [];
 
@@ -47,11 +69,6 @@ const webserv = http.createServer((req, res) => {
     
     //Handle GET requests
     if (method == "GET") {
-
-        //Adapt url in-case of a login/registration -- Find way to determine registration or login
-        if (req.url.indexOf("/?") == 0)
-            url = "loginSystem";
-
         switch(url) {
             case "/":
                 webtools.fileResponse(defaultHTML, pathPublic, res)
@@ -67,79 +84,9 @@ const webserv = http.createServer((req, res) => {
                 webtools.fileResponse(req.url, pathPublic, res)
                 break;
         }
-    } else if (method == "POST") {
-      /*   let data = [];
-        req.on('data', (chunk) => {
-            data.push(chunk);
-        }).on('end', () => {
-            data = Buffer.concat(data).toString();
-            console.log("url: " + req.url + ": " + data);
-
-            let username = data.split("&")[0].split("=")[1];
-            let password = data.split("&")[1].split("=")[1];
-
-            switch(req.url) {
-                case "/html/login":
-                    loginUser(username, password);
-                    break;
-                case "/html/register":
-                    registerUser(username, password);
-                    break;
-                default: break;
-            }
-
-            // res.statusCode = 200;
-            // res.end('\n'); //response is empty 
-        });*/
     } else {
         console.log(`Method: ${req.method}, url: ${req.url}`);
     }
-
-
-    /* async function registerUser(username, password) {
-        //Check for username
-       connection.query(`SELECT username FROM account WHERE username='${username}'`, (error, result, fields) => {
-            if (error) {
-                throw error;
-            } else if (result.length > 0) {
-                    //Notify user, user already exists
-            } else {
-                //Check password isn't empty.
-                if (password.length > 0) {
-                    //Register user
-                    connection.query(`INSERT INTO account (username, password) VALUES ('${username}', '${password}')`);
-                }
-
-                //Throw error, user had empty password
-            }
-        }); 
-    } */
-
-    /* async function loginUser(username, password) {
-        connection.query(`SELECT username, password FROM account WHERE username='${username}' AND password='${password}'`, (error, result, fields) => {
-            if (error) {
-                throw error;
-            } else if (password.length == 0) {
-                    //Notify user, error password empty
-            } else if (result.length > 0) {
-                //Login user
-                console.log("Successful login");
-                webtools.fileResponse(defaultHTML, pathPublic, res)
-
-                //Update user with relevant info
-                //    - Currency
-                //    - Secret
-                //        - Random string -> generate on login                   
-                
-
-                res.statusCode = 200;
-                res.end('\n'); //response is empty 
-            } else {
-                //User doesn't exist or password is wrong
-            }
-            //Throw error, user had empty password
-        });
-    }  */
 
 });
 
@@ -171,7 +118,7 @@ gameserv.on('request', (req) => {
     console.log("Connection accepted from origin: " + req.origin);
 
     let game, //Active game
-        playerObj = new user_stats(),
+        playerObj = new user(),
         response = { type: "blackjack", content: "",
                     //Player response object
                     player: {hand: 0, cards: [], points: 0, winner: null, bet: 0, insurance: 0},
@@ -188,12 +135,13 @@ gameserv.on('request', (req) => {
         //Try and convert message to an easy to handle JSON object.
         //try { 
             let msg = JSON.parse(message.utf8Data);
+            console.log(message.utf8Data);
             if (msg.type == "game") gamehandler(msg);
             if (msg.type == "loginsystem") userhandler(msg);
-       /*  } catch (err) { //Wrong type of message, print error.
+        /* } catch (err) { //Wrong type of message, print error.
             console.error(err);
             return;
-        } */
+        }  */
     });
 
     //Handle closed connection
@@ -204,10 +152,6 @@ gameserv.on('request', (req) => {
             game.leave(playerObj);
             cleanUpInactiveGames();
         }
-        
-
-        //Check if no players are left
-            //Remove game if true
     });
 
     function clearResponse() {
@@ -226,6 +170,8 @@ gameserv.on('request', (req) => {
             case "login":
                 loginUser(message.user, message.pass);
                 break;
+            case "logout":
+                logoutUser(message.user, message.secret);
             default:  break;
         }
     }
@@ -237,7 +183,6 @@ gameserv.on('request', (req) => {
                 throw error;
             } else if (result.length > 0) {
                     //Notify user, user already exists
-                    console.log("Was ehreee");
                     send({type: "register", state: "exists"});
             } else {
                 //Check password isn't empty.
@@ -266,8 +211,6 @@ gameserv.on('request', (req) => {
                     send({type: "login", state: "zeropassword"});
             } else if (result.length > 0 && result[0].password.length > 15 && bcrypt.compareSync(password, result[0].password)) {
                 //Login user
-                console.log("Successful login");
-                //console.log(`Results: ${JSON.stringify(result)} :: fields: ${JSON.stringify(fields)}`);
                 
                 //Generate random secret string to identify a session
                 let secret = generateSecret();
@@ -285,14 +228,40 @@ gameserv.on('request', (req) => {
             //Throw error, user had empty password
         });
 
-        test.on('result', (row) => {
-            console.log(row);
-        });
-        playerObj.username = username;
+       // console.log(test);
     }
 
     function generateSecret() {
         return Math.random().toString(16).substring(2);
+    }
+
+    function logoutUser(username, secret) {
+        //Remove user from game --
+        //Remove "session"
+        //-> Clientside show login --
+        //Update game for remaininding players, if game wasn't empty --
+        //Reset player connection
+        console.log(`Logging out!:: S: ${secret}, U: ${username}`);
+        //Find game in which the user is active
+        for (let i = 0; i < activeGames.length; i++) {
+            let game = activeGames[i];
+            for (let p = 0; p < game.players.length; p++) {
+                let player = game.players[p];
+                if (player.username == username && player.secret == secret) { 
+                    console.log("Found the player and game!");
+                    //Correct user is found on this loop-through
+                    //Maybe cards back in deck (bottom)
+                    game.players.splice(p,1); //Remove player from index p
+                    if (game.players.length > 0)
+                        update(); //Update remotes for remainding players
+                    else
+                        cleanUpInactiveGames();
+
+                    playerObj = new user(); //Reset player object, important info will be set upon next login
+                    clearResponse();
+                }
+            }
+        }
     }
     
     
@@ -300,9 +269,11 @@ gameserv.on('request', (req) => {
     function gamehandler(message) {
         switch(message.content) {
             case "startgame":
-                handleStartGame()
+                console.log("Starting new game!");
                 playerObj.username = message.username;
                 playerObj.secret = message.secret;
+                playerObj.currency = parseInt(message.currency);
+                handleStartGame()
                 break;
             case "newgame":
                 game.resetGame();
@@ -334,6 +305,9 @@ gameserv.on('request', (req) => {
                 handleBet(message);
                 newGame();
                 break;
+            case "test":
+                console.log(game);
+                break;
             default:  break;
         }
         update();
@@ -341,36 +315,32 @@ gameserv.on('request', (req) => {
 
     function handleStartGame() {
         let joined = false;
+        if (playerObj.currency > 0) {
+            for (let i = 0; i < activeGames.length; i++) {
+                if (activeGames[i] == null)
+                    continue;
 
-        for (let i = 0; i < activeGames.length; i++) {
-            if (activeGames[i].players.length < 8) { // 8 is max players
-                //Game isn't full
-                //game.isEveryoneDone()
-                if (!activeGames[i].isGameStarted()) {
-                    playerObj.join(activeGames[i]);
-                    game = playerObj.game;
-                    //game.hold(playerObj.hands[0]); //Player isn't active in this game, hold from the start.
-                    initGame();
-                    joined = true;
-                } /* else {
-                    //Game hasn't started fully
-                    playerObj.join(activeGames[i]);
-                    game = playerObj.game;
-                    initGame(); //-> handleNewJoin() -> gives 2 cards to new players
-                    joined = true;
-                } */
+                if (activeGames[i].players.length < 8) { // 8 is max players
+                    //Game isn't full
+                    //game.isEveryoneDone()
+                    if (!activeGames[i].isGameStarted()) {
+                        playerObj.join(activeGames[i]);
+                        game = playerObj.game;
+                        //game.hold(playerObj.hands[0]); //Player isn't active in this game, hold from the start.
+                        initGame();
+                        joined = true;
+                    }
+                }
+            }
+
+            if (!joined) {
+                //Too many players in all active games, start new game.
+                activeGames.push(new multiplayer_blackjack()); //Starts new game
+                playerObj.join(activeGames[activeGames.length-1]); //length -1 due to 0 index
+                game = playerObj.game;
+                initGame();
             }
         }
-
-        if (!joined) {
-            //Too many players in all active games, start new game.
-            activeGames.push(new blackjackGame()); //Starts new game
-            playerObj.join(activeGames[activeGames.length-1]); //length -1 due to 0 index
-            game = playerObj.game;
-            initGame();
-        }
-
-        
     }
 
     function handleNewGame() {
@@ -391,7 +361,9 @@ gameserv.on('request', (req) => {
 
     function update() {
             let updateResponse = {  type: "blackjack", content: "update" , players: []   };
-            
+            if (game == null)
+                return;
+
             //For each player active in the game
             for (let i = 0; i < game.players.length; i++) {
                 let playersResponse = {hands: [], insurance: 0, username: null},
@@ -523,19 +495,21 @@ gameserv.on('request', (req) => {
     }
 
     function handleHit() {
-        response.content = "card";
-        game.hit(playerObj.hands[activeHand]);
-        response.player.cards = playerObj.hands[activeHand].cards;
-        
-        updateResponsePoints();
-        send(response);
+        if (game.isPlayerInGame(playerObj)) {
+            response.content = "card";
+            game.hit(playerObj.hands[activeHand]);
+            response.player.cards = playerObj.hands[activeHand].cards;
+            
+            updateResponsePoints();
+            send(response);
 
-        //In case of a bust or blackjack
-        if (response.player.points >= 21) {
-            handleHold();
+            //In case of a bust or blackjack
+            if (response.player.points >= 21) {
+                handleHold();
+            }
+
+            setNextHand();
         }
-
-        setNextHand();
     }
 
     function setNextHand() {
@@ -547,11 +521,21 @@ gameserv.on('request', (req) => {
     }
 
     function handleHold() {
-        console.log("Holding fast! on: " + activeHand);
-        game.hold(playerObj.hands[activeHand]);
-        setNextHand();
-        if (game.isEveryoneDone())
-            announceWinner();
+        if (game.isPlayerInGame(playerObj)) {
+            game.hold(playerObj.hands[activeHand]);
+            setTimeout(()=> {
+                game.kickAFK();
+                announceWinner();
+            }, 5000);
+            setNextHand();
+            if (game.isEveryoneDone())
+                announceWinner();
+            //else
+                /* setTimeout(()=> {
+                game.kickAFK();
+                announceWinner();
+            }, 5000);*/
+        }
     }
 
     function announceWinner() {

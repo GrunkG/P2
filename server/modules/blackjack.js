@@ -147,15 +147,19 @@ class Blackjack extends cardmod.Cards{
 
         //Check if everyone is currently holding
         if (this.isEveryoneDone()) {
-            //Show the hidden card. 
-            this.dealer[0].visible = true;
-            //Everyone is holding, get dealer value
-            let dealer_value = this.getCardsValue(this.dealer);
-            //Fill dealer with additional cards.
-            this.fillDealer(dealer_value);
-            //Determine what hands won or lost.
-            this.determineWinner();
+            this.endGame();
         }
+    }
+
+    endGame() {
+        //Show the hidden card. 
+        this.dealer[0].visible = true;
+        //Everyone is holding, get dealer value
+        let dealer_value = this.getCardsValue(this.dealer);
+        //Fill dealer with additional cards.
+        this.fillDealer(dealer_value);
+        //Determine what hands won or lost.
+        this.determineWinner();
     }
 
     //Is all hands holding (Awaiting dealer reveal) ?
