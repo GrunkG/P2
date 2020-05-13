@@ -43,20 +43,24 @@ class user extends blackjackPlayer {
 class multiplayer_blackjack extends blackjackGame {
     constructor() {
         super();
+        this.finished = false;
     }
 
     kickAFK() {
+        let kickedPlayers = [];
         for (let i = 0; i < this.players.length; i++) {
             let player = this.players[i];
             for (let h = 0; h < player.hands.length; h++) {
                 let hand = player.hands[h];
                 if (!hand.isHolding) {
+                    kickedPlayers.push(player);
                     this.removePlayer(player);
                 }
             }
         }
 
         this.endGame();
+        return kickedPlayers;
     }
 }
 
@@ -117,8 +121,7 @@ gameserv.on('request', (req) => {
     let connection = req.accept(null, req.origin);
     console.log("Connection accepted from origin: " + req.origin);
 
-    let game, //Active game
-        playerObj = new user(),
+    let playerObj = new user(),
         response = { type: "blackjack", content: "",
                     //Player response object
                     player: {hand: 0, cards: [], points: 0, winner: null, bet: 0, insurance: 0},
@@ -148,8 +151,8 @@ gameserv.on('request', (req) => {
     //TODO: Remove player from remotes in an active game
     connection.on('close', (connection) => {
         //Remove player from its active game
-        if (game != null) {
-            game.leave(playerObj);
+        if (playerObj.game != null) {
+            playerObj.game.leave(playerObj);
             cleanUpInactiveGames();
         }
     });
@@ -203,7 +206,7 @@ gameserv.on('request', (req) => {
     function loginUser(username, password) {
         //let test = sqlconnection.query(`SELECT currency, ID FROM account WHERE username='${username}' AND password='${password}'`, (error, result, fields) => {
             //connection.query("SELECT * FROM account WHERE username = ? ", [username], (error, rows) => {
-        let test = sqlconnection.query(`SELECT currency, games_won, games_drawn, games_lost, games_played, ID, password FROM account WHERE username='${username}'`, (error, result, fields) => {
+        sqlconnection.query(`SELECT currency, games_won, games_drawn, games_lost, games_played, ID, password, lastLogin, currency_won, currency_lost FROM account WHERE username='${username}'`, (error, result, fields) => {
             if (error) {
                 throw error;
             } else if (password.length == 0) {
@@ -213,14 +216,28 @@ gameserv.on('request', (req) => {
                 //Login user
                 
                 //Generate random secret string to identify a session
+                let effectiveCurrency = result[0].currency;
                 let secret = generateSecret();
+                let date = new Date(),
+                    dateString =`${date.getFullYear()}-${date.getMonth()+1}-${date.getDate()}`,
+                    previous = result[0].lastLogin,
+                    bonus = false;
+                if (previous != null) {
+                    previous = new Date(previous);
+                   if (isLaterDate(previous, date)) {
+                        effectiveCurrency += 300;
+                        bonus = true;
+                   }     
+                }
+            
 
-                sqlconnection.query(`UPDATE account SET secret = '${secret}' WHERE ID = '${result[0].ID}'`, (error, result, fields) => {
+                sqlconnection.query(`UPDATE account SET secret = '${secret}', lastLogin = '${dateString}', currency = '${effectiveCurrency}' WHERE ID = '${result[0].ID}'`, (error, result, fields) => {
                     if (error)
                         throw error;
                 });
-                send({type: "login", state: "success", currency: result[0].currency, games_won: result[0].games_won, games_lost: result[0].games_lost,
-                                                       games_played: result[0].games_played, games_drawn: result[0].games_drawn, identity: secret, username: username});
+                send({type: "login", state: "success", currency: effectiveCurrency, games_won: result[0].games_won, games_lost: result[0].games_lost,
+                                                       games_played: result[0].games_played, games_drawn: result[0].games_drawn, identity: secret, username: username,
+                                                       bonus: bonus, currency_won: result[0].currency_won, currency_lost: result[0].currency_lost});
             } else {
                 //User doesn't exist or password is wrong
                 send({type: "login", state: "noexist"});
@@ -234,6 +251,14 @@ gameserv.on('request', (req) => {
     function generateSecret() {
         return Math.random().toString(16).substring(2);
     }
+
+    function isLaterDate(previous, newDate) {
+        newDate.setHours(0,0,0,0);
+        if (newDate > previous)
+            return true;
+
+        return false;
+    } 
 
     function logoutUser(username, secret) {
         //Remove user from game --
@@ -276,9 +301,8 @@ gameserv.on('request', (req) => {
                 handleStartGame()
                 break;
             case "newgame":
-                game.resetGame();
-                game.resetPlayers();
-                //initGame();
+                playerObj.game.resetGame();
+                playerObj.game.resetPlayers();
                 handleNewGame();
                 //Debug
                 //game.dealer[1] = {suit: "C", val: "A", visible: true}
@@ -305,9 +329,6 @@ gameserv.on('request', (req) => {
                 handleBet(message);
                 newGame();
                 break;
-            case "test":
-                console.log(game);
-                break;
             default:  break;
         }
         update();
@@ -325,7 +346,6 @@ gameserv.on('request', (req) => {
                     //game.isEveryoneDone()
                     if (!activeGames[i].isGameStarted()) {
                         playerObj.join(activeGames[i]);
-                        game = playerObj.game;
                         //game.hold(playerObj.hands[0]); //Player isn't active in this game, hold from the start.
                         initGame();
                         joined = true;
@@ -337,14 +357,18 @@ gameserv.on('request', (req) => {
                 //Too many players in all active games, start new game.
                 activeGames.push(new multiplayer_blackjack()); //Starts new game
                 playerObj.join(activeGames[activeGames.length-1]); //length -1 due to 0 index
-                game = playerObj.game;
                 initGame();
+                joined = true;
             }
         }
+
+        /* if (joined)
+            send({type: "blackjack", content: "ready to bet"}); */
     }
 
     function handleNewGame() {
-        game.leave(playerObj);
+        //playerObj.game.leave(playerObj); -- Already empty
+        playerObj.game = null;
         cleanUpInactiveGames();
 
         handleStartGame();
@@ -361,20 +385,20 @@ gameserv.on('request', (req) => {
 
     function update() {
             let updateResponse = {  type: "blackjack", content: "update" , players: []   };
-            if (game == null)
+            if (playerObj.game == null)
                 return;
 
             //For each player active in the game
-            for (let i = 0; i < game.players.length; i++) {
+            for (let i = 0; i < playerObj.game.players.length; i++) {
                 let playersResponse = {hands: [], insurance: 0, username: null},
-                    player = game.players[i],
+                    player = playerObj.game.players[i],
                     bet = 0;
 
                 playersResponse.username = player.username;
                 //For each hand active for the player
                 for (let x = 0; x < player.hands.length; x++) {
                     let hand = player.hands[x],
-                        value = game.getCardsValue(hand.cards);;
+                        value = playerObj.game.getCardsValue(hand.cards);;
                     bet += hand.bet;
                     playersResponse.hands.push( {   cards: hand.cards, bet: hand.bet, 
                                                 isHolding: hand.isHolding, winner: hand.winner, points: value }  );
@@ -390,22 +414,22 @@ gameserv.on('request', (req) => {
 
             //send(updateResponse);
             //Send to all
-            for (let i = 0; i < game.players.length; i++) {
-                let player = game.players[i];
+            for (let i = 0; i < playerObj.game.players.length; i++) {
+                let player = playerObj.game.players[i];
                 player.connection.send( JSON.stringify(updateResponse) );
             }
     }
 
     function updateResponsePoints() {
-        response.player.points = game.getCardsValue(playerObj.hands[activeHand].cards);
-        response.dealer.points = game.getCardsValue(game.dealer);
+        response.player.points = playerObj.game.getCardsValue(playerObj.hands[activeHand].cards);
+        response.dealer.points = playerObj.game.getCardsValue(playerObj.game.dealer);
         response.player.bet = playerObj.hands[activeHand].bet;
         response.player.hand = activeHand;
     }
 
     function initGame() {
-        if (game.dealer.length == 0)
-            game.initialize(4);
+        if (playerObj.game.dealer.length == 0)
+            playerObj.game.initialize(4);
         else
             handleNewJoin();
         
@@ -418,20 +442,20 @@ gameserv.on('request', (req) => {
     function newGame() {
         response.content = "game created";
         response.player.cards = playerObj.hands[activeHand].cards;
-        response.dealer.cards = game.dealer;
+        response.dealer.cards = playerObj.game.dealer;
         updateResponsePoints();
         send(response);
     }
 
     function handleNewJoin() {
         for (let i = 0; i < 2; i ++) {
-            game.hit(playerObj.hands[activeHand]);
+            playerObj.game.hit(playerObj.hands[activeHand]);
         }
     }
 
     function updateWinnings() {
-        for(let i = 0; i < game.players.length; i++) {
-            let player = game.players[i];
+        for(let i = 0; i < playerObj.game.players.length; i++) {
+            let player = playerObj.game.players[i];
             for(let j = 0; j < player.hands.length; j++) {
                 let hand = player.hands[j];
                 currencyCalculator(hand, player, player.insurance);
@@ -445,6 +469,13 @@ gameserv.on('request', (req) => {
             sqlconnection.query(`UPDATE account SET games_lost = games_lost + ${player.games_lost} WHERE secret = '${player.secret}'`);
             sqlconnection.query(`UPDATE account SET games_drawn = games_drawn + ${player.games_drawn} WHERE secret = '${player.secret}'`);
             sqlconnection.query(`UPDATE account SET games_played = games_played + ${player.games_played} WHERE secret = '${player.secret}'`);
+
+            if (player.currency > 0) {
+                sqlconnection.query(`UPDATE account SET currency_won = currency_won + ${player.currency} WHERE secret = '${player.secret}'`);
+            } else {
+                let absoulute_currency = Math.abs(player.currency); //Negative -> non-negative
+                sqlconnection.query(`UPDATE account SET currency_lost = currency_lost + ${absoulute_currency} WHERE secret = '${player.secret}'`);
+            }
         }
     }
 
@@ -486,8 +517,8 @@ gameserv.on('request', (req) => {
     }
 
     function dealerHasBlackjack() {
-        let dealer = game.dealer;
-        let total = game.getCardsValue(dealer);
+        let dealer = playerObj.game.dealer;
+        let total = playerObj.game.getCardsValue(dealer);
         if (dealer[1].val == "A" && total == 21)
             return true;
         else
@@ -495,21 +526,19 @@ gameserv.on('request', (req) => {
     }
 
     function handleHit() {
-        if (game.isPlayerInGame(playerObj)) {
-            response.content = "card";
-            game.hit(playerObj.hands[activeHand]);
-            response.player.cards = playerObj.hands[activeHand].cards;
-            
-            updateResponsePoints();
-            send(response);
+        response.content = "card";
+        playerObj.game.hit(playerObj.hands[activeHand]);
+        response.player.cards = playerObj.hands[activeHand].cards;
+        
+        updateResponsePoints();
+        send(response);
 
-            //In case of a bust or blackjack
-            if (response.player.points >= 21) {
-                handleHold();
-            }
-
-            setNextHand();
+        //In case of a bust or blackjack
+        if (response.player.points >= 21) {
+            handleHold();
         }
+
+        setNextHand();
     }
 
     function setNextHand() {
@@ -521,29 +550,43 @@ gameserv.on('request', (req) => {
     }
 
     function handleHold() {
-        if (game.isPlayerInGame(playerObj)) {
-            game.hold(playerObj.hands[activeHand]);
+        playerObj.game.hold(playerObj.hands[activeHand]);
+        setNextHand();
+        if (playerObj.game.isEveryoneDone()) {
+            announceWinner();
+            playerObj.game.finished = true;
+        } else {
+            console.log("Well shit");
             setTimeout(()=> {
-                game.kickAFK();
+                let kickedPlayers = playerObj.game.kickAFK();
+                if (kickedPlayers.length > 0) {
+                    announceKicked(kickedPlayers)
+                }
                 announceWinner();
+                playerObj.game.finished = true;
             }, 5000);
-            setNextHand();
-            if (game.isEveryoneDone())
-                announceWinner();
-            //else
-                /* setTimeout(()=> {
-                game.kickAFK();
-                announceWinner();
-            }, 5000);*/
+        }
+        
+    }
+
+    function announceKicked(players) {
+        for(let i = 0; i < players.length; i++) {
+            let player = players[i];
+            let kickedResponse = {type: "blackjack", content: "kicked"}
+
+            player.connection.send(JSON.stringify(kickedResponse));
         }
     }
 
     function announceWinner() {
         console.log("Announced winner");
-        if (game.isEveryoneDone()) {
+        if (playerObj.game.finished)
+            return;
+
+        if (playerObj.game.isEveryoneDone()) {
             //Send announcement to everyone, not just the last player to trigger a hold
-            for (let i = 0; i < game.players.length; i++) {
-                let player = game.players[i];
+            for (let i = 0; i < playerObj.game.players.length; i++) {
+                let player = playerObj.game.players[i];
             
                 let response = {type: "blackjack", content: "done", wins: [], insurance: "L", dealer: {cards: [], points: 0} };
 
@@ -551,8 +594,8 @@ gameserv.on('request', (req) => {
                     response.wins.push(player.hands[i].winner);
                 }
 
-                response.dealer.cards = game.dealer;
-                response.dealer.points = game.getCardsValue(game.dealer);
+                response.dealer.cards = playerObj.game.dealer;
+                response.dealer.points = playerObj.game.getCardsValue(playerObj.game.dealer);
 
                 if (dealerHasBlackjack())
                     response.insurance = "W";
@@ -567,7 +610,7 @@ gameserv.on('request', (req) => {
     function handleDouble() {
         let hand = playerObj.hands[activeHand];
         if (hand.cards.length == 2) {
-            game.double(hand);
+            playerObj.game.double(hand);
             handleHold();
         }
     }
@@ -575,7 +618,7 @@ gameserv.on('request', (req) => {
     //May need refinement, depending on how visualization implementation turns out.
     function handleSplit() {
         let hand = playerObj.hands[activeHand];
-        if ( game.split(playerObj, hand) == true) {
+        if ( playerObj.game.split(playerObj, hand) == true) {
 
             //Hand has been split, response with new hand
             response.content = "split";
@@ -586,7 +629,7 @@ gameserv.on('request', (req) => {
 
     function handleInsurance() {
         //If insurance was possible
-        if(game.insurance(playerObj) == true) {
+        if(playerObj.game.insurance(playerObj) == true) {
 
             //Prepare response -> Set response insurance to active insurance.
             response.player.insurance = playerObj.insurance;
@@ -599,7 +642,7 @@ gameserv.on('request', (req) => {
         let bet = msg.amount;
 
         //playerObj.secret = msg.secret; // Hackfix?
-        game.bet(playerObj.hands[activeHand], bet);
+        playerObj.game.bet(playerObj.hands[activeHand], bet);
         //Reponse code
         response.content = "card";
         response.player.cards = playerObj.hands[activeHand].cards;

@@ -105,11 +105,17 @@ function handleLoginsystem() {
                         document.getElementById("player__info--losses").innerHTML = msg.games_lost;
                         document.getElementById("player__info--draws").innerHTML = msg.games_drawn;
                         document.getElementById("player__info--played").innerHTML = msg.games_played;
+                        document.getElementById("player__info--currency_won").innerHTML = msg.currency_won;
+                        document.getElementById("player__info--currency_lost").innerHTML = msg.currency_lost;
                         document.cookie = "secret = " + msg.identity;
 
                         initiateGame();
                         toggleLogin();
                         toggleLogout();
+
+                        if (msg.bonus)
+                            toggleDailyReward();
+
                         break;
                     case "zeropassword":
                         document.getElementById("login__container--error").innerHTML = "Password is empty, please provide password.";

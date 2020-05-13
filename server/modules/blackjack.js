@@ -152,6 +152,8 @@ class Blackjack extends cardmod.Cards{
     }
 
     endGame() {
+        if (this.dealer == null)
+            return;
         //Show the hidden card. 
         this.dealer[0].visible = true;
         //Everyone is holding, get dealer value
@@ -270,12 +272,19 @@ class Blackjack extends cardmod.Cards{
             let player = this.players[i];
             if (player.hands.length > 1 || player.hands[0].cards.length > 2)
                 return true;
-            if (this.dealer.length >= 2) {
-                let card_visibility = this.dealer[0].visible;
-                //Last card is visible -> Dealer has shown the last card, meaning game is done.
-                if (card_visibility)
-                    return true;
-            }
+
+            if(this.isGameDone())
+                return true;
+        }
+        return false;
+   }
+
+   isGameDone() {
+        if (this.dealer.length >= 2) {
+            let card_visibility = this.dealer[0].visible;
+            //Last card is visible -> Dealer has shown the last card, meaning game is done.
+            if (card_visibility)
+                return true;
         }
         return false;
    }

@@ -186,7 +186,7 @@ function gameHandler() {
     }
 
     websocket.onmessage = (message) => {
-        try {
+       // try {
             let msg = JSON.parse(message.data);
             console.log(msg);
             if (msg.type == "blackjack") {
@@ -214,14 +214,28 @@ function gameHandler() {
                     case "update":
                         updateGame(msg);
                         break;
+                    case "kicked":
+                        handleKicked();
+                        break;
+                    /* case "ready to bet":
+                        game.toggleBetInput();
+                        break; */
                 }
-                disableButtons(game.player.hands[hand]);
+                if (game.player.hands[hand].cards != [])
+                    disableButtons(game.player.hands[hand]);
             }
-        } catch (err) {
-            console.log(err);
-        }
+        //} catch (err) {
+            //console.log(err);
+        //}
         
     }
+}
+
+function handleKicked() {
+    //Display kicked warning
+    alert("You've been kicked for being in-active, \nplease don't leave a game mid-play!");
+
+    logout();
 }
 
 function handleInsurance(msg) {
@@ -269,7 +283,9 @@ function handleWinner(hand, state) {
         wins = parseInt(document.getElementById("player__info--wins").innerHTML),
         losses = parseInt(document.getElementById("player__info--losses").innerHTML),
         draws = parseInt(document.getElementById("player__info--draws").innerHTML),
-        played = parseInt(document.getElementById("player__info--played").innerHTML);
+        played = parseInt(document.getElementById("player__info--played").innerHTML),
+        currency_won = parseInt(document.getElementById("player__info--currency_won").innerHTML),
+        currency_lost = parseInt(document.getElementById("player__info--currency_lost").innerHTML);
 
     //clearCardHolders();
     played++;
@@ -280,9 +296,11 @@ function handleWinner(hand, state) {
     } else if (state == "W") {
         game.player.displayWinHand(hand);
         currency += handBets[hand] * 2;
+        currency_won += handBets[hand];
         wins++;
     } else {
         game.player.displayLoseHand(hand);
+        currency_lost += handBets[hand];
         losses++;
     }
 
@@ -291,6 +309,8 @@ function handleWinner(hand, state) {
     document.getElementById("player__info--losses").innerHTML = losses;
     document.getElementById("player__info--draws").innerHTML = draws;
     document.getElementById("player__info--played").innerHTML = played;
+    document.getElementById("player__info--currency_won").innerHTML = currency_won;
+    document.getElementById("player__info--currency_lost").innerHTML = currency_lost;
 }
 
 function handleInsuranceWin(insuranceState) {
@@ -404,6 +424,9 @@ function doNewGame() {
 }
 
 function disableButtons(activeHand) {
+    if (game.dealer.hands[0].cards.length == 0 || game.player.hands[0].cards.length == 0)
+        return;
+
     enableButtonIf(activeHand.cards.length == 2, "double");
     enableButtonIf(activeHand.cards.length == 2 && activeHand.cards[0].value == activeHand.cards[1].value, "split");
     enableButtonIf(game.dealer.hands[0].cards[0].value == "A" && insurance == 0 && handBets.length == 1, "insurance");
