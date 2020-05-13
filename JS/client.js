@@ -21,6 +21,8 @@ window.onload = () => {
     }
 
     toggleLogin();
+    handleLoginsystem();
+    document.onkeydown = keyHandling;
 };
 
 function initiateGame() {
@@ -110,17 +112,20 @@ function clearCardHolders() {
 //W.I.P - Still missing additional hands handling on client-side.
 function updateGame(msg) {
     //Add new remote players if necessary
-    let remote_players = document.getElementsByClassName("remote-player");
+    //let remote_players = document.getElementsByClassName("remote-player");
     let players = msg.players;
     
     game.removeAllRemotes();
-    game.addRemotes(players.length);
+    //game.addRemotes(players.length);
 
     //For each active player
     for (let i = 0; i < players.length; i++) {
+        game.addRemote(players[i].username);
         let remote_deck = game.remotes[i],
             player = players[i];
 
+        
+        
         //For each active player hand
         for (let x = 0; x < player.hands.length; x++) {
             let hand = player.hands[x],
@@ -135,7 +140,7 @@ function updateGame(msg) {
                 let new_card = new Card(card.val.toString(), card.suit);
                 
                 //updateHand(hand, x);
-
+                remote_deck.username = "HUUUR";
                 remote_deck.hands[x].cards.push(new_card);
             }
         }
@@ -174,18 +179,21 @@ function gameHandler() {
     websocket = new WebSocket(`ws://${host}:${port}/`);
     
     websocket.onopen = () => {
-        websocket.send(JSON.stringify({type: "game", content: "startgame"}));
+        let playerName = document.getElementById("username").value,
+            playerSecret = getCookie("secret"),
+            playerCurrency = document.getElementById("player__info--capital").innerHTML;
+        websocket.send(JSON.stringify({type: "game", content: "startgame", username: playerName, currency: playerCurrency, secret: playerSecret}));
     }
 
     websocket.onmessage = (message) => {
         try {
-            let msg = JSON.parse(message.data),
-                cardObj,
-                newCard;
+            let msg = JSON.parse(message.data);
             console.log(msg);
             if (msg.type == "blackjack") {
                 switch (msg.content) {
                     case "game created":
+                        if (game != null)
+                            game.removeAllRemotes();
                         game = new Game();
                         game.player.setActiveHand(hand);
                         handleCards(msg);
@@ -241,12 +249,28 @@ function handleGameDone(msg) {
     game.togglePlayAgain();
 }
 
+function resetGamePlatform() {
+    if (game != null) {
+        game.player.resetResults();
+        game.player.hands[0].cards = [];
+        game.dealer.hands[0].cards = [];
+        game.updateScreen();
+        game.removeAllRemotes();
+        game.toggleBetInput();
+    }
+
+    document.getElementById(dealerSumTarget).innerHTML = "";
+    document.getElementById(playerSumTarget).innerHTML = "";
+    
+}
+
 function handleWinner(hand, state) {
     let currency = parseInt(document.getElementById("player__info--capital").innerHTML),
         wins = parseInt(document.getElementById("player__info--wins").innerHTML),
         losses = parseInt(document.getElementById("player__info--losses").innerHTML),
         draws = parseInt(document.getElementById("player__info--draws").innerHTML),
         played = parseInt(document.getElementById("player__info--played").innerHTML);
+
     //clearCardHolders();
     played++;
     if (state == "D") {
@@ -362,8 +386,8 @@ function doBet() {
 
         document.getElementById("player__info--capital").innerHTML = currency;
 
-        websocket.send(JSON.stringify({type: "game", content: "bet", amount: value, secret: getCookie("secret")}));
-    } else alert("You have insufficient currency, try a smaller bet :)!")
+        websocket.send(JSON.stringify({type: "game", content: "bet", amount: value})); // , secret: getCookie("secret")
+    } else alert("You have insufficient currency, try a smaller bet :)!");
 }
 
 function doRegister(){
@@ -374,6 +398,8 @@ function doNewGame() {
     game.togglePlayAgainOnPress();
     game.player.resetResults();
     game.removeAllRemotes();
+    game.dealer.hands[0].cards = [];
+    game.updateScreen();
     websocket.send(JSON.stringify({type: "game", content: "newgame"}));
 }
 
@@ -390,3 +416,7 @@ function enableButtonIf(enable, button) {
         document.getElementById("button-" + button).setAttribute("class", "button-" + button + " inactive");
     }
 }
+
+/* function sendInfo() {
+    websocket.send(JSON.stringify({type: "game", content: "setinfo", username: }));
+} */

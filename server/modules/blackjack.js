@@ -147,15 +147,19 @@ class Blackjack extends cardmod.Cards{
 
         //Check if everyone is currently holding
         if (this.isEveryoneDone()) {
-            //Show the hidden card. 
-            this.dealer[0].visible = true;
-            //Everyone is holding, get dealer value
-            let dealer_value = this.getCardsValue(this.dealer);
-            //Fill dealer with additional cards.
-            this.fillDealer(dealer_value);
-            //Determine what hands won or lost.
-            this.determineWinner();
+            this.endGame();
         }
+    }
+
+    endGame() {
+        //Show the hidden card. 
+        this.dealer[0].visible = true;
+        //Everyone is holding, get dealer value
+        let dealer_value = this.getCardsValue(this.dealer);
+        //Fill dealer with additional cards.
+        this.fillDealer(dealer_value);
+        //Determine what hands won or lost.
+        this.determineWinner();
     }
 
     //Is all hands holding (Awaiting dealer reveal) ?
@@ -253,11 +257,25 @@ class Blackjack extends cardmod.Cards{
         return false; //Something went wrong, or client is attempting to cheat.
    }
 
+   /* bool isGameStarted()
+      return true if
+        - A players hand holds more than 2 cards
+        - A player has more than 1 hand
+        - Dealer has shown the face-down card
+
+      return false otherwise
+   */
    isGameStarted() {
         for (let i = 0; i < this.players.length; i++) {
             let player = this.players[i];
             if (player.hands.length > 1 || player.hands[0].cards.length > 2)
                 return true;
+            if (this.dealer.length >= 2) {
+                let card_visibility = this.dealer[0].visible;
+                //Last card is visible -> Dealer has shown the last card, meaning game is done.
+                if (card_visibility)
+                    return true;
+            }
         }
         return false;
    }
@@ -268,6 +286,7 @@ class Blackjack_player extends cardmod.Player{
     constructor() {
         super();
         this.insurance = 0;
+        this.currency = 0;
     }
 }
 

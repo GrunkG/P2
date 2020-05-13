@@ -12,8 +12,10 @@ class Game{
         return new Player(`dealer`);
     }
     //Adds a single remote player to the array of remotes
-    addRemote(){
+    addRemote(username = ""){
         this.remotes[this.remotes.length] = new RemotePlayer(`remote-player-p${this.remotes.length+1}`);
+        if(username != "")
+        this.remotes[this.remotes.length - 1].username = username;
         this.remotes[this.remotes.length - 1].initialize(0);
     }
     //Method that creates multiple remotes
