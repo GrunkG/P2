@@ -13,6 +13,7 @@
     <script src="../JS/Classes/class-player.js"></script>
     <script src="../JS/client.js"></script>
     <link rel="stylesheet" type="text/css" href="../Style/login-form-auto.css">
+    <link rel="stylesheet" type="text/css" href="../Style/daily-reward-auto.css">
     <link rel="stylesheet" type="text/css" href="../Style/blackjack-auto.css">
     <title>P2 projektet</title>
 </head>
@@ -125,6 +126,15 @@
             </form>
         </div>
     </div>
+
+    <div class="daily-reward" id="daily-reward" style="display: none;">
+        <div class="daily-reward__container">
+            <h1 class="daily-reward__container--title">Daily reward</h1>
+            <p class="daily-reward__container--text">Here, have a coin.</p>
+            <input type="button" value="Ok" onclick="toggleDailyReward()">
+        </div>
+    </div>
+
 </body>
 <script src="../JS/global-functions.js"></script>
 <!-- <script src="../JS/Classes/class-cards.js"></script>

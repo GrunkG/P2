@@ -23,3 +23,7 @@ function writeLoginError(error){
 function writeRegisterError(error){
     document.getElementById("register__container--error").innerHTML = error;
 }
+
+function toggleDailyReward(){
+    toggleDisplayNone("daily-reward", "grid");
+}
