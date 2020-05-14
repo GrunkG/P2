@@ -152,7 +152,7 @@ class Blackjack extends cardmod.Cards{
     }
 
     endGame() {
-        if (this.dealer == null)
+        if (this.dealer.length == 0)
             return;
         //Show the hidden card. 
         this.dealer[0].visible = true;

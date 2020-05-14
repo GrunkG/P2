@@ -52,8 +52,11 @@ function logout(){
     resetGamePlatform();
     toggleLogout();
     toggleLogin();
+    let playAgain = document.getElementById("player__play-again").style.display;
+    if (playAgain != "none" && game != null)
+        game.togglePlayAgain();
+        
     let username = document.getElementById("username").value;
-
     websocket.send( JSON.stringify( {type: "loginsystem", content:"logout", user: username, secret: getCookie("secret")} ) );
     handleLoginsystem();
     clearForm();

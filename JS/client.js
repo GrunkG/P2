@@ -115,7 +115,8 @@ function updateGame(msg) {
     //let remote_players = document.getElementsByClassName("remote-player");
     let players = msg.players;
     
-    game.removeAllRemotes();
+    if (game.remotes.length > 0)
+        game.removeAllRemotes();
     //game.addRemotes(players.length);
 
     //For each active player
@@ -385,6 +386,8 @@ function doHold() {
     websocket.send(JSON.stringify({type: "game", content: "hold"}));
 }
 function doDouble() {
+    let currency = parseInt(document.getElementById("player__info--capital").innerHTML);
+    currency -= handBets[hand];
     determineActiveHand();
     websocket.send(JSON.stringify({type: "game", content: "double"}));
 }
