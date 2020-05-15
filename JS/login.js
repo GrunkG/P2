@@ -57,7 +57,7 @@ function logout(){
         game.togglePlayAgain();
         
     let username = document.getElementById("username").value;
-    websocket.send( JSON.stringify( {type: "loginsystem", content:"logout", user: username, secret: getCookie("secret")} ) );
+    websocket.send( JSON.stringify( {type: "loginsystem", content:"logout", user: username, secret: secret/* getCookie("secret") */} ) );
     handleLoginsystem();
     clearForm();
     //document.location.reload();
@@ -111,6 +111,7 @@ function handleLoginsystem() {
                         document.getElementById("player__info--currency_won").innerHTML = msg.currency_won;
                         document.getElementById("player__info--currency_lost").innerHTML = msg.currency_lost;
                         document.cookie = "secret = " + msg.identity;
+                        secret = msg.identity;
 
                         initiateGame();
                         toggleLogin();

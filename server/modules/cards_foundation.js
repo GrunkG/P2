@@ -137,6 +137,7 @@ class Cards { //Rename
         for (let i = 0; i < this.players.length; i++) {
             let current = this.players[i];
             if (current == playerToRemove) {
+                //playerToRemove.resetHands();
                 playerToRemove.game = null;
                 this.players.splice(i, 1);
             }

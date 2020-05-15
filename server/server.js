@@ -1,31 +1,35 @@
+//HTTP Server imports
 const http = require('http');
 const webtools = require('./modules/httptools');
-const sqltools = require('./modules/sqltools');
 
+//Websocket Server imports
 const socket = require('websocket');
-const mysql = require('mysql'); // Not in use yet
-const dbConfig = require('./dbConfig.js')
-const cardgame = require('./modules/cards_foundation');
+const mysql = require('mysql');
+const dbConfig = require('./dbConfig.js');
 const blackjackGame = require('./modules/blackjack').Blackjack;
 const blackjackPlayer = require('./modules/blackjack').Blackjack_player;
 
-const bcrypt = require("bcrypt-nodejs"); //Used for cryptation
+//Encryption made 'easy'
+const bcrypt = require("bcrypt-nodejs");
 
+//MySQL Connection establishment, used
 let sqlconnection = mysql.createConnection(dbConfig);
-
 sqlconnection.connect((err) => {
     if (err) { throw err } else {
         console.log("Connected to database successfully.");
     };
 });
 
-let port = 3000,
-    ip = "127.0.0.1",
-    acceptedOrigin = `http://${ip}:${port}`;
-
+//Hosting Config
 const pathPublic = "./";
 const defaultHTML = "html/blackjack.html";
 
+const port = 3000,
+    ip = "127.0.0.1",
+    acceptedOrigin = `http://${ip}:${port}`;
+
+//Multiplayer class extentions and game list
+let activeGames = [];
 class user extends blackjackPlayer {
     constructor() {
         super();
@@ -33,7 +37,6 @@ class user extends blackjackPlayer {
         this.games_won = 0;
         this.games_lost = 0;
         this.games_drawn = 0;
-        this.exp = 0,
         this.username = null;
         this.secret = null;
         this.connection = null;
@@ -46,6 +49,7 @@ class multiplayer_blackjack extends blackjackGame {
         this.finished = false;
     }
 
+    //Overvejende -> general?
     kickAFK() {
         let kickedPlayers = [];
         for (let i = 0; i < this.players.length; i++) {
@@ -62,19 +66,17 @@ class multiplayer_blackjack extends blackjackGame {
         this.endGame();
         return kickedPlayers;
     }
-
-/*     removeDoubler(player) {
-        for (let i = 0; i < this.players.length; i++) {
-            let playerOnIndex = this.players[i];
-            if (playerOnIndex == player)
-                this.players.splice(i, 1);
-        }
-    } */
 }
 
-let activeGames = [];
+/*#################################################################################
 
-//########  Webserver
+
+            Webserver
+            Handles standard server to client HTTP requests
+
+
+###################################################################################*/
+
 const webserv = http.createServer((req, res) => {
     let method = req.method,
         url = req.url;
@@ -89,8 +91,6 @@ const webserv = http.createServer((req, res) => {
                 webtools.fileResponse(req.url, pathPublic, res)
                 break;
         }
-    } else {
-        console.log(`Method: ${req.method}, url: ${req.url}`);
     }
 
 });
@@ -100,15 +100,32 @@ webserv.listen(port, ip, () => {
     console.log(`[${d.getHours()}:${d.getMinutes()}:${d.getSeconds()}] > Server listening at ${acceptedOrigin}`);
 });
 
-//######## WebSockets - Active game(s) handler
+
+/*############################################################################
+
+
+        Game server / Websocket server
+        Handles game requests and standard TCP/IP connection requests
+
+
+###############################################################################*/
+
+//Game server / Websocket server starting, using the HTTP server as proxy.
 const gameserv = new socket.server({httpServer: webserv});
 
-//Boolean, is origin input equals to the accept origin?
+//Boolean, does the connection come from an accepted origin?
 function isAcceptedOrigin(origin) {
     return (origin == acceptedOrigin) ? true : false;
 }
 
-//WebSocket Event Handler
+/*################################################################
+
+    Game server / Websocket event handler
+    Handles actual request from server to client
+        - Determines what actions to take for the connection
+          whether the user is loggin in or make a play in Blackjack.
+
+##################################################################*/
 gameserv.on('request', (req) => {
     //Only allow connections from our own website origin
     if (!isAcceptedOrigin(req.origin)) {
@@ -122,6 +139,12 @@ gameserv.on('request', (req) => {
     let connection = req.accept(null, req.origin);
     console.log("Connection accepted from origin: " + req.origin);
 
+    /*##################################################
+
+        Variables used for the individual user connection
+
+    ####################################################*/
+
     let playerObj = new user(),
         response = { type: "blackjack", content: "",
                     //Player response object
@@ -129,8 +152,16 @@ gameserv.on('request', (req) => {
                     //Dealer response object
                     dealer: {cards: [], points: 0} },
         activeHand = 0; //Current playing hand -> 0 unless player has been able to split.
+        playerObj.connection = connection;
 
-    playerObj.connection = connection;
+    /*#################################################
+
+        Events handling for incoming messages from client
+        and handling of a disconnected user.
+            'message':  Incoming client messages
+            'close':    User disconnected
+    
+    ####################################################*/
 
     //Handle incoming messages from connection
     connection.on('message', (message) => {
@@ -150,17 +181,15 @@ gameserv.on('request', (req) => {
         if (playerObj.game != null) {
             playerObj.game.leave(playerObj);
             cleanUpInactiveGames();
+            console.log("Closed connection");
         }
     });
 
-    function clearResponse() {
-        response = { type: "blackjack", content: "",
-        //Player response object
-        player: {hand: 0, cards: [], points: 0, winner: null, bet: 0, insurance: 0},
-        //Dealer response object
-        dealer: {cards: [], points: 0} };
-    }
+    /*#################################################
+            Handling of login system using websockets
+    ###################################################*/
 
+    //Determine whether user is logging in/out or registering.
     function userhandler(message) {
         switch(message.content) {
             case "register":
@@ -197,6 +226,36 @@ gameserv.on('request', (req) => {
                 //Throw error, user had empty password
             }
         }); 
+    }
+
+    function logoutUser(username, secret) {
+        //Remove user from game --
+        //Remove "session"
+        //-> Clientside show login --
+        //Update game for remaininding players, if game wasn't empty --
+        //Reset player connection
+        console.log(`Logging out!:: S: ${secret}, U: ${username}`);
+        //Find game in which the user is active
+        for (let i = 0; i < activeGames.length; i++) {
+            let game = activeGames[i];
+            for (let p = 0; p < game.players.length; p++) {
+                let player = game.players[p];
+                console.log(`[U: ${player.username} | S: ${player.secret}]`);
+                if (player.username == username && player.secret == secret) { 
+                    console.log("Found the player and game!");
+                    //Correct user is found on this loop-through
+                    //Maybe cards back in deck (bottom)
+                    game.players.splice(p,1); //Remove player from index p
+                    if (game.players.length > 0)
+                        update(); //Update remotes for remainding players
+                    else
+                        cleanUpInactiveGames();
+
+                    playerObj = new user(); //Reset player object, important info will be set upon next login
+                    clearResponse();
+                }
+            }
+        }
     }
 
     function loginUser(username, password) {
@@ -240,14 +299,22 @@ gameserv.on('request', (req) => {
             }
             //Throw error, user had empty password
         });
-
-       // console.log(test);
     }
 
+    /* string generateSecret()
+        Math.random():  Generates a value between 0 and 1
+        toString(16):   Converts the value into a HEX value
+        substring(2):   Removes the leading '0.' of the value
+    */
     function generateSecret() {
         return Math.random().toString(16).substring(2);
     }
 
+    /* bool isLaterDate(previous Date, new Date)
+       Starts out by setting the newly generated date's
+       time to 0, so it's possible to compare only date
+       instead of date-time.
+    */
     function isLaterDate(previous, newDate) {
         newDate.setHours(0,0,0,0);
         if (newDate > previous)
@@ -256,37 +323,32 @@ gameserv.on('request', (req) => {
         return false;
     } 
 
-    function logoutUser(username, secret) {
-        //Remove user from game --
-        //Remove "session"
-        //-> Clientside show login --
-        //Update game for remaininding players, if game wasn't empty --
-        //Reset player connection
-        console.log(`Logging out!:: S: ${secret}, U: ${username}`);
-        //Find game in which the user is active
-        for (let i = 0; i < activeGames.length; i++) {
-            let game = activeGames[i];
-            for (let p = 0; p < game.players.length; p++) {
-                let player = game.players[p];
-                if (player.username == username && player.secret == secret) { 
-                    console.log("Found the player and game!");
-                    //Correct user is found on this loop-through
-                    //Maybe cards back in deck (bottom)
-                    game.players.splice(p,1); //Remove player from index p
-                    if (game.players.length > 0)
-                        update(); //Update remotes for remainding players
-                    else
-                        cleanUpInactiveGames();
+    
 
-                    playerObj = new user(); //Reset player object, important info will be set upon next login
-                    clearResponse();
-                }
-            }
-        }
+    function clearResponse() {
+        response = { type: "blackjack", content: "",
+        //Player response object
+        player: {hand: 0, cards: [], points: 0, winner: null, bet: 0, insurance: 0},
+        //Dealer response object
+        dealer: {cards: [], points: 0} };
     }
     
-    
-    //Handles all the blackjack game logic
+    /*########################################################################
+
+
+            Game handling
+            startgame:  Received whenever a user establishes initial game connection
+            newgame:    Received whenever a user wishes to 'play again'
+            hit:        Received whenever a user wishes to 'hit' in Blackjack
+            hold:       Received whenever a user wishes to 'hold' in Blackjack
+            double:     Received whenever a user wishes to 'double' in Blackjack
+            split:      Received whenever a user wishes to 'split' in Blackjack
+            insure:     Received whenever a user wishes to 'insure' in Blackjack
+            bet:        Received whenever a user wishes to 'bet' in Blackjack
+
+
+    ##########################################################################*/
+
     function gamehandler(message) {
         switch(message.content) {
             case "startgame":
@@ -296,18 +358,8 @@ gameserv.on('request', (req) => {
                 handleStartGame()
                 break;
             case "newgame":
-                //Game exists -> Reset -> Reset players -> Game still exists -> Game set to null for individual
-                //-> Games are cleaned up -> Game should not exist (0 players after reset)
-                playerObj.game.resetGame();
-                playerObj.game.resetPlayers();
                 handleNewGame();
-                console.log("Made new game!!!!!");
-                //Debug
-                //game.dealer[1] = {suit: "C", val: "A", visible: true}
                 break;
-            /* case "joingame":
-                handleNewJoin();
-                break; */
             case "hit":
                 handleHit();
                 break;
@@ -329,56 +381,101 @@ gameserv.on('request', (req) => {
                 break;
             default:  break;
         }
+
+        //Updates everyone who's active in a given game.
         update();
     }
 
-    function handleStartGame() { // Game -> don't exist -> Make new game -> Joined the game -> where is err?????
-        let joined = false;
-        console.log("Attempting to start new game, player has: " + playerObj.currency + "currency.");
+    /* void handleStartGame()
+        Determines whether the user attempting to make or join a game
+        actually has any currency.
+            If the the user does have more than 0 currency, then
+            the user joins a game if one is already running with less than 8
+            player. Otherwise it creates a new game and pushes the user into
+            the new game.
+    */
+    function handleStartGame() {
+        //Is the user poor?
         if (playerObj.currency > 0) {
+            //Go through each already existing game stored in the activeGames array
             for (let i = 0; i < activeGames.length; i++) {
-                if (activeGames[i] == null)
+                //If for some reason the game is stored as null, skip to next loop-through.
+                if (activeGames[i] == null || activeGames[i].finished)
                     continue;
 
                 //Remove doubler / previous session / double login
                 activeGames[i].removePlayer(playerObj);
 
+                //If current game has less than 8 players, allow new user to join
                 if (activeGames[i].players.length < 8) { // 8 is max players
                     //Game isn't full
-                    //game.isEveryoneDone()
                     if (!activeGames[i].isGameStarted()) {
                         playerObj.join(activeGames[i]);
-                        //game.hold(playerObj.hands[0]); //Player isn't active in this game, hold from the start.
                         initGame();
-                        joined = true;
-                        console.log("Joined existing");
                     }
                 }
             }
 
-            if (!joined) {
-                //Too many players in all active games, start new game.
+            //Wasn't able to join any existing games, create a new game for the user.
+            if (playerObj.game == null) {
                 activeGames.push(new multiplayer_blackjack()); //Starts new game
                 playerObj.join(activeGames[activeGames.length-1]); //length -1 due to 0 index
                 initGame();
-                joined = true;
-                console.log("Made new game");
             }
         }
-
-        //if (joined)
-            //send({type: "blackjack", content: "ready to bet"});
     }
 
+    /* void initGame()
+        Initializes a game for the individual user based on whether the dealer
+        has any cards or not.
+            If the dealer has cards, then the user is joining an existing game
+            and is then simply dealt 2 cards from the top of the deck.
+            If the dealer doesn't have any cards, it's a new game and everyone
+            is dealt 2 cards, player and dealer. One card not being visible on the
+            dealer.
+    */
+    function initGame() {
+        if (playerObj.game.dealer.length == 0)
+            playerObj.game.initialize(4); //Initializes a game with 4 decks in play
+        else
+            handleNewJoin();
+
+        //Resets the user hand to index 0, incase they just exit a game on a higher index.
+        activeHand = 0;
+
+        //Prepares the default response for a new game.
+        clearResponse();
+    }
+
+    /* void handleNewJoin()
+        Deals 2 cards to new player joining a game.
+    */
+    function handleNewJoin() {
+        for (let i = 0; i < 2; i ++) {
+            playerObj.game.hit(playerObj.hands[activeHand]);
+        }
+    }
+
+    /* void handleNewGame()
+        Resets the game board and player game,
+        cleans up any existing empty games in the activeGames array
+        and lastly allows the user to join a new existing game or create
+        an entirely new game by calling handleStartGame().
+    */
     function handleNewGame() {
-        //playerObj.game.leave(playerObj); -- Already empty
+        playerObj.game.resetGame();
+        playerObj.game.resetPlayers();
         playerObj.game = null;
         cleanUpInactiveGames();
 
         handleStartGame();
     }
 
-    //Remove in-active games from the activeGames array.
+    /* void cleanUpInactiveGames()
+        Loops through each game currently stored in the activeGames array
+            If a game has 0 players, then there is no reason to have it
+            and the games is promptly removed from the array.
+    */
     function cleanUpInactiveGames() {
         for (let i = 0; i < activeGames.length; i++) {
             let players = activeGames[i].players.length;
@@ -387,6 +484,32 @@ gameserv.on('request', (req) => {
         }
     }
 
+    /* void newGame()
+        Essentially what notes the client that a new game is now active.
+        Used to send the initial information to the client-side user, so a
+        new game can be displayed.
+    */
+    function newGame() {
+        response.content = "game created";
+        response.player.cards = playerObj.hands[activeHand].cards;
+        response.dealer.cards = playerObj.game.dealer;
+        updateResponsePoints();
+        send(response);
+    }
+
+    /* void update()
+        Loops through all players active in the game the currency connection
+        is active in. Each player is then sent an update containing the correct
+        hands for each player, which in themselves contain:
+            - Cards
+            - Bet amount
+            - Are they in holding state?
+            - Winning state
+            - Card values
+
+        This is then used client-side to correct display each remote player's cards
+        at hand.
+    */
     function update() {
             let updateResponse = {  type: "blackjack", content: "update" , players: []   };
             if (playerObj.game == null)
@@ -424,6 +547,10 @@ gameserv.on('request', (req) => {
             }
     }
 
+    /* void updateResponsePoints
+        Updates the default response object to contain the correct point values
+        Used in several function relevant to hit, hold, split etc.
+    */
     function updateResponsePoints() {
         response.player.points = playerObj.game.getCardsValue(playerObj.hands[activeHand].cards);
         response.dealer.points = playerObj.game.getCardsValue(playerObj.game.dealer);
@@ -431,52 +558,49 @@ gameserv.on('request', (req) => {
         response.player.hand = activeHand;
     }
 
-    function initGame() {
-        console.log("Init: " + playerObj.game.dealer.length);
-        if (playerObj.game.dealer.length == 0)
-            playerObj.game.initialize(4);
-        else
-            handleNewJoin();
-        
-        //newGame();
-        activeHand = 0;
-        clearResponse();
-    }
+    /*#######################################################
+            Game currency related functionality
+            - Updating currency in the MySQL database
+            based on the individual user's hand.
 
-    function newGame() {
-        response.content = "game created";
-        response.player.cards = playerObj.hands[activeHand].cards;
-        response.dealer.cards = playerObj.game.dealer;
-        updateResponsePoints();
-        send(response);
-    }
+    #########################################################*/
 
-    function handleNewJoin() {
-        for (let i = 0; i < 2; i ++) {
-            playerObj.game.hit(playerObj.hands[activeHand]);
-        }
-    }
+    /* void updateWinnings()
+        Loops through each player active in the current user's active game.
+        For each player the current currency amount is stored and is then updated
+        based on how many hands has a winning, losing or drawn state as well as whether
+        the user has an active insurance.
 
+        Along with updating the currency amount, new statistics is updated based on again
+        winning, losing etc.
+
+        Eventually everything is updated in the database using MySQL queries.
+     */
     function updateWinnings() {
+        //Loop through each player in the currenct user's game
         for(let i = 0; i < playerObj.game.players.length; i++) {
             let player = playerObj.game.players[i],
                 previous = player.currency,
                 difference = 0;
+
+            //Loop through each hand for the individual users
             for(let j = 0; j < player.hands.length; j++) {
                 let hand = player.hands[j];
                 currencyCalculator(hand, player, player.insurance);
+                updatePlayerStats(player, hand);
             }
+            //Difference will be positive on a net-gain and negative on a net-loss
             difference = player.currency - previous;
-            updatePlayerStats(player);
-            
-            console.log(`[W: ${player.games_won} | L: ${player.games_lost} | D: ${player.games_drawn} | P: ${player.games_played}]`);
-            //Update database                                           + - = negative / + + = positive
-            sqlconnection.query(`UPDATE account SET currency = ${player.currency} WHERE secret = '${player.secret}'`);
-            sqlconnection.query(`UPDATE account SET games_won = games_won + ${player.games_won} WHERE secret = '${player.secret}'`);
-            sqlconnection.query(`UPDATE account SET games_lost = games_lost + ${player.games_lost} WHERE secret = '${player.secret}'`);
-            sqlconnection.query(`UPDATE account SET games_drawn = games_drawn + ${player.games_drawn} WHERE secret = '${player.secret}'`);
-            sqlconnection.query(`UPDATE account SET games_played = games_played + ${player.games_played} WHERE secret = '${player.secret}'`);
 
+            //Update database with new values
+            sqlconnection.query(`UPDATE account SET currency = ${player.currency},
+                                                    games_won = games_won + ${player.games_won},
+                                                    games_lost = games_lost + ${player.games_lost},
+                                                    games_drawn = games_drawn + ${player.games_drawn},
+                                                    games_played = games_played + ${player.games_played}
+                                WHERE secret = '${player.secret}'`);
+
+            //Update database currency_won and currency_lost based on the difference.
             if (difference > 0) {
                 sqlconnection.query(`UPDATE account SET currency_won = currency_won + ${difference} WHERE secret = '${player.secret}'`);
             } else {
@@ -489,21 +613,20 @@ gameserv.on('request', (req) => {
         }
     }
 
-    //Currency update method to add/subtract currency in-game
-    //OBS!    playerObj.currencyAmount skal ændres til noget fra db'en
+    /* void currencyCalculator(hand, player, insurance)
+        Updates the player variable: currency
+        currency is updated based on whether there was an active
+        insurance and whether the hand had a winning, losing or drawn state.
+     */
     function currencyCalculator(hand, player, insurance) {
-        let total = 0;
         //Withdraws the correct amount of money in case the player insures
         if (insurance > 0 && dealerHasBlackjack()) {
             player.currency += insurance * 2;
-            console.log("Won insurance");
         } else if (insurance > 0 && !dealerHasBlackjack()) {
             player.currency -= insurance;
-            console.log("Lost insurance");
         }
         
-        //Withdraws the correct amount of money and add stats
-        
+        //Adds or negates currency based on the hand bet
         if (hand.winner == "W") {
             player.currency += hand.bet;        
         } else if (hand.winner == "L") {
@@ -511,11 +634,28 @@ gameserv.on('request', (req) => {
         }
     }
 
-    function updatePlayerStats(player) {
-        //console.log("Updating player stats");
-        //console.log(playerObj);
-        for (let i = 0; i < player.hands.length; i++) {
-            let hand = player.hands[i];
+    /* bool dealerHasBlackjack()
+        Determines whether the dealer has a blackjack based
+        on the 2nd card (The one shown from the start) is
+        an Ace and then checking whether the total card value is 21.
+     */
+    function dealerHasBlackjack() {
+        let dealer = playerObj.game.dealer;
+        let total = playerObj.game.getCardsValue(dealer);
+        if (dealer[1].val == "A" && total == 21 && dealer.length == 2)
+            return true;
+        else
+            return false;
+    }
+
+    /* void updatePlayerStats(player)
+        Updates the individual player statistics based on the hand:
+            - Games won
+            - Games lost
+            - Games drawn
+            - Games played
+    */
+    function updatePlayerStats(player, hand) {
             player.games_played++;
             if (hand.winner == "W") {
                 player.games_won++;           
@@ -524,8 +664,6 @@ gameserv.on('request', (req) => {
             } else {
                 player.games_drawn++;
             }
-            console.log("Winnings calculating!");
-        }
     }
 
     function resetPlayerStatistics(player) {
@@ -535,46 +673,74 @@ gameserv.on('request', (req) => {
         player.games_played = 0;
     }
 
-    function dealerHasBlackjack() {
-        let dealer = playerObj.game.dealer;
-        let total = playerObj.game.getCardsValue(dealer);
-        if (dealer[1].val == "A" && total == 21)
-            return true;
-        else
-            return false;
-    }
+    /*###########################################################
 
+            Server-side Blackjack card handling
+            Here is all the functionality that sends information
+            to client-side based on whether the client chooses
+            to hit, hold, split etc.
+
+     ############################################################*/
+
+    /* void handleHit()
+        Gives the player a card from the deck,
+        prepared the response to client-side and
+        determines whether the hand is a bust or blackjack.
+        In such a case the hand is automatically put in a holding state.
+        Lastly the activeHand variable is updated through the setNextHand()
+        function.
+     */
     function handleHit() {
-        response.content = "card";
+        //Deal the player a card from the top of the deck.
         playerObj.game.hit(playerObj.hands[activeHand]);
+
+        //Prepare the response object
+        response.content = "card"; //We're dealing with cards here
+
+        //Update the response with current player cards
         response.player.cards = playerObj.hands[activeHand].cards;
-        
+
+        //Update the response points so correct card values are sent along.
         updateResponsePoints();
-        send(response);
+        send(response); //Send the response to client-side
 
         //In case of a bust or blackjack
         if (response.player.points >= 21) {
             handleHold();
         }
 
+        //Determine whether the activeHand variable should be increased or not.
         setNextHand();
     }
 
+    //Determine what to do with the activeHand variable
     function setNextHand() {
-        //Next hand
+        /*If the players has more than 1 hand, and we're not already dealing with
+          the last hand, then increase activeHand value by 1*/
         if (playerObj.hands.length > 1)
             activeHand++;
-        if (activeHand == playerObj.hands.length)
+        if (activeHand == playerObj.hands.length) //We're at the end reset to index 0
             activeHand = 0;
     }
 
+    /* void handleHold()
+        Sets the current active hand to a holding position, and determine whether
+        the active hand needs to increase to next index.
+            If everyone has their hands in a holding state, then reveal the dealer cards
+            and determine winner hands through the announceWinner() function.
+            Otherwise set a timer that will kick everyone who isn't done after 1 minute,
+            and then determine winner hands.
+    */
     function handleHold() {
+        //Set player hand to a holding state and determine next active hand.
         playerObj.game.hold(playerObj.hands[activeHand]);
         setNextHand();
+
+        //If everyone are done and in a holding position, announce winners.
         if (playerObj.game.isEveryoneDone()) {
             announceWinner();
             playerObj.game.finished = true;
-        } else {
+        } else { //Otherwise, sudden death
             setTimeout(()=> {
                 if (playerObj.game != null) {
                     if (!playerObj.game.finished) {
@@ -586,11 +752,14 @@ gameserv.on('request', (req) => {
                         playerObj.game.finished = true;
                     }
                 }
-            }, 5000);
+            }, 60000);
         }
-        
     }
 
+    /* void announceKicked(players)
+        Loops through each player whom has been determine to be AFK (Away from keyboard)
+        and announces to them client-side that it's time to logout forcefully.
+    */
     function announceKicked(players) {
         for(let i = 0; i < players.length; i++) {
             let player = players[i];
@@ -600,60 +769,92 @@ gameserv.on('request', (req) => {
         }
     }
 
+    /* void announceWinner()
+        Sends out a response to each client-side player, whether they won, lost or had a draw.
+
+        If the game is already finished for some reason, exit the function,
+        otherwise if everyone are done, loop through each player and determine their winning states.
+        Lastly update each player's winnings and stats through the updateWinnings() function.
+     */
     function announceWinner() {
+        //If the game has already finished for some reason, exit function.
         if (playerObj.game.finished)
             return;
 
+        //If everyone has holding state hands, then prepare a response for each player with their winning states.
         if (playerObj.game.isEveryoneDone()) {
+
             //Send announcement to everyone, not just the last player to trigger a hold
             for (let i = 0; i < playerObj.game.players.length; i++) {
                 let player = playerObj.game.players[i];
             
                 let response = {type: "blackjack", content: "done", wins: [], insurance: "L", dealer: {cards: [], points: 0} };
 
+                //Push each winning state for each hand of the player into the wins array.
                 for (let i = 0; i < player.hands.length; i++) {
                     response.wins.push(player.hands[i].winner);
                 }
 
+                //Prepare response with end result dealer cards and cards value.
                 response.dealer.cards = playerObj.game.dealer;
                 response.dealer.points = playerObj.game.getCardsValue(playerObj.game.dealer);
 
+                //If the dealer has a blackjack, then update the response insurance variable accordingly
                 if (dealerHasBlackjack())
                     response.insurance = "W";
-
-                updateWinnings();
                 
                 player.connection.send( JSON.stringify(response) );
             }
+
+            //Update player currency and statistics based on hand winnings.
+            updateWinnings();
         }
     }
 
+    /* void handleDouble()
+        Gives a last card to the current active player hand
+        and puts it into hold, along with doubling the player bet.
+    */
     function handleDouble() {
         let hand = playerObj.hands[activeHand];
+        //Can only be done at the start where the player has 2 cards at hand.
         if (hand.cards.length == 2) {
-            response.content = "card";
+            //Get a card and double the bet
             playerObj.game.double(hand);
+
+            //Prepare the response object
+            response.content = "card";
             response.player.cards = playerObj.hands[activeHand].cards;
             updateResponsePoints();
             send(response);
+
+            //Put the hand into a holding state
             handleHold();
         }
     }
 
-    //May need refinement, depending on how visualization implementation turns out.
+    /* void handleSplit()
+        Call the blackjack split function (Split the hand and get a card for each hand)
+        Prepare a response telling the client-side to split their hand. (Visually)
+    */
     function handleSplit() {
         let hand = playerObj.hands[activeHand];
+        //If the game successfully split the player hand
         if ( playerObj.game.split(playerObj, hand) == true) {
 
-            //Hand has been split, response with new hand
+            //Hand has been split, tell the server to do it visually.
             response.content = "split";
             updateResponsePoints();
             send(response);
         }
     }
 
+    /* void handleInsurance()
+        Determine whether the player can insure,
+        if successfull send a response to client-side containing correct insurance amount.
+    */
     function handleInsurance() {
-        //If insurance was possible
+        //If insurance is possible
         if(playerObj.game.insurance(playerObj) == true) {
 
             //Prepare response -> Set response insurance to active insurance.
@@ -663,19 +864,28 @@ gameserv.on('request', (req) => {
         }
     }
 
+    /* void handleBet(msg) msg: message
+        Sets the hand bet based on how much the client has bet client-side, if
+        the player has the needed curreny and sends a response with new values to
+        be updated visually.
+     */
     function handleBet(msg) { //Send cards here
         let bet = msg.amount;
 
-        //playerObj.secret = msg.secret; // Hackfix?
-        console.log("Attempting to bet on hand: " + activeHand + ", Game: " + playerObj.game);
-        playerObj.game.bet(playerObj.hands[activeHand], bet);
-        //Reponse code
-        response.content = "card";
-        response.player.cards = playerObj.hands[activeHand].cards;
-        updateResponsePoints();
-        send(response);
+        //If the player actually has the currency needed
+        if (bet <= playerObj.currency) {
+            //Sent the hand bet to the bet amount
+            playerObj.game.bet(playerObj.hands[activeHand], bet);
+            
+            //Prepare the response object
+            response.content = "card";
+            response.player.cards = playerObj.hands[activeHand].cards;
+            updateResponsePoints();
+            send(response);
+        }
     }
 
+    //Simplified send function that stringifies a JSON object.
     function send(message) {
         connection.send( JSON.stringify(message) );
     }

@@ -3,7 +3,8 @@ const playerTarget = "player__card-container",
     dealerTarget = "dealer__card-container",
     dealerSumTarget = "dealer__card-sum";
 
-let game = null;
+let game = null,
+    secret = null;
 
 let hand = 0,
     handBets = [],
@@ -183,7 +184,7 @@ function gameHandler() {
         let playerName = document.getElementById("username").value,
             playerSecret = getCookie("secret"),
             playerCurrency = document.getElementById("player__info--capital").innerHTML;
-        websocket.send(JSON.stringify({type: "game", content: "startgame", username: playerName, currency: playerCurrency, secret: playerSecret}));
+        websocket.send(JSON.stringify({type: "game", content: "startgame", username: playerName, currency: playerCurrency, secret: secret}));
     }
 
     websocket.onmessage = (message) => {
