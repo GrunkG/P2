@@ -46,18 +46,6 @@ class Game{
         this.player.printHands();
         this.dealer.printHands();
     }
-    // toggleWinScreen(){ //Outdated - use the one in the player class
-    //     toggleDisplayNone("result", "grid");
-    //     toggleDisplayNone("result__win", "grid");
-    // }
-    // toggleLoseScreen(){ //Outdated - use the one in the player class
-    //     toggleDisplayNone("result", "grid");
-    //     toggleDisplayNone("result__lose", "grid");
-    // }
-    // toggleDrawScreen(){ //Outdated - use the one in the player class
-    //     toggleDisplayNone("result", "grid");
-    //     toggleDisplayNone("result__draw", "grid");
-    // }
     toggleBetInput(){
         toggleDisplayNone("player__card-container", "grid");
         toggleDisplayNone("player__buttons", "flex");

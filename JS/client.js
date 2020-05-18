@@ -189,6 +189,7 @@ function gameHandler() {
 
     websocket.onmessage = (message) => {
        // try {
+            let countdown;
             let msg = JSON.parse(message.data);
             console.log(msg);
             if (msg.type == "blackjack") {
@@ -211,6 +212,7 @@ function gameHandler() {
                         handleInsurance(msg);
                         break;
                     case "done":
+                        stopCountdown();
                         handleGameDone(msg);
                         break;
                     case "update":
@@ -218,6 +220,9 @@ function gameHandler() {
                         break;
                     case "kicked":
                         handleKicked();
+                        break;
+                    case "countdown":
+                        setCountdown(msg.seconds);
                         break;
                     /* case "ready to bet":
                         game.toggleBetInput();
@@ -442,6 +447,34 @@ function enableButtonIf(enable, button) {
     } else { //Disable button
         document.getElementById("button-" + button).setAttribute("class", "button-" + button + " inactive");
     }
+}
+
+let countInterval;
+function setCountdown(seconds){
+    let countdownContainer = document.getElementById("countdown");
+    let countdownNumber = document.getElementById("countdown__number");
+    let countdownStroke = document.getElementById("countdown__stroke");
+    let countdown = seconds;
+
+    countdownContainer.style.display = "block";
+    countdownStroke.style.animation = `countdown ${seconds}s linear infinite forwards`;
+    countdownNumber.innerHTML = countdown;
+
+    countInterval = setInterval(() => { //Counts down countdown by 1 every second
+    countdown--;
+    countdownNumber.innerHTML = countdown;
+    }, 1000); //1 second
+
+    setTimeout(() => { //Hides the container after the countdown
+        countdownContainer.style.display = "none";
+        clearInterval(countInterval);
+    }, seconds * 1000);
+}
+
+function stopCountdown(){
+    let countdownContainer = document.getElementById("countdown");
+    clearInterval(countInterval);
+    countdownContainer.style.display = "none";
 }
 
 /* function sendInfo() {

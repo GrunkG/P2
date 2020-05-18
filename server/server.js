@@ -741,6 +741,10 @@ gameserv.on('request', (req) => {
             announceWinner();
             playerObj.game.finished = true;
         } else { //Otherwise, sudden death
+            playerObj.game.players.forEach(player => { //Sends each player a message to start a countdown
+                let countdownMsg = {type: "blackjack", content: "countdown", seconds: 60};
+                player.connection.send(JSON.stringify(countdownMsg));
+            });
             setTimeout(()=> {
                 if (playerObj.game != null) {
                     if (!playerObj.game.finished) {
@@ -752,7 +756,7 @@ gameserv.on('request', (req) => {
                         playerObj.game.finished = true;
                     }
                 }
-            }, 60000);
+            }, 60000); //60 seconds
         }
     }
 

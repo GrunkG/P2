@@ -28,22 +28,3 @@ function toggleDailyReward(){
     toggleDisplayNone("daily-reward", "grid");
 }
 
-function setCountdown(seconds){
-    let countdownNumber = document.getElementById("countdown__number");
-    let countdownStroke = document.getElementById("countdown__stroke");
-    let countdown = seconds;
-
-    toggleDisplayNone("countdown", "block");
-    countdownStroke.style.animation = `countdown ${seconds}s linear infinite forwards`;
-    countdownNumber.innerHTML = countdown;
-
-    let countInterval = setInterval(() => { //Counts down countdown by 1 every second
-    countdown--;
-    countdownNumber.innerHTML = countdown;
-    }, 1000); //1 second
-
-    setTimeout(() => { //Hides the container after the countdown
-        toggleDisplayNone("countdown", "block");
-        clearInterval(countInterval);
-    }, seconds * 1000);
-}
