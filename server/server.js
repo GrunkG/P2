@@ -259,8 +259,6 @@ gameserv.on('request', (req) => {
     }
 
     function loginUser(username, password) {
-        //let test = sqlconnection.query(`SELECT currency, ID FROM account WHERE username='${username}' AND password='${password}'`, (error, result, fields) => {
-            //connection.query("SELECT * FROM account WHERE username = ? ", [username], (error, rows) => {
         sqlconnection.query(`SELECT currency, games_won, games_drawn, games_lost, games_played, ID, password, lastLogin, currency_won, currency_lost FROM account WHERE username='${username}'`, (error, result, fields) => {
             if (error) {
                 throw error;
