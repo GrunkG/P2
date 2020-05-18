@@ -476,6 +476,62 @@ button:focus {
   outline: 0;
 }
 
+#countdown {
+  -ms-grid-row: 1;
+  -ms-grid-column: 1;
+  -ms-grid-column-span: 2;
+  grid-area: title;
+  place-self: end;
+  position: relative;
+  height: 40px;
+  width: 40px;
+  text-align: center;
+}
+
+#countdown #countdown__number {
+  color: #1d34bd;
+  display: inline-block;
+  line-height: 40px;
+  font-size: 1.4rem;
+}
+
+#countdown svg {
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 40px;
+  height: 40px;
+  -webkit-transform: rotateY(-180deg) rotateZ(-90deg);
+          transform: rotateY(-180deg) rotateZ(-90deg);
+}
+
+#countdown svg circle {
+  stroke-dasharray: 113px;
+  stroke-dashoffset: 0px;
+  stroke-linecap: round;
+  stroke-width: 2px;
+  stroke: #1d34bd;
+  fill: none;
+}
+
+@-webkit-keyframes countdown {
+  from {
+    stroke-dashoffset: 0px;
+  }
+  to {
+    stroke-dashoffset: 113px;
+  }
+}
+
+@keyframes countdown {
+  from {
+    stroke-dashoffset: 0px;
+  }
+  to {
+    stroke-dashoffset: 113px;
+  }
+}
+
 @-webkit-keyframes rotate {
   100% {
     -webkit-transform: rotate(360deg);
