@@ -240,7 +240,6 @@ gameserv.on('request', (req) => {
             let game = activeGames[i];
             for (let p = 0; p < game.players.length; p++) {
                 let player = game.players[p];
-                console.log(`[U: ${player.username} | S: ${player.secret}]`);
                 if (player.username == username && player.secret == secret) { 
                     console.log("Found the player and game!");
                     //Correct user is found on this loop-through
