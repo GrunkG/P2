@@ -793,7 +793,8 @@ gameserv.on('request', (req) => {
         //If the game has already finished for some reason, exit function.
         if (playerObj.game.finished)
             return;
-
+            
+        clearTimeout(playerObj.game.timer);
         //If everyone has holding state hands, then prepare a response for each player with their winning states.
         if (playerObj.game.isEveryoneDone()) {
 
