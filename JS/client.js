@@ -224,9 +224,6 @@ function gameHandler() {
                     case "countdown":
                         setCountdown(msg.seconds);
                         break;
-                    /* case "ready to bet":
-                        game.toggleBetInput();
-                        break; */
                 }
                 if (game.player.hands[hand].cards != [])
                     disableButtons(game.player.hands[hand]);

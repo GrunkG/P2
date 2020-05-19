@@ -47,6 +47,7 @@ class multiplayer_blackjack extends blackjackGame {
     constructor() {
         super();
         this.finished = false;
+        this.timer = null;
     }
 
     //Overvejende -> general?
@@ -347,6 +348,7 @@ gameserv.on('request', (req) => {
     ##########################################################################*/
 
     function gamehandler(message) {
+        //New game creation - Requires no game to be set.
         switch(message.content) {
             case "startgame":
                 playerObj.username = message.username;
@@ -357,30 +359,37 @@ gameserv.on('request', (req) => {
             case "newgame":
                 handleNewGame();
                 break;
-            case "hit":
-                handleHit();
-                break;
-            case "hold":
-                handleHold()
-                break;
-            case "double":
-                handleDouble();
-                break;
-            case "split":
-                handleSplit();
-                break;
-            case "insure":
-                handleInsurance();
-                break;
-            case "bet":
-                handleBet(message);
-                newGame();
-                break;
-            default:  break;
         }
 
-        //Updates everyone who's active in a given game.
-        update();
+        //Game actions - Requires game to be set
+        if (playerObj.game != null) {
+            switch(message.content) {
+                case "hit":
+                    handleHit();
+                    break;
+                case "hold":
+                    handleHold()
+                    break;
+                case "double":
+                    handleDouble();
+                    break;
+                case "split":
+                    handleSplit();
+                    break;
+                case "insure":
+                    handleInsurance();
+                    break;
+                case "bet":
+                    handleBet(message);
+                    newGame();
+                    break;
+                default:  break;
+            }
+            //Updates everyone who's active in a given game.
+            update();
+        }
+
+        
     }
 
     /* void handleStartGame()
@@ -738,22 +747,25 @@ gameserv.on('request', (req) => {
             announceWinner();
             playerObj.game.finished = true;
         } else { //Otherwise, sudden death
-            playerObj.game.players.forEach(player => { //Sends each player a message to start a countdown
-                let countdownMsg = {type: "blackjack", content: "countdown", seconds: 60};
-                player.connection.send(JSON.stringify(countdownMsg));
-            });
-            setTimeout(()=> {
-                if (playerObj.game != null) {
-                    if (!playerObj.game.finished) {
-                        let kickedPlayers = playerObj.game.kickAFK();
-                        if (kickedPlayers.length > 0) {
-                            announceKicked(kickedPlayers)
+            if (playerObj.game.timer == null) {
+                playerObj.game.players.forEach(player => { //Sends each player a message to start a countdown
+                    let countdownMsg = {type: "blackjack", content: "countdown", seconds: 60};
+                    player.connection.send(JSON.stringify(countdownMsg));
+                });
+            
+                playerObj.game.timer = setTimeout(()=> {
+                    if (playerObj.game != null) {
+                        if (!playerObj.game.finished) {
+                            let kickedPlayers = playerObj.game.kickAFK();
+                            if (kickedPlayers.length > 0) {
+                                announceKicked(kickedPlayers)
+                            }
+                            announceWinner();
+                            playerObj.game.finished = true;
                         }
-                        announceWinner();
-                        playerObj.game.finished = true;
                     }
-                }
-            }, 60000); //60 seconds
+                }, 60000); //60 seconds
+            }
         }
     }
 
