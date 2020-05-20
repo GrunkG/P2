@@ -102,11 +102,11 @@ class RemotePlayer extends Player{
     addToHtml() {
         //Creates something like this:
             // <div class="remote-player">
-            //         <span class="remote-player__title">P1</span>
+            //         <span class="remote-player__title"></span>
             //         <div class="remote-player__card-container" id="remote-player-p1__card-container">
             //             <div class="remote-player__hand" id="remote-player-p1__hand0">
             //                 <div id="remote-player-p1__card-container0"></div>
-            //                 <span class="remote-player__card-sum" id="remote-player-p1__card-sum0">10</span>
+            //                 <span class="remote-player__card-sum" id="remote-player-p1__card-sum0"></span>
             //                 <span class="remote-player__result" id="remote-player-p1__result0"></span>
             //             </div>
             //         </div>
@@ -116,8 +116,6 @@ class RemotePlayer extends Player{
         let newRemote = document.createElement("div");
         let newRemoteTitle = document.createElement("span");
         let newRemoteCardContainer = document.createElement("div");
-        // let newRemoteInnerCardContainer = document.createElement("div");
-        // let newRemoteCardSum = document.createElement("span");
 
         newRemote.setAttribute("class", "remote-player");
         newRemote.setAttribute("id", this.id);
@@ -132,13 +130,6 @@ class RemotePlayer extends Player{
         newRemoteCardContainer.setAttribute("class", "remote-player__card-container"); //Card container
         newRemoteCardContainer.setAttribute("id", `${this.id}__card-container`);
         newRemote.appendChild(newRemoteCardContainer);
-
-        // newRemoteInnerCardContainer.setAttribute("id", this.id + "__card-container0");
-        // newRemoteCardContainer.appendChild(newRemoteInnerCardContainer);
-
-        // newRemoteCardSum.setAttribute("class", "remote-player__card-sum"); //Sum container
-        // newRemoteCardSum.setAttribute("id", `${this.id}__card-sum0`);
-        // newRemoteCardContainer.appendChild(newRemoteCardSum);
 
         parent.appendChild(newRemote);
         

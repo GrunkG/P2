@@ -662,14 +662,14 @@ gameserv.on('request', (req) => {
             - Games played
     */
     function updatePlayerStats(player, hand) {
-            player.games_played++;
-            if (hand.winner == "W") {
-                player.games_won++;           
-            } else if (hand.winner == "L") {
-                player.games_lost++;
-            } else {
-                player.games_drawn++;
-            }
+        player.games_played++;
+        if (hand.winner == "W") {
+            player.games_won++;           
+        } else if (hand.winner == "L") {
+            player.games_lost++;
+        } else {
+            player.games_drawn++;
+        }
     }
 
     function resetPlayerStatistics(player) {
