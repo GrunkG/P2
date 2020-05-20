@@ -118,7 +118,6 @@ function updateGame(msg) {
     
     if (game.remotes.length > 0)
         game.removeAllRemotes();
-    //game.addRemotes(players.length);
 
     //For each active player
     for (let i = 0; i < players.length; i++) {
@@ -126,8 +125,6 @@ function updateGame(msg) {
         let remote_deck = game.remotes[i],
             player = players[i];
 
-        
-        
         //For each active player hand
         for (let x = 0; x < player.hands.length; x++) {
             let hand = player.hands[x],
@@ -147,9 +144,8 @@ function updateGame(msg) {
             }
         }
         
-        //Update the shown cards
-        //game.updateScreen();
     }
+    
     game.updateScreen();
 }
 

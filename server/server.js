@@ -428,6 +428,8 @@ gameserv.on('request', (req) => {
                 playerObj.join(activeGames[activeGames.length-1]); //length -1 due to 0 index
                 initGame();
             }
+
+            
         }
     }
 
@@ -445,7 +447,7 @@ gameserv.on('request', (req) => {
             playerObj.game.initialize(4); //Initializes a game with 4 decks in play
         else
             handleNewJoin();
-
+        console.log("Cards in play: " + playerObj.game.deck.length);
         //Resets the user hand to index 0, incase they just exit a game on a higher index.
         activeHand = 0;
 
@@ -888,9 +890,9 @@ gameserv.on('request', (req) => {
 
         //If the player actually has the currency needed
         if (bet <= playerObj.currency) {
-            //Sent the hand bet to the bet amount
-            playerObj.game.bet(playerObj.hands[activeHand], bet);
-            
+            //Set the active hand's bet to the bet amount.
+            playerObj.hands[activeHand].bet = bet;
+
             //Prepare the response object
             response.content = "card";
             response.player.cards = playerObj.hands[activeHand].cards;
