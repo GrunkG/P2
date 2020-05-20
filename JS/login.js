@@ -40,8 +40,10 @@ function register(){
 
     let username = document.getElementById("register__username").value;
     let password = document.getElementById("register__password").value;
-
-    websocket.send( JSON.stringify( {type: "loginsystem", content:"register", user: username, pass: password} ) );
+    let checkbox = document.getElementById("register__checkbox");
+    if (checkbox.checked) {
+        websocket.send( JSON.stringify( {type: "loginsystem", content:"register", user: username, pass: password} ) );
+    }
 
     //toggleRegister();
 }
