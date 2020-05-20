@@ -103,6 +103,67 @@
                 }
             }
         }
+        &--form .register__adult{
+            // align-items: center;
+            // display: flex;
+            // margin-top: 1rem;
+            // input{
+            //     width: 20px;
+            //     height: 20px;
+            //     margin: 0;
+            // }
+            // label{
+            //     display: inline-block;
+            //     font-size: 1.4rem;
+            //     color: #333333;
+            //     font-weight: normal;
+            //     margin: 0 0 0 10px;
+            // }
+            display: block;
+            position: relative;
+            line-height: 27px;
+            cursor: pointer;
+            user-select: none;
+            font-size: 1.4rem;
+            padding-left: 35px;
+            color: #333333;
+            font-weight: normal;
+            input{
+                position: absolute;
+                opacity: 0;
+                cursor: pointer;
+                height: 0;
+                width: 0;
+                &:checked ~ span{
+                    background-color: $main-color;
+                    &::after{
+                        display: block;
+                    }
+                }
+            }
+            span{
+                position: absolute;
+                top: 0;
+                left: 0;
+                height: 25px;
+                width: 25px;
+                background-color: #fff;
+                border: 1px solid #aaa;
+                border-radius: 5px;
+                &::after{
+                    content: "";
+                    position: absolute;
+                    display: none;
+                    left: 9px;
+                    top: 5px;
+                    width: 5px;
+                    height: 10px;
+                    border: solid white;
+                    border-width: 0 3px 3px 0;
+                    transform: rotate(45deg);
+                }
+            }
+        }
         &--form-register, &--form-forgot{
             font-size: 1.8rem;
             text-decoration: none;

@@ -75,24 +75,6 @@
                     </div>
                 </div>
             </div>
-
-            <div class="result" id="result" style="display: none;">
-                <div class="result__win" id="result__win" style="display: none;">
-                    <span>You Win</span>
-                    <button onclick="doNewGame(this)">Play Again</button>
-                    <button>Log out</button>
-                </div>
-                <div class="result__lose" id="result__lose" style="display: none;">
-                    <span>You Lose</span>
-                    <button onclick="doNewGame(this)">Play Again</button>
-                    <button>Log out</button>
-                </div>
-                <div class="result__draw" id="result__draw" style="display: none;">
-                    <span>Draw</span>
-                    <button onclick="doNewGame(this)">Play Again</button>
-                    <button>Log out</button>
-                </div>
-            </div>
         </div>
     </main>
 
@@ -130,6 +112,11 @@
                 <label for="password">Password</label>
                 <input type="password" name="password" id="register__password" required="required">
 
+                <label class="register__adult">
+                    I am at least 18 years of age
+                    <input type="checkbox" name="adult" required="required">
+                    <span></span>
+                </label>
                 <input type="button" value="Register" onclick="register()">
             </form>
         </div>
