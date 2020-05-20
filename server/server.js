@@ -7,12 +7,12 @@ const socket = require('websocket');
 const mysql = require('mysql');
 const dbConfig = require('./dbConfig.js');
 const blackjackGame = require('./modules/blackjack').Blackjack;
-const blackjackPlayer = require('./modules/blackjack').Blackjack_player;
+const blackjackPlayer = require('./modules/blackjack').Blackjack_Player;
 
 //Encryption made 'easy'
 const bcrypt = require("bcrypt-nodejs");
 
-//MySQL Connection establishment, used
+//MySQL Connection initiation
 let sqlconnection = mysql.createConnection(dbConfig);
 sqlconnection.connect((err) => {
     if (err) { throw err } else {
@@ -21,7 +21,7 @@ sqlconnection.connect((err) => {
 });
 
 //Hosting Config
-const pathPublic = "./";
+const pathPublic = "./"; // '../' on linux
 const defaultHTML = "html/blackjack.html";
 
 const port = 3000,
@@ -30,6 +30,7 @@ const port = 3000,
 
 //Multiplayer class extentions and game list
 let activeGames = [];
+
 class user extends blackjackPlayer {
     constructor() {
         super();
@@ -230,22 +231,15 @@ gameserv.on('request', (req) => {
     }
 
     function logoutUser(username, secret) {
-        //Remove user from game --
-        //Remove "session"
-        //-> Clientside show login --
-        //Update game for remaininding players, if game wasn't empty --
-        //Reset player connection
-        console.log(`Logging out!:: S: ${secret}, U: ${username}`);
         //Find game in which the user is active
         for (let i = 0; i < activeGames.length; i++) {
             let game = activeGames[i];
             for (let p = 0; p < game.players.length; p++) {
                 let player = game.players[p];
                 if (player.username == username && player.secret == secret) { 
-                    console.log("Found the player and game!");
                     //Correct user is found on this loop-through
-                    //Maybe cards back in deck (bottom)
                     game.players.splice(p,1); //Remove player from index p
+
                     if (game.players.length > 0)
                         update(); //Update remotes for remainding players
                     else
@@ -766,7 +760,7 @@ gameserv.on('request', (req) => {
                             playerObj.game.finished = true;
                         }
                     }
-                }, 60000); //60 seconds
+                }, 5000); //60 seconds
             }
         }
     }

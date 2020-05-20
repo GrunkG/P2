@@ -30,6 +30,34 @@ class Blackjack extends cardmod.Cardgame {
         this.dealer.push(this.drawCard());
     }
 
+    /*####################################
+            GAME-END FUNCTIONALITY
+    ######################################*/
+
+    /* void endGame()
+        Ends the cards game and handles everything needed to show or determine winners.
+         - First the hidden dealer card is shown
+         - Second the dealer hand is filled until the total value of the cards amounts to
+           17 or above.
+         - Lastly the determineWinner() function is called to determine player hand values.
+    */
+    endGame() {
+        if (this.dealer.length == 0)
+            return;
+
+        //Show the hidden card. 
+        this.dealer[0].visible = true;
+
+        //Everyone is holding, get dealer value
+        let dealer_value = this.getCardsValue(this.dealer);
+
+        //Fill dealer with additional cards.
+        this.fillDealer(dealer_value);
+
+        //Determine what hands won or lost.
+        this.determineWinner();
+    }
+
     //Fill up the dealer cards until value is higher or equals to 17.
     fillDealer(value) {
         //If the current dealer hand value is above or equal to 17
@@ -44,6 +72,51 @@ class Blackjack extends cardmod.Cardgame {
 
         //Do it all over again, but this time based on the new dealer value.
         this.fillDealer(new_value);        
+    }
+
+    /* void determineWinner()
+        Get each hand value for each player and compares it to the dealer value.
+        If the hand value is above the dealer value and below or equal to 21, then
+        the player wins.
+        If the hand value is above 21 then the player busts and loses.
+     */
+    determineWinner() {
+        let dealer_value = this.getCardsValue(this.dealer);
+        //For all players
+        for (let i = 0; i < this.players.length; i++) {
+            let player = this.players[i];
+            //And all player hands
+            for (let x = 0; x < player.hands.length; x++) {
+                //Hand: {cards:[], bet: 0, isHolding: false, winner: null}
+                let hand = player.hands[x],
+                    value = this.getCardsValue(hand.cards);
+                
+                //W = win, L = Loss, D = Draw
+                //Best hand
+                if (dealer_value > value)
+                    hand.winner = "L";
+                if (value > dealer_value)
+                    hand.winner = "W";
+                if (dealer_value == 21 && value != 21)
+                    hand.winner = "L";
+                if (value == 21 && dealer_value != 21)
+                    hand.winner = "W";
+
+                //Draw
+                if (dealer_value == 21 && value == 21) {
+                    hand.winner = "D";
+                    continue;
+                }
+                if (dealer_value == value)
+                    hand.winner = "D";
+
+                //Busts
+                if (value > 21)
+                    hand.winner = "L";
+                if (dealer_value > 21 && value < 21)
+                    hand.winner = "W";
+            }
+        }
     }
 
     //Get the total card value of a card array's shown cards.
@@ -91,6 +164,10 @@ class Blackjack extends cardmod.Cardgame {
         return value;
     }
 
+    /*##########################################
+            BLACKJACK CARD ACTIONS
+    ############################################*/
+
     //Hit -> Draw card
     hit(hand) {
         //Can only draw a card if not in a holding position
@@ -112,62 +189,6 @@ class Blackjack extends cardmod.Cardgame {
         //Check if everyone is currently holding
         if (this.isEveryoneDone()) {
             this.endGame();
-        }
-    }
-
-    endGame() {
-        if (this.dealer.length == 0)
-            return;
-        //Show the hidden card. 
-        this.dealer[0].visible = true;
-        //Everyone is holding, get dealer value
-        let dealer_value = this.getCardsValue(this.dealer);
-        //Fill dealer with additional cards.
-        this.fillDealer(dealer_value);
-        //Determine what hands won or lost.
-        this.determineWinner();
-    }
-
-    //Goes through each hand for each player and determines whether it was a losing hand or not.
-    determineWinner() {
-        let dealer_value = this.getCardsValue(this.dealer);
-        //For all players
-        for (let i = 0; i < this.players.length; i++) {
-            let player = this.players[i];
-            //And all player hands
-            for (let x = 0; x < player.hands.length; x++) {
-                //Hand: {cards:[], bet: 0, isHolding: false, winner: null}
-                let hand = player.hands[x],
-                    value = this.getCardsValue(hand.cards);
-                
-                
-                //W = win, L = Loss, D = Draw
-                //Best hand
-                if (dealer_value > value)
-                    hand.winner = "L";
-                if (value > dealer_value)
-                    hand.winner = "W";
-                if (dealer_value == 21 && value != 21)
-                    hand.winner = "L";
-                if (value == 21 && dealer_value != 21)
-                    hand.winner = "W";
-
-                //Draw
-                if (dealer_value == 21 && value == 21) {
-                    hand.winner = "D";
-                    continue;
-                }
-                if (dealer_value == value)
-                    hand.winner = "D";
-
-                //Busts
-                if (dealer_value > 21 && value > 21)
-                    hand.winner = "L";
-                if (dealer_value < 21 && value > 21)
-                    hand.winner = "L";
-                if (dealer_value > 21 && value < 21)
-                    hand.winner = "W";
-            }
         }
     }
 
@@ -197,9 +218,9 @@ class Blackjack extends cardmod.Cardgame {
 
         Each hand is then dealt a card, so they have 2 each.
     */
-   split(player, hand) {
-       //If the player hand has only 2 cards and isn't in a holding position.
-       if (hand.cards.length == 2 && !hand.isHolding) {
+    split(player, hand) {
+        //If the player hand has only 2 cards and isn't in a holding position.
+        if (hand.cards.length == 2 && !hand.isHolding) {
             let cards = hand.cards;
             //If both cards have the same card values
             if (cards[0].val == cards[1].val) {
@@ -219,19 +240,19 @@ class Blackjack extends cardmod.Cardgame {
 
                 return true; //Success
             }
-       }
+        }
 
-       return false; //Something went wrong, or client is attempting to cheat.
-   }
+        return false; //Something went wrong, or client is attempting to cheat.
+    }
 
-   /*
+    /*
         Insurance, is an initial bet that runs paralel with a game.
         Insurance can be done if the dealer starts with an Ace.
         The player bets that the dealer will get a blackjack (Ace + a picture card);
         The insurance bet is half the initial bet.
         Bet is paid 2:1
-   */
-   insurance(player) {
+    */
+    insurance(player) {
         //First card is always hidden, shown card a such the second one, on index 1.
         let dealer_card = this.dealer[1];
         //If the dealer card is an Ace
@@ -244,7 +265,11 @@ class Blackjack extends cardmod.Cardgame {
         }
 
         return false; //Something went wrong, or client is attempting to cheat.
-   }
+    }
+
+   /*###############################
+            BOOL FUNCTIONS
+   #################################*/
 
    /* bool isGameStarted()
       return true if
@@ -266,6 +291,7 @@ class Blackjack extends cardmod.Cardgame {
         return false;
    }
 
+   //Is the game finished?
    isGameDone() {
         if (this.dealer.length >= 2) {
             let card_visibility = this.dealer[0].visible;
@@ -295,10 +321,13 @@ class Blackjack extends cardmod.Cardgame {
         //We've been through them all, it checks out, everyone is done.
         return true;
     }
-
 }
 
-class Blackjack_player extends cardmod.Player{
+/* Blackjack_player Class
+   Extends the general frame Player class
+    / Expands upon
+*/
+class Blackjack_Player extends cardmod.Player{
     constructor() {
         super();
         this.insurance = 0;
@@ -306,4 +335,4 @@ class Blackjack_player extends cardmod.Player{
     }
 }
 
-module.exports = {Blackjack, Blackjack_player};
+module.exports = {Blackjack, Blackjack_Player};
