@@ -40,10 +40,10 @@ function register(){
 
     let username = document.getElementById("register__username").value;
     let password = document.getElementById("register__password").value;
-    //Let 18+ checkbox
-    //If 18 checkbox == true then allow websocket.send otherwise set error message
-
-    websocket.send( JSON.stringify( {type: "loginsystem", content:"register", user: username, pass: password} ) );
+    let checkbox = document.getElementById("register__checkbox");
+    if (checkbox.checked) {
+        websocket.send( JSON.stringify( {type: "loginsystem", content:"register", user: username, pass: password} ) );
+    }
 
     //toggleRegister();
 }
