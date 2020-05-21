@@ -469,7 +469,7 @@ gameserv.on('request', (req) => {
         playerObj.game.resetPlayers();
         playerObj.game = null;
         cleanUpInactiveGames();
-
+        
         handleStartGame();
     }
 
@@ -723,8 +723,9 @@ gameserv.on('request', (req) => {
             activeHand = (playerObj.hands[activeHand+1]) ? activeHand + 1 : 0;
 
             if (playerObj.hands[activeHand].isHolding) {
-                console.log("Holding:" + playerObj.hands.length);
                 for (let i = 0; i < playerObj.hands.length; i++) {
+                    if (activeHand >= playerObj.hands.length)
+                        break;
                     if (!playerObj.hands[activeHand].isHolding)
                         break;
     
@@ -734,8 +735,6 @@ gameserv.on('request', (req) => {
         }
         if (activeHand == playerObj.hands.length) //We're at the end reset to index 0
             activeHand = 0;
-
-        console.log("Done");
     }
 
     /* void handleHold()

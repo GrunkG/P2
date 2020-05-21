@@ -81,7 +81,7 @@ function resetGamePlatform() {
         game.player.resetResults();
         game.player.hands[0].cards = [];
         game.dealer.hands[0].cards = [];
-        game.updateScreen();
+        //game.updateScreen();
         game.removeAllRemotes();
         game.toggleBetInput();
     }
@@ -135,7 +135,8 @@ function gameHandler() {
                         handleGameDone(msg);
                         break;
                     case "update":
-                        updateGame(msg);
+                        if (handBets.length > 0)
+                            updateGame(msg);
                         break;
                     case "kicked":
                         handleKicked();
@@ -298,7 +299,9 @@ function updateHand(handObj, index) {
             deck.cards.push(new_card);
     }
     game.player.hands[index] = deck;
-    document.getElementById("player__card-sum" + index).innerHTML = handObj.points;
+    console.log(index);
+    if (document.getElementById("player__card-sum" + index))
+        document.getElementById("player__card-sum" + index).innerHTML = handObj.points;
     
 }
 
@@ -329,6 +332,7 @@ function resetGameValues() {
     document.getElementById("player__info--bet").innerHTML = 0;
     insurance = 0;
     handBets = [];
+    hand = 0;
 }
 
 function handleWinner(hand, state) {
@@ -440,10 +444,12 @@ function doRegister(){
 
 function doNewGame() {
     game.togglePlayAgainOnPress();
-    game.player.resetResults();
+    /* game.player.resetResults();
     game.removeAllRemotes();
     game.dealer.hands[0].cards = [];
-    game.updateScreen();
+    game.updateScreen(); */
+    resetGamePlatform();
+    game.toggleBetInput();
     websocket.send(JSON.stringify({type: "game", content: "newgame"}));
 }
 
