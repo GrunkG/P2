@@ -760,7 +760,7 @@ gameserv.on('request', (req) => {
                             playerObj.game.finished = true;
                         }
                     }
-                }, 5000); //60 seconds
+                },60000); //60 seconds
             }
         }
     }

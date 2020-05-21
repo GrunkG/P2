@@ -116,7 +116,7 @@ function handleLoginsystem() {
                         document.cookie = "secret = " + msg.identity;
                         secret = msg.identity;
 
-                        initiateGame();
+                        gameHandler();
                         toggleLogin();
                         toggleLogout();
 
