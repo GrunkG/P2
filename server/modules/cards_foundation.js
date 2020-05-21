@@ -1,14 +1,16 @@
 //Variables
 //            Spades, Hearts, Diamonds, Clubs
 const suits = ["S", "H", "D", "C"];
-//                                                      Jack, Queen, King, Ace
+//                                                          Jack, Queen, King, Ace
 const values = ["2", "3", "4", "5", "6", "7", "8", "9", "10", "J", "Q", "K", "A"];
 
-/*
-    Cards Class, handles general card game elements.
+/*  Cardgame Class, handles general card game elements.
     Should for the most part function as an abstract class.
+
+    The general card game frame to be expanded upon based on different card games,
+    and their individual rules and actions.
 */
-class Cards { //Rename
+class Cardgame { //Rename
     constructor() {
         this.players = [];  //Contains all player objects active in the current game.
         this.dealer = [];   //Contains all dealer cards
@@ -16,7 +18,7 @@ class Cards { //Rename
     }
 
     /*
-        initialize(dekcs, jokers)
+        initialize(decKs, jokers)
         Function handles initilization of a card game by:
             - Filling the 'deck' based on whether jokers should be used 
               and how many decks are in play.
@@ -27,24 +29,29 @@ class Cards { //Rename
         this.shuffleDeck();
     }
 
+    /*Fills the game Deck based on how many decks are used as input
+      and whether jokers are in play.*/
     fillDeck(decks, jokers) {
-        //For each suit
-        for (let suit = 0; suit < suits.length; suit++) {
-            //And for each cards value
-            for (let i = 0; i < values.length; i++) {
-                let value = 0,                  //Initiate value variable
-                    current_suit = suits[suit]; //Current suit for easier read.
+        //For each deck to be in play
+        for (let deck = 0; deck < decks; deck++) {
+            //For each suit in a deck
+            for (let suit = 0; suit < suits.length; suit++) {
+                //Add a card for each card value
+                for (let i = 0; i < values.length; i++) {
+                    let value = 0,                  //Initiate value variable
+                        current_suit = suits[suit]; //Current suit for easier read.
 
-                //If the card index is below 8.
-                if (i >= 0 && i <= 8)
-                    value = parseInt(values[i]); //Convert string to integer.
-                if (i > 8)
-                    value = values[i];          //Use the string value, since it might differ based on the game.
+                    //If the card index is below 8.
+                    if (i >= 0 && i <= 8)
+                        value = parseInt(values[i]); //Convert string to integer.
+                    if (i > 8)
+                        value = values[i];          //Use the string value, since it might differ based on the game.
 
-                //Construct card object
-                let card = {suit: current_suit, val: value, visible: true};
-                //Push new card into the deck array.
-                this.deck.push(card); 
+                    //Construct card object
+                    let card = {suit: current_suit, val: value, visible: true};
+                    //Push new card into the deck array.
+                    this.deck.push(card); 
+                }
             }
         }
 
@@ -61,7 +68,21 @@ class Cards { //Rename
         }
     }
 
-    shuffleDeck() { //Using Fisher-Yates Shuffle - https://bost.ocks.org/mike/shuffle/
+    /* Using Fisher-Yates Shuffle - https://bost.ocks.org/mike/shuffle/
+       Shuffles a deck by:
+        - Getting a random element in the deck and the 'i' variable to selected element
+                - Done by getting a random element between 0 and 1 (0.xxxx) and then multiplying
+                  the random value by 'm'. 'm' is initially the deck length.
+        - 't' is set to the 'm' index. 'm' is decreased after the random element, setting it to the last
+          index in the array initially.
+        - index 'm' is then set to be the random element 'i' and 'i' is set to have the element that used
+          to be the last element in the iteration.
+
+      This way a random element is selected and swapped with the last element within a decreasing range in the array,
+      as such the elements that has already been swapped cannot be selected again. Eventually the while-loop will have
+      come to the first element of the array and be done.
+     */
+    shuffleDeck() {
         var m = this.deck.length, t, i;
 
         // While there remain elements to shuffle…
@@ -76,51 +97,37 @@ class Cards { //Rename
         }
     }
 
-    resetGame() {
-        this.deck = [];
-        this.dealer = [];
-        this.resetPlayerHands();
-    }
-
-    resetPlayers() {
-        this.players = [];
-    }
-
-    resetPlayerHands() {
-        for (let i = 0; i < this.players.length; i++) {
-            let player  = this.players[i];
-            player.resetHands();
-        }
-    }
-
-    //Deals each player a card
+    /*Deals each player a card by looping through the players and hand arrays, 
+      then inserting a card from the deck.*/
     dealPlayers() {
         //Runs through each player currently in the player array
         for (let i = 0; i < this.players.length; i++) {
-            let player = this.players[i],
-                hands = player.hands.length;
+            let player = this.players[i],   //Current selected player
+                hands = player.hands.length;//Amount of hands the player has
 
-            //Run through each existing hand.
+            //Run through each existing hand of the player.
             for (let x = 0; x < hands; x++) {
-                let hand = player.hands[x];
+                let hand = player.hands[x]; //Current hand
 
-                //Deal first card in the deck.
-                hand.cards.push(this.deck.shift());
+                //Draws card from deck and inserts into hand
+                hand.cards.push(this.drawCard());
             }
         }
     }
 
-    //Draw a card from the top of the deck
+    /*Deal first card in the deck. 
+        shift() takes the first element in an array (top of the deck)
+        much like pop() takes the last element in an array (bottom of the deck)
+    */
     drawCard() {
         return this.deck.shift();
     }
 
-    //Bet for hand - Not handling a currency check, since that may varie based on the
-    //Service provider.
-    bet(hand, amount) {
-        hand.bet = amount;
-    }
+    /*##################################
+            BOOL FUNCTIONS
+    ####################################*/
 
+    // bool - checks whether everyone in players array has bet with each hand.
     hasEveryoneBet() {
         for (let i = 0; i < this.players.length; i++) {
             let player = this.players[i];
@@ -131,6 +138,19 @@ class Cards { //Rename
         }
         return true;
     }
+
+    // bool - checks whether a certain player object is in this specific game.
+    isPlayerInGame(playerToCheck) {
+        for(let i = 0; i < this.players.length; i++) {
+            if (playerToCheck == this.players[i])
+                return true;
+        }
+        return false;
+    }
+
+    /*#################################################
+            PLAYER MANAGEMENT & GAME RESETING
+    ###################################################*/
 
     //Remove player from the game in the case a player leaves or is forced a leave.
     removePlayer(playerToRemove) {
@@ -144,6 +164,7 @@ class Cards { //Rename
         }
     }
 
+    //Removes a play
     leave(playerObject) {
         if (this.players.length > 1) {
             this.removePlayer(playerObject);
@@ -152,19 +173,31 @@ class Cards { //Rename
         }
     }
 
-    isPlayerInGame(playerToCheck) {
-        for(let i = 0; i < this.players.length; i++) {
-            if (playerToCheck == this.players[i])
-                return true;
+    /* Reset the deck, dealer arrays to empty arrays and
+       resets the player hands */
+    resetGame() {
+        this.deck = [];
+        this.dealer = [];
+        this.resetPlayerHands();
+    }
+
+    //Reset the players array to empty array.
+    resetPlayers() {
+        this.players = [];
+    }
+
+    //Reset all players hands in the players array
+    resetPlayerHands() {
+        for (let i = 0; i < this.players.length; i++) {
+            let player  = this.players[i];
+            player.resetHands();
         }
-        return false;
     }
 }
 
 class Player {
     constructor() {
-        this.hands = [];
-        this.hands.push(new Hand());
+        this.hands = [new Hand()];
         this.game = null;
     }
 
@@ -174,19 +207,25 @@ class Player {
         game.players.push(this);
     }
 
+    //Reset player hands to initial value.
     resetHands() {
-        this.hands = [];
-        this.hands.push(new Hand());
+        this.hands = [new Hand()];
+    }
+
+    //Reset an individual hand on index.
+    resetHand(index) {
+        this.hand[index] = new Hand();
     }
 }
 
 class Hand {
     constructor() {
         this.cards = [];
+        this.winner = null;
+
         this.bet = 0;
         this.isHolding = false;
-        this.winner = null;
     }
 }
 
-module.exports = { Cards, Player, Hand };
+module.exports = { Cardgame, Player, Hand };

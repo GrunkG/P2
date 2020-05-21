@@ -11,7 +11,7 @@ let hand = 0,
     insurance = 0;
 
 window.onload = () => {
-    //initiateGame();
+    //Prepares the bet slider to be used
     let slider = document.getElementById("player__bet--input");
     let output = document.getElementById("player__bet--amount");
     output.innerHTML = slider.value;
@@ -21,44 +21,160 @@ window.onload = () => {
         output.innerHTML = this.value;
     }
 
+    //Prepares the login system to be used
     toggleLogin();
     handleLoginsystem();
     document.onkeydown = keyHandling;
 };
 
-function initiateGame() {
-    //playerDeck.cardFront = "Simple Black";
-    gameHandler();
+/*########################################################
+        BUTTON CORRECTION
+            AND TIMER
+##########################################################*/
+function disableButtons(activeHand) {
+    if (game.dealer.hands[0].cards.length == 0 || game.player.hands[0].cards.length == 0)
+        return;
+
+    enableButtonIf(activeHand.cards.length == 2, "double");
+    enableButtonIf(activeHand.cards.length == 2 && activeHand.cards[0].value == activeHand.cards[1].value, "split");
+    enableButtonIf(game.dealer.hands[0].cards[0].value == "A" && insurance == 0 && handBets.length == 1, "insurance");
 }
 
-function dealCard(target, card, visible = true) {
-    if (visible)
-        card.printCardById(target);
-    else
-        card.printCardFaceDown(document.getElementById(target));
+function enableButtonIf(enable, button) {
+    if (enable) { //Enable button
+        document.getElementById("button-" + button).setAttribute("class", "button-" + button);
+    } else { //Disable button
+        document.getElementById("button-" + button).setAttribute("class", "button-" + button + " inactive");
+    }
 }
 
-function handleHit(msg) {
+let countInterval;
+function setCountdown(seconds){
+    let countdownContainer = document.getElementById("countdown");
+    let countdownNumber = document.getElementById("countdown__number");
+    let countdownStroke = document.getElementById("countdown__stroke");
+    let countdown = seconds;
 
-    //Currently sending all cards at a time, rather than just 1 card.
-    handleCards(msg);
+    countdownContainer.style.display = "block";
+    countdownStroke.style.animation = `countdown ${seconds}s linear infinite forwards`;
+    countdownNumber.innerHTML = countdown;
+
+    countInterval = setInterval(() => { //Counts down countdown by 1 every second
+    countdown--;
+    countdownNumber.innerHTML = countdown;
+    }, 1000); //1 second
+
+    setTimeout(() => { //Hides the container after the countdown
+        countdownContainer.style.display = "none";
+        clearInterval(countInterval);
+    }, seconds * 1000);
 }
 
-function handleCards(msg) {
-    //clearCardHolders();
+function stopCountdown(){
+    let countdownContainer = document.getElementById("countdown");
+    clearInterval(countInterval);
+    countdownContainer.style.display = "none";
+}
 
+function resetGamePlatform() {
+    if (game != null) {
+        game.player.resetResults();
+        game.player.hands[0].cards = [];
+        game.dealer.hands[0].cards = [];
+        game.updateScreen();
+        game.removeAllRemotes();
+        game.toggleBetInput();
+    }
+
+    document.getElementById(dealerSumTarget).innerHTML = "";
+    document.getElementById(playerSumTarget).innerHTML = "";
+    
+}
+
+function handleKicked() {
+    //Display kicked warning
+    alert("You've been kicked for being in-active, \nplease don't leave a game mid-play!");
+    logout();
+}
+
+//Handles all server-client communication related to Blackjack
+function gameHandler() {
+    //                        ws = websocket
+    websocket = new WebSocket(`ws://${host}:${port}/`);
+    
+    websocket.onopen = () => {
+        let playerName = document.getElementById("username").value,
+            playerCurrency = document.getElementById("player__info--capital").innerHTML;
+        websocket.send(JSON.stringify({type: "game", content: "startgame", username: playerName, currency: playerCurrency, secret: secret}));
+    }
+
+    websocket.onmessage = (message) => {
+            let msg = JSON.parse(message.data);
+            console.log(msg);
+            if (msg.type == "blackjack") {
+                switch (msg.content) {
+                    case "game created":
+                        if (game != null)
+                            game.removeAllRemotes();
+                        game = new Game();
+                        game.player.setActiveHand(hand);
+                        handleCards(msg);
+                        game.toggleBetInput();
+                        break;
+                    case "card":
+                        handleCards(msg);
+                        break;
+                    case "split":
+                        handleSplit(msg);
+                        break;
+                    case "insurance":
+                        handleInsurance(msg);
+                        break;
+                    case "done":
+                        stopCountdown();
+                        handleGameDone(msg);
+                        break;
+                    case "update":
+                        updateGame(msg);
+                        break;
+                    case "kicked":
+                        handleKicked();
+                        break;
+                    case "countdown":
+                        setCountdown(msg.seconds);
+                        break;
+                }
+
+                if (game.player.hands[hand].cards != [])
+                    disableButtons(game.player.hands[hand]);
+            }        
+    }
+}
+
+/*#########################################################################
+        HANDLE CARDS 
+            - Update User hand (On Hit)
+            - Update dealer hand (On Hit)
+            - 
+###########################################################################*/
+
+/*Handles input from server-side containing cards for the user and displays
+  them in the correct hand as well as updates the bet if it changed or modified*/
+function handleCards(msg, update = false) {
     //Player
     let player = msg.player,
         playerDeck = new Deck([]);
     
     handBets[player.hand] = player.bet;
 
+    //For all cards on the active hand
     for (let i = 0; i < player.cards.length; i++) {
         let card = player.cards[i],
             new_card = new Card(card.val.toString(), card.suit);
             
         playerDeck.cards.push(new_card);
     }
+
     game.player.hands[player.hand] = playerDeck;
     document.getElementById(playerSumTarget).innerHTML = player.points;
 
@@ -70,10 +186,12 @@ function handleCards(msg) {
     
 }
 
+//handleCards for the dealer -> Updates the dealer hand in case there is changes to it
 function updateDealer(msg) {
     //Dealer
     let dealer = msg.dealer,
         dealerDeck = new Deck([]);
+
     for (i = 0; i < dealer.cards.length; i++) {
         let card = dealer.cards[i],
             new_card = new Card(card.val.toString(), card.suit),
@@ -100,66 +218,69 @@ function updateTotalBet(insurance = 0) {
     document.getElementById("player__info--bet").innerHTML = total;
 } 
 
+function handleInsurance(msg) {
+    let bet = parseInt(document.getElementById("player__info--bet").innerHTML);
+    let player_insurance = msg.player.insurance;
+    bet += player_insurance;
+    insurance = player_insurance;
+    document.getElementById("player__info--bet").innerHTML = bet;
+
+}
+
 function handleSplit(msg) {
     game.player.splitHand(msg.player.hand);
     handBets.push(handBets[hand]);
 }
 
-function clearCardHolders() {
-    document.getElementById("player__card-container").innerHTML = "";
-    document.getElementById("dealer__card-container0").innerHTML = "";
-}
+/*#######################################
+        UPDATE FROM SERVER-SIDE
+            - New player joins
+            - Player left the game
+            - Remote-player got new card
+            - User did a hand split
+#########################################*/
 
-//W.I.P - Still missing additional hands handling on client-side.
 function updateGame(msg) {
-    //Add new remote players if necessary
-    //let remote_players = document.getElementsByClassName("remote-player");
-    let players = msg.players;
+    let players = msg.players,
+        thisUsername = document.getElementById("username").value;
     
     if (game.remotes.length > 0)
         game.removeAllRemotes();
-    //game.addRemotes(players.length);
 
     //For each active player
     for (let i = 0; i < players.length; i++) {
         game.addRemote(players[i].username);
         let remote_deck = game.remotes[i],
-            player = players[i];
+            player = players[i],
+            name = players[i].username;
 
-        
-        
         //For each active player hand
         for (let x = 0; x < player.hands.length; x++) {
             let hand = player.hands[x],
+                remote_length;
+
+            if (name == thisUsername) {
+                updateHand(hand, x)
+            }
+
+            if (remote_deck.hands[x])
                 remote_length = remote_deck.hands[x].cards.length;
 
             if (remote_length == hand.cards.length)
                 continue;
 
-            //-> Add hand cards to a hand element for each separat hand
+            //
             for (let y = remote_length; y < hand.cards.length; y++) {
                 let card = hand.cards[y];
                 let new_card = new Card(card.val.toString(), card.suit);
-                
-                //updateHand(hand, x);
-                remote_deck.username = "HUUUR";
+
                 remote_deck.hands[x].cards.push(new_card);
             }
         }
         
-        //Update the shown cards
-        //game.updateScreen();
     }
+    
     game.updateScreen();
-}
-
-function resetRemotes() {
-    let remotes = document.getElementsByClassName("remote-player");
-    for (let i = 0; i < remotes.length; i++) {
-        remotes[i].remove();
-    }
-
-    game.remotes = [];
 }
 
 function updateHand(hand, index) {
@@ -176,81 +297,13 @@ function updateHand(hand, index) {
     
 }
 
-function gameHandler() {
-    //                        ws = websocket
-    websocket = new WebSocket(`ws://${host}:${port}/`);
-    
-    websocket.onopen = () => {
-        let playerName = document.getElementById("username").value,
-            playerSecret = getCookie("secret"),
-            playerCurrency = document.getElementById("player__info--capital").innerHTML;
-        websocket.send(JSON.stringify({type: "game", content: "startgame", username: playerName, currency: playerCurrency, secret: secret}));
-    }
-
-    websocket.onmessage = (message) => {
-       // try {
-            let countdown;
-            let msg = JSON.parse(message.data);
-            console.log(msg);
-            if (msg.type == "blackjack") {
-                switch (msg.content) {
-                    case "game created":
-                        if (game != null)
-                            game.removeAllRemotes();
-                        game = new Game();
-                        game.player.setActiveHand(hand);
-                        handleCards(msg);
-                        game.toggleBetInput();
-                        break;
-                    case "card":
-                        handleHit(msg);
-                        break;
-                    case "split":
-                        handleSplit(msg);
-                        break;
-                    case "insurance":
-                        handleInsurance(msg);
-                        break;
-                    case "done":
-                        stopCountdown();
-                        handleGameDone(msg);
-                        break;
-                    case "update":
-                        updateGame(msg);
-                        break;
-                    case "kicked":
-                        handleKicked();
-                        break;
-                    case "countdown":
-                        setCountdown(msg.seconds);
-                        break;
-                }
-                if (game.player.hands[hand].cards != [])
-                    disableButtons(game.player.hands[hand]);
-            }
-        //} catch (err) {
-            //console.log(err);
-        //}
-        
-    }
-}
-
-function handleKicked() {
-    //Display kicked warning
-    alert("You've been kicked for being in-active, \nplease don't leave a game mid-play!");
-
-    logout();
-}
-
-function handleInsurance(msg) {
-    let bet = parseInt(document.getElementById("player__info--bet").innerHTML);
-    let player_insurance = msg.player.insurance;
-    bet += player_insurance;
-    insurance = player_insurance;
-    document.getElementById("player__info--bet").innerHTML = bet;
-
-}
-
+/*##########################################################
+        ENDED GAME FUNCTIONALITY
+            - Update visuals
+            - Display correct statistics
+            - Reset and prepare for next game
+            - Determine won/lost currency
+############################################################*/
 function handleGameDone(msg) {
     let hand_states = msg.wins;
     for (let i = 0; i < hand_states.length; i++) {
@@ -267,19 +320,10 @@ function handleGameDone(msg) {
     game.togglePlayAgain();
 }
 
-function resetGamePlatform() {
-    if (game != null) {
-        game.player.resetResults();
-        game.player.hands[0].cards = [];
-        game.dealer.hands[0].cards = [];
-        game.updateScreen();
-        game.removeAllRemotes();
-        game.toggleBetInput();
-    }
-
-    document.getElementById(dealerSumTarget).innerHTML = "";
-    document.getElementById(playerSumTarget).innerHTML = "";
-    
+function resetGameValues() {
+    document.getElementById("player__info--bet").innerHTML = 0;
+    insurance = 0;
+    handBets = [];
 }
 
 function handleWinner(hand, state) {
@@ -291,7 +335,6 @@ function handleWinner(hand, state) {
         currency_won = parseInt(document.getElementById("player__info--currency_won").innerHTML),
         currency_lost = parseInt(document.getElementById("player__info--currency_lost").innerHTML);
 
-    //clearCardHolders();
     played++;
     if (state == "D") {
         game.player.displayDrawHand(hand);
@@ -325,12 +368,6 @@ function handleInsuranceWin(insuranceState) {
     document.getElementById("player__info--capital").innerHTML = currency;
 }
 
-function resetGameValues() {
-    document.getElementById("player__info--bet").innerHTML = 0;
-    insurance = 0;
-    handBets = [];
-}
-
 function isGameDone() {
     //Got through each hand, to determine if every hand has either lost, won or tied.
     for (let i = 0; i < handBets.length; i++) {
@@ -351,33 +388,9 @@ function isGameDone() {
     return true;
 }
 
-function determineActiveHand() {
-    if (handBets.length > 1) {
-        hand++;
-        console.log("Step 1 -- " + hand);
-
-        if ( (hand+1) < handBets.length) {
-            console.log("Step 2 -- " + hand);
-            if (game.player.hands[hand].hold)
-                hand++;
-            else
-                hand--;
-
-            console.log("Step 3 -- " + hand);
-        }
-    }
-
-    if (hand == handBets.length)
-        hand = 0;
-
-    if (!game.player.hands[hand].hold)
-        game.player.setActiveHand(hand);
-    else
-        game.player.setActiveHand(-1);
-
-    disableButtons(game.player.hands[hand]);
-}
-
+/*##########################################################
+        BUTTON ACTIONS
+############################################################*/
 function doHit() {
     determineActiveHand();
     websocket.send(JSON.stringify({type: "game", content: "hit"}));
@@ -429,51 +442,25 @@ function doNewGame() {
     websocket.send(JSON.stringify({type: "game", content: "newgame"}));
 }
 
-function disableButtons(activeHand) {
-    if (game.dealer.hands[0].cards.length == 0 || game.player.hands[0].cards.length == 0)
-        return;
+function determineActiveHand() {
+    if (handBets.length > 1) {
+        hand++;
 
-    enableButtonIf(activeHand.cards.length == 2, "double");
-    enableButtonIf(activeHand.cards.length == 2 && activeHand.cards[0].value == activeHand.cards[1].value, "split");
-    enableButtonIf(game.dealer.hands[0].cards[0].value == "A" && insurance == 0 && handBets.length == 1, "insurance");
-}
-
-function enableButtonIf(enable, button) {
-    if (enable) { //Enable button
-        document.getElementById("button-" + button).setAttribute("class", "button-" + button);
-    } else { //Disable button
-        document.getElementById("button-" + button).setAttribute("class", "button-" + button + " inactive");
+        if ( (hand+1) < handBets.length) {
+            if (game.player.hands[hand].hold)
+                hand++;
+            else
+                hand--;
+        }
     }
+
+    if (hand == handBets.length)
+        hand = 0;
+
+    if (!game.player.hands[hand].hold)
+        game.player.setActiveHand(hand);
+    else
+        game.player.setActiveHand(-1);
+
+    disableButtons(game.player.hands[hand]);
 }
-
-let countInterval;
-function setCountdown(seconds){
-    let countdownContainer = document.getElementById("countdown");
-    let countdownNumber = document.getElementById("countdown__number");
-    let countdownStroke = document.getElementById("countdown__stroke");
-    let countdown = seconds;
-
-    countdownContainer.style.display = "block";
-    countdownStroke.style.animation = `countdown ${seconds}s linear infinite forwards`;
-    countdownNumber.innerHTML = countdown;
-
-    countInterval = setInterval(() => { //Counts down countdown by 1 every second
-    countdown--;
-    countdownNumber.innerHTML = countdown;
-    }, 1000); //1 second
-
-    setTimeout(() => { //Hides the container after the countdown
-        countdownContainer.style.display = "none";
-        clearInterval(countInterval);
-    }, seconds * 1000);
-}
-
-function stopCountdown(){
-    let countdownContainer = document.getElementById("countdown");
-    clearInterval(countInterval);
-    countdownContainer.style.display = "none";
-}
-
-/* function sendInfo() {
-    websocket.send(JSON.stringify({type: "game", content: "setinfo", username: }));
-} */
