@@ -283,17 +283,22 @@ function updateGame(msg) {
     game.updateScreen();
 }
 
-function updateHand(hand, index) {
-    let deck = new Deck([]);
+function updateHand(handObj, index) {
+    let deck = new Deck([]),
+        holding = handObj.isHolding;
 
-    for (let i = 0; i < hand.cards.length; i++) {
-        let card = hand.cards[i],
+    if (holding) {
+        game.player.hands[hand].hold = true;
+    }
+
+    for (let i = 0; i < handObj.cards.length; i++) {
+        let card = handObj.cards[i],
             new_card = new Card(card.val.toString(), card.suit);
             
             deck.cards.push(new_card);
     }
     game.player.hands[index] = deck;
-    document.getElementById("player__card-sum" + index).innerHTML = hand.points;
+    document.getElementById("player__card-sum" + index).innerHTML = handObj.points;
     
 }
 
@@ -396,9 +401,9 @@ function doHit() {
     websocket.send(JSON.stringify({type: "game", content: "hit"}));
 }
 function doHold() {
-    determineActiveHand();
     game.player.hands[hand].hold = true;
-    game.player.resetHandClassAttributes(hand);
+    determineActiveHand();
+    //game.player.resetHandClassAttributes(hand);
     websocket.send(JSON.stringify({type: "game", content: "hold"}));
 }
 function doDouble() {
@@ -444,23 +449,26 @@ function doNewGame() {
 
 function determineActiveHand() {
     if (handBets.length > 1) {
-        hand++;
+        hand = (game.player.hands[hand+1]) ? hand + 1 : 0;
+        
+        if (game.player.hands[hand].hold) {
+            for (let i = 0; i < game.player.hands.length; i++) {
+                if (!game.player.hands[hand].hold)
+                    break;
 
-        if ( (hand+1) < handBets.length) {
-            if (game.player.hands[hand].hold)
                 hand++;
-            else
-                hand--;
+            }
         }
+        
     }
 
-    if (hand == handBets.length)
+    if (hand >= handBets.length)
         hand = 0;
 
     if (!game.player.hands[hand].hold)
         game.player.setActiveHand(hand);
     else
-        game.player.setActiveHand(-1);
+        game.player.resetHandClassAttributes(hand);
 
     disableButtons(game.player.hands[hand]);
 }

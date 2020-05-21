@@ -441,7 +441,7 @@ gameserv.on('request', (req) => {
             playerObj.game.initialize(4); //Initializes a game with 4 decks in play
         else
             handleNewJoin();
-        console.log("Cards in play: " + playerObj.game.deck.length);
+
         //Resets the user hand to index 0, incase they just exit a game on a higher index.
         activeHand = 0;
 
@@ -719,10 +719,23 @@ gameserv.on('request', (req) => {
     function setNextHand() {
         /*If the players has more than 1 hand, and we're not already dealing with
           the last hand, then increase activeHand value by 1*/
-        if (playerObj.hands.length > 1)
-            activeHand++;
+        if (playerObj.hands.length > 1) {
+            activeHand = (playerObj.hands[activeHand+1]) ? activeHand + 1 : 0;
+
+            if (playerObj.hands[activeHand].isHolding) {
+                console.log("Holding:" + playerObj.hands.length);
+                for (let i = 0; i < playerObj.hands.length; i++) {
+                    if (!playerObj.hands[activeHand].isHolding)
+                        break;
+    
+                    activeHand++;
+                }
+            }
+        }
         if (activeHand == playerObj.hands.length) //We're at the end reset to index 0
             activeHand = 0;
+
+        console.log("Done");
     }
 
     /* void handleHold()
@@ -756,8 +769,12 @@ gameserv.on('request', (req) => {
                             if (kickedPlayers.length > 0) {
                                 announceKicked(kickedPlayers)
                             }
-                            announceWinner();
-                            playerObj.game.finished = true;
+                            //If for some reason the only player was yourself and you 
+                            //got kicked for being inactive on your 2nd hand.
+                            if (playerObj.game != null) {
+                                announceWinner();
+                                playerObj.game.finished = true;
+                            }
                         }
                     }
                 },60000); //60 seconds
