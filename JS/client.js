@@ -299,7 +299,6 @@ function updateHand(handObj, index) {
             deck.cards.push(new_card);
     }
     game.player.hands[index] = deck;
-    console.log(index);
     if (document.getElementById("player__card-sum" + index))
         document.getElementById("player__card-sum" + index).innerHTML = handObj.points;
     
@@ -462,14 +461,14 @@ function determineActiveHand() {
             for (let i = 0; i < game.player.hands.length; i++) {
                 if (!game.player.hands[hand].hold)
                     break;
-
-                hand++;
+                else
+                    hand++;
             }
         }
         
     }
 
-    if (hand >= handBets.length)
+    if (hand >= game.player.hands.length)
         hand = 0;
 
     if (!game.player.hands[hand].hold)

@@ -423,6 +423,11 @@ gameserv.on('request', (req) => {
                 initGame();
             }
 
+            //Does the user already have 21/Blackjack?
+            updateResponsePoints();
+            if (response.player.points >= 21) {
+                handleHold();
+            }
             
         }
     }
@@ -842,9 +847,12 @@ gameserv.on('request', (req) => {
         and puts it into hold, along with doubling the player bet.
     */
     function handleDouble() {
-        let hand = playerObj.hands[activeHand];
+        let hand = playerObj.hands[activeHand],
+            totalBet = getAccumulatedBet(),
+            handBet = hand.bet,
+            doubleBet = (totalBet-handBet) + handBet*2;
         //Can only be done at the start where the player has 2 cards at hand.
-        if (hand.cards.length == 2) {
+        if (hand.cards.length == 2 && (doubleBet) <= playerObj.currency) {
             //Get a card and double the bet
             playerObj.game.double(hand);
 
@@ -857,6 +865,15 @@ gameserv.on('request', (req) => {
             //Put the hand into a holding state
             handleHold();
         }
+    }
+
+    function getAccumulatedBet() {
+        let result = 0;
+        for (let i = 0; i < playerObj.hands.length; i++) {
+            let bet = playerObj.hands[i].bet
+            result += bet;
+        }
+        return result;
     }
 
     /* void handleSplit()
