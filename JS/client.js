@@ -413,6 +413,7 @@ function doHold() {
 function doDouble() {
     let currency = parseInt(document.getElementById("player__info--capital").innerHTML);
     currency -= handBets[hand];
+    document.getElementById("player__info--capital").innerHTML = currency;
     determineActiveHand();
     websocket.send(JSON.stringify({type: "game", content: "double"}));
 }
