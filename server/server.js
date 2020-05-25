@@ -259,7 +259,7 @@ gameserv.on('request', (req) => {
             } else if (password.length == 0) {
                     //Notify user, error password empty
                     send({type: "login", state: "zeropassword"});
-            } else if (result.length > 0 && result[0].password.length > 15 && bcrypt.compareSync(password, result[0].password)) {
+            } else if (result.length > 0 && result[0].password.length > 15 && bcrypt.compareSync(password, result[0].password)) { //"result[0].password.length > 15" blocks old non encrypted accounts
                 //Login user
                 
                 //Generate random secret string to identify a session
