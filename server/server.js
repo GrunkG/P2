@@ -423,6 +423,11 @@ gameserv.on('request', (req) => {
                 initGame();
             }
 
+            //Does the user already have 21/Blackjack?
+            updateResponsePoints();
+            if (response.player.points >= 21) {
+                handleHold();
+            }
             
         }
     }
@@ -441,7 +446,7 @@ gameserv.on('request', (req) => {
             playerObj.game.initialize(4); //Initializes a game with 4 decks in play
         else
             handleNewJoin();
-        console.log("Cards in play: " + playerObj.game.deck.length);
+
         //Resets the user hand to index 0, incase they just exit a game on a higher index.
         activeHand = 0;
 
@@ -469,7 +474,7 @@ gameserv.on('request', (req) => {
         playerObj.game.resetPlayers();
         playerObj.game = null;
         cleanUpInactiveGames();
-
+        
         handleStartGame();
     }
 
@@ -719,8 +724,20 @@ gameserv.on('request', (req) => {
     function setNextHand() {
         /*If the players has more than 1 hand, and we're not already dealing with
           the last hand, then increase activeHand value by 1*/
-        if (playerObj.hands.length > 1)
-            activeHand++;
+        if (playerObj.hands.length > 1) {
+            activeHand = (playerObj.hands[activeHand+1]) ? activeHand + 1 : 0;
+
+            if (playerObj.hands[activeHand].isHolding) {
+                for (let i = 0; i < playerObj.hands.length; i++) {
+                    if (activeHand >= playerObj.hands.length)
+                        break;
+                    if (!playerObj.hands[activeHand].isHolding)
+                        break;
+    
+                    activeHand++;
+                }
+            }
+        }
         if (activeHand == playerObj.hands.length) //We're at the end reset to index 0
             activeHand = 0;
     }
@@ -756,8 +773,12 @@ gameserv.on('request', (req) => {
                             if (kickedPlayers.length > 0) {
                                 announceKicked(kickedPlayers)
                             }
-                            announceWinner();
-                            playerObj.game.finished = true;
+                            //If for some reason the only player was yourself and you 
+                            //got kicked for being inactive on your 2nd hand.
+                            if (playerObj.game != null) {
+                                announceWinner();
+                                playerObj.game.finished = true;
+                            }
                         }
                     }
                 },60000); //60 seconds
@@ -826,9 +847,12 @@ gameserv.on('request', (req) => {
         and puts it into hold, along with doubling the player bet.
     */
     function handleDouble() {
-        let hand = playerObj.hands[activeHand];
+        let hand = playerObj.hands[activeHand],
+            totalBet = getAccumulatedBet(),
+            handBet = hand.bet,
+            doubleBet = (totalBet-handBet) + handBet*2;
         //Can only be done at the start where the player has 2 cards at hand.
-        if (hand.cards.length == 2) {
+        if (hand.cards.length == 2 && (doubleBet) <= playerObj.currency) {
             //Get a card and double the bet
             playerObj.game.double(hand);
 
@@ -841,6 +865,15 @@ gameserv.on('request', (req) => {
             //Put the hand into a holding state
             handleHold();
         }
+    }
+
+    function getAccumulatedBet() {
+        let result = 0;
+        for (let i = 0; i < playerObj.hands.length; i++) {
+            let bet = playerObj.hands[i].bet
+            result += bet;
+        }
+        return result;
     }
 
     /* void handleSplit()

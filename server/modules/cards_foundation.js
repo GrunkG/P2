@@ -209,6 +209,7 @@ class Player {
 
     //Reset player hands to initial value.
     resetHands() {
+        this.hands = null;
         this.hands = [new Hand()];
     }
 
